@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import logo from "../assets/images/kravely.logo.png";
 
-// ===================== FLIP LINK =====================
+// ===================== FLIP LINK — regular anchor =====================
 function FlipLink({ href, children }) {
   return (
     <>
@@ -44,6 +45,16 @@ function FlipLink({ href, children }) {
         <span className="flip-bottom">{children}</span>
       </a>
     </>
+  );
+}
+
+// ===================== FLIP ROUTER LINK — React Router =====================
+function FlipRouterLink({ to, children }) {
+  return (
+    <Link to={to} className="flip-link" style={{ textDecoration: "none" }}>
+      <span className="flip-top">{children}</span>
+      <span className="flip-bottom">{children}</span>
+    </Link>
   );
 }
 
@@ -95,42 +106,44 @@ function Navbar() {
           ? "bg-black/95 backdrop-blur-md border-b border-white/10"
           : "bg-transparent"
       }`}>
-        <div className="relative max-w-7xl mx-auto flex items-center justify-between px-8 md:px-12"
-          style={{ height: "72px" }}>
+        <div
+          className="relative max-w-7xl mx-auto flex items-center justify-between px-5 md:px-12"
+          style={{ height: "72px" }}
+        >
 
           {/* LOGO */}
-          <a href="#" className="flex items-center flex-shrink-0 z-10">
+          <Link to="/" className="flex items-center flex-shrink-0 z-10">
             <img
               src={logo}
               alt="Kravely"
               className="logo-wobble object-contain"
-              style={{ height: "100px", width: "auto", maxWidth: "180px mr-20px"  }}
+              style={{ height: "100px", width: "auto", maxWidth: "160px", marginLeft: "-10px" }}
             />
-          </a>
+          </Link>
 
           {/* NAV LINKS — perfectly centered */}
           <div className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
-            <FlipLink href="#">Home</FlipLink>
+            <FlipRouterLink to="/">Home</FlipRouterLink>
             <FlipLink href="#">Vendors</FlipLink>
             <FlipLink href="#">How It Works</FlipLink>
-            <FlipLink href="#">About</FlipLink>
+            <FlipRouterLink to="/about">About</FlipRouterLink>
           </div>
 
-          {/* ORDER NOW — right side */}
+          {/* ORDER NOW */}
           <div className="hidden md:flex items-center z-10">
-            <a
-              href="#"
+            <Link
+              to="/login"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
               className="bg-green-500 text-black font-bold text-sm px-6 py-2.5 rounded-full transition-all duration-200 hover:bg-green-600 hover:scale-105 no-underline"
             >
               Order Now
-            </a>
+            </Link>
           </div>
 
           {/* HAMBURGER */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`md:hidden flex flex-col gap-1.5 bg-transparent border-none cursor-pointer p-1 z-10 ${menuOpen ? "is-open" : ""}`}
+            className={`md:hidden flex flex-col gap-1.5 bg-transparent border-none cursor-pointer p-2 z-10 ${menuOpen ? "is-open" : ""}`}
           >
             <span className="ham-line ham-line1" />
             <span className="ham-line ham-line2" />
@@ -142,24 +155,31 @@ function Navbar() {
 
       {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="mobile-menu-anim fixed top-[72px] left-0 right-0 z-40 bg-black/98 backdrop-blur-md border-b border-white/10 flex flex-col gap-6 px-10 pt-6 pb-8 md:hidden">
-          {["Home", "Vendors", "How It Works", "About"].map(link => (
-            <a
-              key={link}
-              href="#"
+        <div className="mobile-menu-anim fixed top-[72px] left-0 right-0 z-40 bg-black/98 backdrop-blur-md border-b border-white/10 flex flex-col gap-6 px-8 pt-6 pb-8 md:hidden">
+          {[
+            { label: "Home", to: "/" },
+            { label: "Vendors", to: "#" },
+            { label: "How It Works", to: "#" },
+            { label: "About", to: "/about" },
+          ].map(({ label, to }) => (
+            <Link
+              key={label}
+              to={to}
+              onClick={() => setMenuOpen(false)}
               style={{ fontFamily: "'DM Sans', sans-serif" }}
               className="text-green-100 text-lg font-semibold border-b border-white/10 pb-4 transition-colors duration-200 hover:text-green-500 no-underline"
             >
-              {link}
-            </a>
+              {label}
+            </Link>
           ))}
-          <a
-            href="#"
+          <Link
+            to="/login"
+            onClick={() => setMenuOpen(false)}
             style={{ fontFamily: "'DM Sans', sans-serif" }}
             className="bg-green-500 text-black font-bold text-base text-center py-3.5 rounded-full no-underline hover:bg-green-600 transition-colors duration-200"
           >
             Order Now
-          </a>
+          </Link>
         </div>
       )}
     </>
