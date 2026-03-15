@@ -30,14 +30,14 @@ function About() {
       name: "Nimi George",
       role: "CEO & Co-founder",
       desc: "The vision behind Kravely. Nimi leads the business side — from signing vendors to making sure every student has a seamless experience.",
-      initial: "N",
+      initial: "NG",
       gradient: "linear-gradient(135deg, #22c55e, #16a34a)",
     },
     {
       name: "Ebuka Okolo",
       role: "CTO & Co-founder",
       desc: "The brain behind the build. Ebuka architects and builds every part of the Kravely platform — from the first line of code to deployment.",
-      initial: "E",
+      initial: "EO",
       gradient: "linear-gradient(135deg, #4ade80, #22c55e)",
     },
   ];
@@ -262,7 +262,7 @@ function About() {
           <Reveal delay={300}>
             <p className="text-center text-green-500 font-bold mt-14"
               style={{ fontFamily: "'Syne', sans-serif", fontSize: 16 }}>
-              Built at FUTO with code & jollof rice. 🍚🇳🇬
+               Built By Ebuka Okolo
             </p>
             <p className="text-center text-gray-600 text-sm mt-2"
               style={{ fontFamily: "'DM Sans', sans-serif" }}>

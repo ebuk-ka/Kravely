@@ -27,7 +27,7 @@ function FlipLocation() {
   return (
     <div className="flex items-center gap-3 mb-8">
       <span style={{ fontFamily: "'DM Sans', sans-serif" }} className="text-gray-400 text-base font-medium">
-        📍 We deliver to
+        We deliver to
       </span>
       <div className="bg-green-500/10 border border-green-500/25 rounded-xl px-5 overflow-hidden flex items-center justify-center h-10 min-w-[140px]">
         <span
@@ -50,9 +50,10 @@ function FlipLocation() {
   );
 }
 
-// ===================== PHONE MOCKUP =====================
+// ===================== IPHONE MOCKUP WITH DYNAMIC ISLAND =====================
 function PhoneMockup() {
   const [activeOrder, setActiveOrder] = useState(0);
+  const [islandExpanded, setIslandExpanded] = useState(false);
 
   const orders = [
     { name: "Jollof Rice + Chicken", vendor: "Mama Nkechi's", price: "₦1,800", status: "On the way 🏃", time: "12 min", progress: "75%" },
@@ -63,6 +64,9 @@ function PhoneMockup() {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveOrder((prev) => (prev + 1) % orders.length);
+      // Expand Dynamic Island when order changes
+      setIslandExpanded(true);
+      setTimeout(() => setIslandExpanded(false), 2000);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -79,101 +83,186 @@ function PhoneMockup() {
       <div className="absolute w-64 h-64 rounded-full blur-3xl pointer-events-none"
         style={{ background: "radial-gradient(circle, rgba(34,197,94,0.25) 0%, transparent 70%)" }} />
 
-      {/* Phone */}
-      <div className="relative z-10 w-64 rounded-[40px] border-2 border-white/10 overflow-hidden"
+      {/* iPhone Frame */}
+      <div className="relative z-10 rounded-[52px] border border-white/20 overflow-hidden"
         style={{
+          width: "260px",
           background: "#0a0a0a",
-          boxShadow: "0 0 60px rgba(34,197,94,0.15), 0 40px 80px rgba(0,0,0,0.6)",
+          boxShadow: `
+            0 0 60px rgba(34,197,94,0.15),
+            0 40px 80px rgba(0,0,0,0.6),
+            inset 0 0 0 1px rgba(255,255,255,0.08),
+            inset 0 1px 0 rgba(255,255,255,0.15)
+          `,
           animation: "phoneFloat 4s ease-in-out infinite"
         }}>
 
-        {/* Notch */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-20 h-1.5 bg-white/20 rounded-full" />
-        </div>
+        {/* iPhone side buttons */}
+        <div className="absolute -left-[3px] top-24 w-[3px] h-8 bg-white/20 rounded-l-full" />
+        <div className="absolute -left-[3px] top-36 w-[3px] h-12 bg-white/20 rounded-l-full" />
+        <div className="absolute -left-[3px] top-52 w-[3px] h-12 bg-white/20 rounded-l-full" />
+        <div className="absolute -right-[3px] top-36 w-[3px] h-16 bg-white/20 rounded-r-full" />
 
         {/* Screen */}
-        <div className="px-4 pb-6">
+        <div className="relative overflow-hidden rounded-[52px]"
+          style={{ background: "#050505" }}>
 
-          {/* Header */}
-          <div className="flex justify-between items-center py-3 border-b border-white/5 mb-4">
-            <div>
-              <p className="text-white/40 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>Good Day </p>
-              <p className="text-white font-bold text-sm" style={{ fontFamily: "'Syne', sans-serif" }}>User</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-              <span className="text-green-500 text-xs font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>E</span>
-            </div>
-          </div>
-
-          {/* Search */}
-          <div className="bg-white/5 rounded-xl px-3 py-2 flex items-center gap-2 mb-4">
-            <span className="text-white/30 text-xs">🔍</span>
-            <span className="text-white/30 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>Search vendors, meals...</span>
-          </div>
-
-          {/* Categories */}
-          <div className="flex gap-2 mb-4 overflow-hidden">
-            {["All", "Rice", "Soup", "Grill"].map((cat, i) => (
-              <span key={cat} style={{ fontFamily: "'DM Sans', sans-serif" }}
-                className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${
-                  i === 0 ? "bg-green-500 text-black" : "bg-white/5 text-white/50"
-                }`}>{cat}</span>
-            ))}
-          </div>
-
-          {/* Vendors */}
-          <p className="text-white/40 text-xs mb-2" style={{ fontFamily: "'DM Sans', sans-serif" }}>Popular near you</p>
-          <div className="flex flex-col gap-2 mb-4">
-            {[
-              { name: "Mama Nkechi's", tag: "Local • ₦800+", rating: "4.8", icon: "🍲" },
-              { name: "Chukwu's Grill", tag: "Grills • ₦1,200+", rating: "4.6", icon: "🔥" },
-            ].map((v) => (
-              <div key={v.name} className="bg-white/5 rounded-xl p-2.5 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-sm">{v.icon}</div>
-                  <div>
-                    <p className="text-white text-xs font-semibold" style={{ fontFamily: "'Syne', sans-serif" }}>{v.name}</p>
-                    <p className="text-white/40 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>{v.tag}</p>
-                  </div>
-                </div>
-                <span className="text-green-500 text-xs font-bold" style={{ fontFamily: "'DM Sans', sans-serif" }}>⭐ {v.rating}</span>
+          {/* Status bar */}
+          <div className="flex justify-between items-center px-6 pt-4 pb-1">
+            <span className="text-white text-xs font-semibold" style={{ fontFamily: "'DM Sans', sans-serif" }}>9:41</span>
+            <div className="flex items-center gap-1.5">
+              {/* Signal bars */}
+              <div className="flex items-end gap-0.5">
+                {[3, 5, 7, 9].map((h, i) => (
+                  <div key={i} className="w-1 bg-white rounded-sm" style={{ height: `${h}px`, opacity: i < 3 ? 1 : 0.3 }} />
+                ))}
               </div>
-            ))}
-          </div>
-
-          {/* Live order */}
-          <div className="rounded-xl p-3 border border-green-500/20"
-            style={{ background: "rgba(34,197,94,0.05)" }}>
-            <div className="flex justify-between items-start mb-1.5">
-              <p className="text-white text-xs font-bold leading-tight max-w-[120px]"
-                style={{ fontFamily: "'Syne', sans-serif" }}>{orders[activeOrder].name}</p>
-              <span className="text-green-500 text-xs font-bold"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}>{orders[activeOrder].price}</span>
-            </div>
-            <p className="text-white/40 text-xs mb-1.5"
-              style={{ fontFamily: "'DM Sans', sans-serif" }}>{orders[activeOrder].vendor}</p>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-green-400 text-xs"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}>{orders[activeOrder].status}</span>
-              <span className="text-white/30 text-xs"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}>{orders[activeOrder].time}</span>
-            </div>
-            <div className="bg-white/10 rounded-full h-1">
-              <div className="bg-green-500 h-1 rounded-full transition-all duration-700"
-                style={{ width: orders[activeOrder].progress }} />
+              {/* WiFi */}
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                <path d="M7 8.5C7.55 8.5 8 8.95 8 9.5S7.55 10.5 7 10.5 6 10.05 6 9.5 6.45 8.5 7 8.5Z" fill="white"/>
+                <path d="M4.5 6.5C5.3 5.7 6.1 5.3 7 5.3S8.7 5.7 9.5 6.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                <path d="M2.5 4.5C3.8 3.2 5.3 2.5 7 2.5S10.2 3.2 11.5 4.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.5"/>
+              </svg>
+              {/* Battery */}
+              <div className="flex items-center gap-0.5">
+                <div className="border border-white/60 rounded-sm relative" style={{ width: 20, height: 10 }}>
+                  <div className="absolute left-0.5 top-0.5 bottom-0.5 bg-white rounded-sm" style={{ width: "70%" }} />
+                </div>
+                <div className="w-0.5 h-1.5 bg-white/40 rounded-r-sm" />
+              </div>
             </div>
           </div>
 
-        </div>
+          {/* ===== DYNAMIC ISLAND ===== */}
+          <div className="flex justify-center mb-2">
+            <div
+              className="relative flex items-center justify-center overflow-hidden"
+              style={{
+                background: "#000",
+                borderRadius: islandExpanded ? "24px" : "20px",
+                width: islandExpanded ? "200px" : "120px",
+                height: islandExpanded ? "56px" : "32px",
+                transition: "all 0.4s cubic-bezier(0.34,1.56,0.64,1)",
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.06)"
+              }}
+            >
+              {/* Camera dot */}
+              {!islandExpanded && (
+                <div className="absolute right-3 w-2.5 h-2.5 rounded-full"
+                  style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#0a0a2e] m-auto mt-0.5"
+                    style={{ boxShadow: "0 0 3px rgba(100,149,237,0.6)" }} />
+                </div>
+              )}
 
-        {/* Bottom nav */}
-        <div className="flex justify-around items-center px-4 py-3 border-t border-white/5">
-          {["🏠", "🔍", "🛒", "👤"].map((icon, i) => (
-            <span key={i} className={`text-base ${i === 0 ? "opacity-100" : "opacity-30"}`}>{icon}</span>
-          ))}
-        </div>
+              {/* Expanded content — live order notification */}
+              {islandExpanded && (
+                <div className="flex items-center gap-2 px-3 w-full">
+                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm">K</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-bold truncate"
+                      style={{ fontFamily: "'Syne', sans-serif" }}>
+                      Kravely
+                    </p>
+                    <p className="text-green-400 text-xs truncate"
+                      style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                      {orders[activeOrder].status}
+                    </p>
+                  </div>
+                  <span className="text-white/40 text-xs flex-shrink-0"
+                    style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                    {orders[activeOrder].time}
+                  </span>
+                </div>
+              )}
 
+              {/* Collapsed — subtle pulse dot */}
+              {!islandExpanded && (
+                <div className="absolute left-3 w-2 h-2 rounded-full bg-green-500"
+                  style={{ animation: "pulse-glow-sm 2s infinite" }} />
+              )}
+            </div>
+          </div>
+
+          {/* App Screen Content */}
+          <div className="px-4 pb-4">
+
+            {/* Greeting */}
+            <div className="flex justify-between items-center py-2 mb-3">
+              <div>
+                <p className="text-white/40 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>Good Day 👋</p>
+                <p className="text-white font-bold text-sm" style={{ fontFamily: "'Syne', sans-serif" }}>User</p>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                <span className="text-green-500 text-xs font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>K</span>
+              </div>
+            </div>
+
+            {/* Search */}
+            <div className="bg-white/5 rounded-xl px-3 py-2 flex items-center gap-2 mb-3">
+              <span className="text-white/30 text-xs">🔍</span>
+              <span className="text-white/30 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>Search vendors, meals...</span>
+            </div>
+
+            {/* Categories */}
+            <div className="flex gap-2 mb-3 overflow-hidden">
+              {["All", "Rice", "Soup", "Grill"].map((cat, i) => (
+                <span key={cat} style={{ fontFamily: "'DM Sans', sans-serif" }}
+                  className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${
+                    i === 0 ? "bg-green-500 text-black" : "bg-white/5 text-white/50"
+                  }`}>{cat}</span>
+              ))}
+            </div>
+
+            {/* Vendors */}
+            <p className="text-white/40 text-xs mb-2" style={{ fontFamily: "'DM Sans', sans-serif" }}>Popular near you</p>
+            <div className="flex flex-col gap-2 mb-3">
+              {[
+                { name: "Mama Nkechi's", tag: "Local • ₦800+", rating: "4.8", icon: "🍲" },
+                { name: "Chukwu's Grill", tag: "Grills • ₦1,200+", rating: "4.6", icon: "🔥" },
+              ].map((v) => (
+                <div key={v.name} className="bg-white/5 rounded-xl p-2.5 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center text-xs">{v.icon}</div>
+                    <div>
+                      <p className="text-white text-xs font-semibold" style={{ fontFamily: "'Syne', sans-serif" }}>{v.name}</p>
+                      <p className="text-white/40 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>{v.tag}</p>
+                    </div>
+                  </div>
+                  <span className="text-green-500 text-xs font-bold">⭐ {v.rating}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Live order */}
+            <div className="rounded-xl p-3 border border-green-500/20"
+              style={{ background: "rgba(34,197,94,0.05)" }}>
+              <div className="flex justify-between items-start mb-1">
+                <p className="text-white text-xs font-bold leading-tight max-w-[110px]"
+                  style={{ fontFamily: "'Syne', sans-serif" }}>{orders[activeOrder].name}</p>
+                <span className="text-green-500 text-xs font-bold">{orders[activeOrder].price}</span>
+              </div>
+              <p className="text-white/40 text-xs mb-1">{orders[activeOrder].vendor}</p>
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-green-400 text-xs">{orders[activeOrder].status}</span>
+                <span className="text-white/30 text-xs">{orders[activeOrder].time}</span>
+              </div>
+              <div className="bg-white/10 rounded-full h-1">
+                <div className="bg-green-500 h-1 rounded-full transition-all duration-700"
+                  style={{ width: orders[activeOrder].progress }} />
+              </div>
+            </div>
+
+          </div>
+
+          {/* Home indicator */}
+          <div className="flex justify-center pb-2">
+            <div className="w-24 h-1 bg-white/30 rounded-full" />
+          </div>
+
+        </div>
       </div>
 
       {/* Floating pills */}
@@ -213,6 +302,10 @@ function Hero() {
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
           50% { box-shadow: 0 0 0 16px rgba(34,197,94,0); }
+        }
+        @keyframes pulse-glow-sm {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+          50% { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
         }
         @keyframes phoneFloat {
           0%, 100% { transform: translateY(0px); }
@@ -270,7 +363,7 @@ function Hero() {
             </div>
 
             {/* Headline */}
-            <h1 className="slide-up-2 font-black text-white leading-tight mb-6 mr-200px"
+            <h1 className="slide-up-2 font-black text-white leading-tight mb-6"
               style={{
                 fontSize: "clamp(44px, 5vw, 80px)",
                 letterSpacing: -3,
@@ -309,9 +402,9 @@ function Hero() {
               </button>
             </div>
 
-            {/* Honest launch message instead of fake stats */}
+            {/* Coming soon launch */}
             <div className="slide-up-6 mt-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-3">
-              <span className="text-2xl"></span>
+              <span className="text-2xl">🚀</span>
               <p className="text-gray-400 text-sm text-left" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                 Launching at FUTO very soon —{" "}
                 <span className="text-green-400 font-semibold">be the first to order!</span>
@@ -320,7 +413,7 @@ function Hero() {
 
           </div>
 
-          {/* RIGHT — Phone (hidden on mobile) */}
+          {/* RIGHT — iPhone (hidden on mobile) */}
           <div className="slide-right lg:flex flex-1 items-center justify-center xl:justify-end">
             <PhoneMockup />
           </div>
