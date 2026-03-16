@@ -62,6 +62,21 @@ function OrderCTA() {
           -webkit-text-fill-color: transparent;
           animation: shimmer 3s linear infinite;
         }
+
+        @keyframes thumbPump {
+           0%   { transform: translateY(0) rotate(0deg) scale(1); }
+           20%  { transform: translateY(-12px) rotate(-10deg) scale(1.2); }
+           40%  { transform: translateY(0) rotate(0deg) scale(1); }
+           60%  { transform: translateY(-6px) rotate(-5deg) scale(1.1); }
+           80%  { transform: translateY(0) rotate(0deg) scale(1); }
+           100% { transform: translateY(0) rotate(0deg) scale(1); }
+}
+  .thumbs-up {
+  display: inline-block;
+  animation: thumbPump 2s ease-in-out infinite;
+  transform-origin: bottom center;
+  filter: hue-rotate(85deg) saturate(2) brightness(0.6);
+}
       `}</style>
 
       <section className="bg-black py-28 px-6 md:px-16 lg:px-24 relative overflow-hidden">
@@ -100,12 +115,11 @@ function OrderCTA() {
                   fontSize: "clamp(40px, 7vw, 88px)",
                   fontFamily: "'Syne', sans-serif",
                   letterSpacing: -2,
-                  lineHeight: 1.05
+                  lineHeight: 1.0,
                 }}>
                 Hungry right now?<br />
-                <span className="shimmer-text">We got you. 👍🏼 </span>
+                <span className="shimmer-text">We got you.</span><span className="thumbs-up">👍</span>
               </h2>
-
               {/* Subtext */}
               <p className="text-gray-400 max-w-lg mx-auto mb-10"
                 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, lineHeight: 1.8 }}>
