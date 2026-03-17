@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import logo from "../assets/images/kravely.logo.png";
+import playstorelogo from "../assets/images/playstore.png";
+import appstorelogo from "../assets/images/appstore.png";
 
 function Footer() {
   const currentYear = new Date().getFullYear();
@@ -92,12 +95,29 @@ function Footer() {
           color: #6b7280;
           transition: all 0.2s ease;
           cursor: pointer;
+          text-decoration: none;
         }
         .social-btn:hover {
           background: rgba(34,197,94,0.1);
           border-color: rgba(34,197,94,0.3);
           color: #22c55e;
           transform: translateY(-3px);
+        }
+        .store-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.03);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-decoration: none;
+        }
+        .store-btn:hover {
+          border-color: rgba(34,197,94,0.3);
+          background: rgba(34,197,94,0.05);
         }
       `}</style>
 
@@ -121,18 +141,15 @@ function Footer() {
 
             {/* Brand column */}
             <div className="lg:col-span-2">
+
               {/* Logo */}
-              <Link to="/" style={{ textDecoration: "none" }}>
-                <span className="font-black text-3xl"
-                  style={{
-                    fontFamily: "'Syne', sans-serif",
-                    letterSpacing: -1,
-                    background: "linear-gradient(90deg, #22c55e, #4ade80)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}>
-                  Kravely
-                </span>
+              <Link to="/" className="flex items-center flex-shrink-0 z-10">
+                <img
+                  src={logo}
+                  alt="Kravely"
+                  className="object-contain"
+                  style={{ height: "100px", width: "auto", maxWidth: "160px", marginLeft: "-10px" }}
+                />
               </Link>
 
               <p className="text-gray-500 mt-4 max-w-xs leading-relaxed"
@@ -141,7 +158,7 @@ function Footer() {
               </p>
 
               {/* Socials */}
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3 mt-8">
                 {socials.map(({ name, href, icon }) => (
                   <a key={name} href={href} className="social-btn" title={name}>
                     {icon}
@@ -149,31 +166,40 @@ function Footer() {
                 ))}
               </div>
 
-              {/* App store badges placeholder */}
-              <div className="flex gap-3 mt-5">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 cursor-pointer"
-                  style={{ background: "rgba(255,255,255,0.03)", transition: "all 0.2s" }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(34,197,94,0.3)"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"}
-                >
-                  <span style={{ fontSize: 20 }}>🍎</span>
-                  <div>
-                    <p className="text-white/30 text-xs" style={{ fontFamily: "'DM Sans', sans-serif", lineHeight: 1 }}>Coming soon</p>
-                    <p className="text-white text-xs font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>App Store</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 cursor-pointer"
-                  style={{ background: "rgba(255,255,255,0.03)", transition: "all 0.2s" }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(34,197,94,0.3)"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"}
-                >
-                  <span style={{ fontSize: 20 }}>🤖</span>
-                  <div>
-                    <p className="text-white/30 text-xs" style={{ fontFamily: "'DM Sans', sans-serif", lineHeight: 1 }}>Coming soon</p>
-                    <p className="text-white text-xs font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>Google Play</p>
-                  </div>
-                </div>
-              </div>
+              {/* App store badges */}
+             <div style={{ position: "relative", display: "inline-block" }}>
+              <a href="#" className="store-btn" style={{ opacity: 0.5, cursor: "not-allowed", filter: "grayscale(0.3)" }}>
+                <img src={appstorelogo} alt="App Store"
+                  style={{ height: "28px", width: "auto", objectFit: "contain" }} />
+              </a>
+              <span style={{
+                position: "absolute", top: "-10px", right: "-8px",
+                background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                color: "#000", fontSize: 9, fontWeight: 800,
+                fontFamily: "'DM Sans', sans-serif",
+                padding: "2px 7px", borderRadius: 50,
+                letterSpacing: "0.5px", textTransform: "uppercase",
+                boxShadow: "0 2px 8px rgba(34,197,94,0.4)",
+                whiteSpace: "nowrap",
+              }}>Soon</span>
+            </div>
+            
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <a href="#" className="store-btn" style={{ opacity: 0.5, cursor: "not-allowed", filter: "grayscale(0.3)" }}>
+                <img src={playstorelogo} alt="Google Play"
+                  style={{ height: "28px", width: "auto", objectFit: "contain" }} />
+              </a>
+              <span style={{
+                position: "absolute", top: "-10px", right: "-8px",
+                background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                color: "#000", fontSize: 9, fontWeight: 800,
+                fontFamily: "'DM Sans', sans-serif",
+                padding: "2px 7px", borderRadius: 50,
+                letterSpacing: "0.5px", textTransform: "uppercase",
+                boxShadow: "0 2px 8px rgba(34,197,94,0.4)",
+                whiteSpace: "nowrap",
+              }}>Soon</span>
+            </div>
             </div>
 
             {/* Links columns */}
@@ -201,13 +227,6 @@ function Footer() {
             <p className="text-gray-600 text-sm text-center md:text-left"
               style={{ fontFamily: "'DM Sans', sans-serif" }}>
               © {currentYear} Kravely Technologies. All rights reserved.
-            </p>
-
-            <p className="text-gray-600 text-sm text-center"
-              style={{ fontFamily: "'DM Sans', sans-serif" }}>
-              Built at{" "}
-              <span className="text-green-500 font-semibold">FUTO</span>
-              {" "}with ❤️ and jollof rice 🍚
             </p>
 
             <div className="flex gap-5">

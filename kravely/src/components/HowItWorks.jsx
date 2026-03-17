@@ -5,44 +5,63 @@ function HowItWorks() {
     {
       step: "01",
       title: "Browse Vendors",
-      desc: "Explore all FUTO campus food vendors near your hostel or faculty. Filter by location, food type or rating and find exactly what you're craving.",
+      desc: "Explore all FUTO campus food vendors near your hostel or faculty.",
       tag: "🔍 Discover",
-      image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1400&q=90",
       color: "#22c55e",
-      glow: "rgba(34,197,94,0.15)",
+      glow: "rgba(34,197,94,0.35)",
     },
     {
       step: "02",
       title: "Pick Your Meal",
-      desc: "Choose from jollof rice, pepper soup, suya, grills and more. Add items to cart and customise your order in seconds.",
+      desc: "Choose from jollof rice, pepper soup, suya, grills and more.",
       tag: "🍽️ Choose",
-      image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1400&q=90",
       color: "#4ade80",
-      glow: "rgba(74,222,128,0.15)",
+      glow: "rgba(74,222,128,0.35)",
     },
     {
       step: "03",
       title: "Pay Securely",
-      desc: "Checkout fast and safely with Paystack. Pay with card, bank transfer or USSD — your money is always protected.",
+      desc: "Checkout fast and safely with Paystack. Card, transfer or USSD.",
       tag: "💳 Pay",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1400&q=90",
       color: "#86efac",
-      glow: "rgba(134,239,172,0.15)",
+      glow: "rgba(134,239,172,0.35)",
     },
     {
       step: "04",
       title: "Fast Delivery",
-      desc: "Your food is picked up and delivered hot straight to your hostel or faculty door. Track your order live on the app.",
+      desc: "Your food arrives hot straight to your hostel or faculty door.",
       tag: "🏃 Delivered",
-      image: "https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1526367790999-0150786686a2?w=1400&q=90",
       color: "#22c55e",
-      glow: "rgba(34,197,94,0.15)",
+      glow: "rgba(34,197,94,0.35)",
     },
   ];
 
   const sectionRef = useRef(null);
   const [activeStep, setActiveStep] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [smoothProgress, setSmoothProgress] = useState(0);
+  const rawProgressRef = useRef(0);
+  const animFrameRef = useRef(null);
+
+  // Smooth lerp animation
+  useEffect(() => {
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    const animate = () => {
+      setSmoothProgress(prev => {
+        const diff = rawProgressRef.current - prev;
+        if (Math.abs(diff) < 0.0001) return rawProgressRef.current;
+        return lerp(prev, rawProgressRef.current, 0.08); // 0.08 = smoothness
+      });
+      animFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animFrameRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animFrameRef.current);
+  }, [steps.length]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,13 +71,10 @@ function HowItWorks() {
       const scrolled = -rect.top;
       const totalProgress = Math.max(0, Math.min(1, scrolled / sectionHeight));
 
-      setProgress(totalProgress);
+      rawProgressRef.current = totalProgress;
 
-      // Which step is active based on scroll progress
-      const stepIndex = Math.min(
-        Math.floor(totalProgress * steps.length),
-        steps.length - 1
-      );
+      const stepFloat = totalProgress * steps.length;
+      const stepIndex = Math.min(Math.floor(stepFloat), steps.length - 1);
       setActiveStep(stepIndex);
     };
 
@@ -68,165 +84,243 @@ function HowItWorks() {
 
   const current = steps[activeStep];
 
+  // Smooth local progress within each step
+  const stepFloat = smoothProgress * steps.length;
+  const stepLocalProgress = stepFloat - Math.floor(Math.min(stepFloat, steps.length - 0.001));
+  const curtainPercent = stepLocalProgress * 100;
+
   return (
     <>
       <style>{`
-        @keyframes fadeSlideIn {
-          from { opacity: 0; transform: translateY(24px); }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(28px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes imgZoom {
-          from { transform: scale(1.05); opacity: 0.6; }
-          to { transform: scale(1); opacity: 1; }
+        @keyframes tagPop {
+          from { opacity: 0; transform: translateY(10px) scale(0.9); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .step-content-anim {
-          animation: fadeSlideIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+        @keyframes scrollBounce {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50% { transform: translateX(-50%) translateY(6px); }
         }
-        .step-img-anim {
-          animation: imgZoom 0.6s cubic-bezier(0.22,1,0.36,1) both;
+        .step-text-anim {
+          animation: fadeInUp 0.6s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        .tag-anim {
+          animation: tagPop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.15s both;
+        }
+        .scroll-hint {
+          animation: scrollBounce 2s ease-in-out infinite;
         }
       `}</style>
 
-      {/* Tall section to create scroll space */}
       <section
         ref={sectionRef}
         style={{ height: `${steps.length * 100}vh`, position: "relative" }}
       >
-        {/* Sticky container */}
         <div style={{
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          background: "#030303",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
+          position: "sticky", top: 0,
+          height: "100vh", overflow: "hidden",
         }}>
 
-          {/* Background glow that changes color */}
+          {/* ===== NEXT IMAGE — always underneath ===== */}
+          {steps.map((step, i) => (
+            <div
+              key={`bg-${i}`}
+              style={{
+                position: "absolute", inset: 0,
+                backgroundImage: `url(${step.image})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                opacity: i === Math.min(activeStep + 1, steps.length - 1) ? 1 : 0,
+                transition: "opacity 0.3s ease",
+              }}
+            />
+          ))}
+
+          {/* ===== CURRENT IMAGE — slides up like a curtain ===== */}
+          <div style={{
+            position: "absolute", inset: 0,
+            clipPath: `inset(${curtainPercent}% 0 0 0)`,
+          }}>
+            {steps.map((step, i) => (
+              <div
+                key={`cur-${i}`}
+                style={{
+                  position: "absolute", inset: 0,
+                  backgroundImage: `url(${step.image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  opacity: i === activeStep ? 1 : 0,
+                  transition: "opacity 0.3s ease",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Dark gradient */}
+          {/* Dark gradient */}
           <div style={{
             position: "absolute", inset: 0, pointerEvents: "none",
-            background: `radial-gradient(ellipse at 70% 50%, ${current.glow} 0%, transparent 60%)`,
-            transition: "background 0.6s ease",
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.82) 100%)",
+          }} />
+          
+          {/* Top fade — blends into section above */}
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0,
+            height: "180px", pointerEvents: "none",
+            background: "linear-gradient(to bottom, #000 0%, transparent 100%)",
+          }} />
+          
+          {/* Bottom fade — blends into section below */}
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0,
+            height: "180px", pointerEvents: "none",
+            background: "linear-gradient(to top, #000 0%, transparent 100%)",
           }} />
 
-          <div className="relative z-10 max-w-7xl mx-auto w-full px-6 md:px-16 lg:px-24">
+          {/* Color tint */}
+          <div style={{
+            position: "absolute", inset: 0, pointerEvents: "none",
+            background: `radial-gradient(ellipse at 15% 85%, ${current.glow} 0%, transparent 50%)`,
+            transition: "background 0.7s ease",
+          }} />
 
-            {/* Section label */}
-            <div className="mb-10">
-              <span className="text-green-500 text-xs font-semibold tracking-widest uppercase"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                Simple Process
-              </span>
-              <h2 className="text-white font-black mt-2"
-                style={{ fontSize: "clamp(28px, 4vw, 48px)", fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>
-                How Kravely Works
+          {/* ===== UI CONTENT ===== */}
+          <div className="relative z-10 h-full flex flex-col justify-between"
+            style={{ padding: "36px clamp(20px, 5vw, 80px) 56px" }}>
+
+            {/* Top bar */}
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <span style={{
+                  color: "rgba(255,255,255,0.45)",
+                  fontSize: 11, fontWeight: 600,
+                  letterSpacing: "0.2em", textTransform: "uppercase",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  How It Works
+                </span>
+                <div style={{ width: 36, height: 1, background: "rgba(255,255,255,0.2)" }} />
+              </div>
+
+              {/* Step dots */}
+              <div className="flex items-center gap-2">
+                {steps.map((_, i) => (
+                  <div key={i} style={{
+                    height: 3, borderRadius: 2,
+                    width: i === activeStep ? 28 : 8,
+                    background: i === activeStep
+                      ? current.color
+                      : i < activeStep
+                        ? "rgba(255,255,255,0.45)"
+                        : "rgba(255,255,255,0.18)",
+                    transition: "all 0.5s cubic-bezier(0.22,1,0.36,1)",
+                  }} />
+                ))}
+                <span style={{
+                  color: "rgba(255,255,255,0.35)",
+                  fontSize: 12, marginLeft: 8,
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  {activeStep + 1}/{steps.length}
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom content */}
+            <div key={activeStep} className="step-text-anim" style={{ maxWidth: 680 }}>
+
+              {/* Tag */}
+              <div className="tag-anim" style={{ marginBottom: 20 }}>
+                <span style={{
+                  background: "rgba(0,0,0,0.5)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border: `1px solid ${current.color}45`,
+                  color: current.color,
+                  padding: "7px 18px",
+                  borderRadius: 50,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  {current.tag}
+                </span>
+              </div>
+
+              {/* Title */}
+              <h2 style={{
+                color: "#fff",
+                fontWeight: 900,
+                fontFamily: "'Syne', sans-serif",
+                fontSize: "clamp(42px, 7.5vw, 96px)",
+                lineHeight: 1.0,
+                letterSpacing: -2,
+                marginBottom: 18,
+              }}>
+                {current.title}
               </h2>
-            </div>
 
-            {/* Main content — two columns */}
-            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+              {/* Description */}
+              <p style={{
+                color: "rgba(255,255,255,0.65)",
+                fontSize: "clamp(15px, 1.8vw, 18px)",
+                fontFamily: "'DM Sans', sans-serif",
+                lineHeight: 1.75,
+                maxWidth: 460,
+                marginBottom: 32,
+              }}>
+                {current.desc}
+              </p>
 
-              {/* LEFT — Step info */}
-              <div className="flex-1 max-w-lg" key={activeStep}>
-                <div className="step-content-anim">
-
-                  {/* Step counter */}
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0"
-                      style={{ background: current.color, color: "#000", fontFamily: "'Syne', sans-serif" }}>
-                      {current.step}
-                    </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-bold"
-                      style={{
-                        background: `${current.color}15`,
-                        color: current.color,
-                        border: `1px solid ${current.color}30`,
-                        fontFamily: "'DM Sans', sans-serif",
-                      }}>
-                      {current.tag}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-white font-black mb-4"
-                    style={{ fontSize: "clamp(32px, 4vw, 56px)", fontFamily: "'Syne', sans-serif", letterSpacing: -1, lineHeight: 1.1 }}>
-                    {current.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-gray-400 leading-relaxed mb-8"
-                    style={{ fontSize: 17, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.8 }}>
-                    {current.desc}
-                  </p>
-
-                  {/* Step dots */}
-                  <div className="flex items-center gap-3">
-                    {steps.map((s, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <div style={{
-                          width: i === activeStep ? "32px" : "8px",
-                          height: "8px",
-                          borderRadius: "4px",
-                          background: i === activeStep ? current.color : i < activeStep ? `${current.color}50` : "rgba(255,255,255,0.1)",
-                          transition: "all 0.4s ease",
-                        }} />
-                      </div>
-                    ))}
-                    <span className="text-gray-600 text-sm ml-2"
-                      style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                      {activeStep + 1} / {steps.length}
-                    </span>
-                  </div>
-
-                </div>
-              </div>
-
-              {/* RIGHT — Image */}
-              <div className="flex-1 w-full max-w-md lg:max-w-lg" key={`img-${activeStep}`}>
-                <div className="step-img-anim relative rounded-3xl overflow-hidden"
-                  style={{
-                    height: "clamp(280px, 40vh, 420px)",
-                    boxShadow: `0 32px 80px ${current.glow}, 0 0 0 1px ${current.color}20`,
-                  }}>
-                  <img
-                    src={current.image}
-                    alt={current.title}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Overlay */}
-                  <div className="absolute inset-0"
-                    style={{ background: `linear-gradient(135deg, ${current.glow} 0%, rgba(0,0,0,0.4) 100%)` }} />
-
-                  {/* Step watermark */}
-                  <div className="absolute bottom-4 right-6"
-                    style={{
-                      fontSize: 120, fontWeight: 900, color: "rgba(255,255,255,0.04)",
-                      fontFamily: "'Syne', sans-serif", lineHeight: 1, userSelect: "none"
-                    }}>
-                    {current.step}
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Progress bar at bottom */}
-            <div className="mt-10 w-full bg-white/5 rounded-full h-0.5">
-              <div className="h-0.5 rounded-full transition-all duration-200"
-                style={{
-                  width: `${progress * 100}%`,
-                  background: `linear-gradient(90deg, #22c55e, ${current.color})`,
+              {/* Progress bar */}
+              <div style={{
+                width: 160, height: 2,
+                background: "rgba(255,255,255,0.12)",
+                borderRadius: 2, overflow: "hidden",
+              }}>
+                <div style={{
+                  height: "100%", borderRadius: 2,
+                  width: `${stepLocalProgress * 100}%`,
+                  background: `linear-gradient(90deg, ${current.color}, #fff)`,
+                  transition: "none",
+                  boxShadow: `0 0 8px ${current.color}`,
                 }} />
+              </div>
+
             </div>
 
-            {/* Scroll hint — only on first step */}
-            {activeStep === 0 && (
-              <div className="mt-4 flex items-center gap-2 text-gray-600"
-                style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>
+            {/* Watermark number */}
+            <div style={{
+              position: "absolute",
+              bottom: 32, right: "clamp(20px, 5vw, 80px)",
+              fontSize: "clamp(110px, 17vw, 210px)",
+              fontWeight: 900,
+              color: "rgba(255,255,255,0.035)",
+              fontFamily: "'Syne', sans-serif",
+              lineHeight: 1,
+              userSelect: "none",
+              pointerEvents: "none",
+              transition: "color 0.4s ease",
+            }}>
+              {current.step}
+            </div>
+
+            {/* Scroll hint */}
+            {activeStep === 0 && stepLocalProgress < 0.12 && (
+              <div className="scroll-hint" style={{
+                position: "absolute", bottom: 28, left: "50%",
+                display: "flex", flexDirection: "column",
+                alignItems: "center", gap: 5,
+                color: "rgba(255,255,255,0.3)",
+                fontFamily: "'DM Sans', sans-serif", fontSize: 12,
+              }}>
                 <span>Scroll to explore</span>
-                <span style={{ animation: "bounce 1s infinite" }}>↓</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
             )}
 
