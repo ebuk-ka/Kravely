@@ -6,6 +6,7 @@ import About from './pages/About'
 import VendorCTA from './components/VendorCta'
 import OrderCTA from './components/OrderCta'
 import Footer from './components/Footer'
+import OrderNow from "./pages/OrderNow";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           </>
         } />
         <Route path="/about" element={<About />} />
+        <Route path="/order" element={<OrderNow />} />
       </Routes>
     </div>
   )

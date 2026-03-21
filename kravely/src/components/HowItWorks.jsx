@@ -21,7 +21,7 @@ function HowItWorks() {
       tag: "🍽️ Choose",
       color: "#4ade80",
       screen: {
-        header: "Mama Nkechi's 🍲",
+        header: "Pearls Cuisine",
         subheader: "Local Delicacies",
         content: "menu",
       },
@@ -75,7 +75,7 @@ function HowItWorks() {
             ))}
           </div>
           {[
-            { name: "Mama Nkechi's", tag: "Local • ₦800+", icon: "🍲", rating: "4.8" },
+            { name: "Pearls Cuisine", tag: "Local • ₦800+", icon: "🍲", rating: "4.8" },
             { name: "Chukwu's Grill", tag: "Grills • ₦1,200+", icon: "🔥", rating: "4.6" },
             { name: "Campus Bites", tag: "Snacks • ₦500+", icon: "🥪", rating: "4.5" },
           ].map(v => (
@@ -158,7 +158,7 @@ function HowItWorks() {
               <span style={{ color, fontSize: 9, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>₦1,800</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span style={{ color, fontSize: 9, fontFamily: "'DM Sans', sans-serif" }}>On the way 🏃</span>
+              <span style={{ color, fontSize: 9, fontFamily: "'DM Sans', sans-serif" }}>On the way </span>
               <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 9 }}>12 min</span>
             </div>
             <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 4, height: 4 }}>
@@ -189,8 +189,8 @@ function HowItWorks() {
   const autoPlayRef = useRef(null);
   const containerRef = useRef(null);
 
-  const CARD_WIDTH = 240;
-  const CARD_GAP = 24;
+  const CARD_WIDTH = 280;
+  const CARD_GAP = 32;
 
   const next = useCallback(() => {
     setActiveIndex(prev => (prev + 1) % steps.length);
@@ -199,6 +199,25 @@ function HowItWorks() {
   const prev = useCallback(() => {
     setActiveIndex(prev => (prev - 1 + steps.length) % steps.length);
   }, [steps.length]);
+
+  const [smoothDragOffset, setSmoothDragOffset] = useState(0);
+  const dragOffsetRef = useRef(0);
+  const lerpFrameRef = useRef(null);
+
+  useEffect(() => {
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const animate = () => {
+      setSmoothDragOffset(prev => {
+        const target = dragOffsetRef.current;
+        const diff = target - prev;
+        if (Math.abs(diff) < 0.1) return target;
+        return lerp(prev, target, 0.12);
+      });
+      lerpFrameRef.current = requestAnimationFrame(animate);
+    };
+    lerpFrameRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(lerpFrameRef.current);
+  }, []);
 
   // Auto play
   useEffect(() => {
@@ -211,35 +230,42 @@ function HowItWorks() {
   const onMouseDown = (e) => {
     setIsDragging(true);
     setDragStartX(e.clientX);
+    dragOffsetRef.current = 0;
     setDragOffset(0);
   };
   const onMouseMove = (e) => {
     if (!isDragging) return;
-    setDragOffset(e.clientX - dragStartX);
+    const offset = e.clientX - dragStartX;
+    dragOffsetRef.current = offset;
+    setDragOffset(offset);
   };
   const onMouseUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
     if (dragOffset < -60) next();
     else if (dragOffset > 60) prev();
+    dragOffsetRef.current = 0;
     setDragOffset(0);
   };
 
-  // Touch handlers
   const onTouchStart = (e) => {
     setIsDragging(true);
     setDragStartX(e.touches[0].clientX);
+    dragOffsetRef.current = 0;
     setDragOffset(0);
   };
   const onTouchMove = (e) => {
     if (!isDragging) return;
-    setDragOffset(e.touches[0].clientX - dragStartX);
+    const offset = e.touches[0].clientX - dragStartX;
+    dragOffsetRef.current = offset;
+    setDragOffset(offset);
   };
   const onTouchEnd = () => {
     if (!isDragging) return;
     setIsDragging(false);
     if (dragOffset < -60) next();
     else if (dragOffset > 60) prev();
+    dragOffsetRef.current = 0;
     setDragOffset(0);
   };
 
@@ -248,20 +274,21 @@ function HowItWorks() {
     const absOffset = Math.abs(offset);
     const isActive = offset === 0;
 
-    let x = offset * (CARD_WIDTH + CARD_GAP) + dragOffset;
-    let scale = isActive ? 1 : Math.max(0.82, 1 - absOffset * 0.09);
-    let opacity = isActive ? 1 : Math.max(0.3, 1 - absOffset * 0.25);
+    let x = offset * (CARD_WIDTH + CARD_GAP) + smoothDragOffset;
+    let scale = isActive ? 1 : Math.max(0.78, 1 - absOffset * 0.1);
+    let opacity = isActive ? 1 : Math.max(0.25, 1 - absOffset * 0.3);
     let zIndex = steps.length - absOffset;
-    let blur = isActive ? 0 : Math.min(absOffset * 1.5, 4);
+    let blur = isActive ? 0 : Math.min(absOffset * 2, 5);
+    let y = isActive ? 0 : absOffset * 12; // inactive cards drop slightly
 
     return {
-      transform: `translateX(${x}px) scale(${scale})`,
+      transform: `translateX(${x}px) translateY(${y}px) scale(${scale})`,
       opacity,
       zIndex,
       filter: blur > 0 ? `blur(${blur}px)` : "none",
       transition: isDragging
         ? "none"
-        : "transform 0.5s cubic-bezier(0.34,1.2,0.64,1), opacity 0.5s ease, filter 0.5s ease",
+        : "transform 0.6s cubic-bezier(0.34,1.3,0.64,1), opacity 0.6s ease, filter 0.6s ease",
     };
   };
 
@@ -296,7 +323,7 @@ function HowItWorks() {
 
           {/* Header */}
           <div className="text-center mb-16">
-            <span className="text-green-500 text-xs font-semibold tracking-widest uppercase"
+            <span className="text-green-700 text-xs font-semibold tracking-widest uppercase"
               style={{ fontFamily: "'DM Sans', sans-serif" }}>
               Simple Process
             </span>
@@ -366,7 +393,7 @@ function HowItWorks() {
 
             {/* RIGHT — Phone carousel */}
             <div className="flex-1 flex items-center justify-center relative"
-              style={{ height: 520 }}>
+              style={{ height: 680 }}>
 
               {/* Carousel container */}
               <div
@@ -375,7 +402,7 @@ function HowItWorks() {
                 style={{
                   position: "relative",
                   width: CARD_WIDTH,
-                  height: 480,
+                  height: 620,
                   userSelect: "none",
                 }}
                 onMouseDown={onMouseDown}
@@ -400,20 +427,20 @@ function HowItWorks() {
                     {/* iPhone frame */}
                     <div style={{
                       width: CARD_WIDTH,
-                      borderRadius: 44,
+                      borderRadius: 48,
                       background: "linear-gradient(160deg, #3a3a3c, #1c1c1e 40%, #2c2c2e 70%, #3a3a3c)",
                       padding: "2.5px",
                       boxShadow: i === activeIndex
-                        ? `0 0 0 0.5px rgba(255,255,255,0.12), 0 0 40px ${step.color}25, 0 32px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.18)`
+                        ? `0 0 0 0.5px rgba(255,255,255,0.12), 0 0 40px ${step.color}25, 0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.18)`
                         : "0 0 0 0.5px rgba(255,255,255,0.06), 0 16px 32px rgba(0,0,0,0.4)",
-                      transition: "box-shadow 0.5s ease",
+                      transition: "box-shadow 0.6s ease",
                     }}>
 
                       {/* Side buttons */}
-                      <div style={{ position: "absolute", left: -3, top: 88, width: 3, height: 22, background: "linear-gradient(180deg,#2a2a2c,#1a1a1c,#2a2a2c)", borderRadius: "2px 0 0 2px" }} />
-                      <div style={{ position: "absolute", left: -3, top: 120, width: 3, height: 42, background: "linear-gradient(180deg,#2a2a2c,#1a1a1c,#2a2a2c)", borderRadius: "2px 0 0 2px" }} />
-                      <div style={{ position: "absolute", left: -3, top: 172, width: 3, height: 42, background: "linear-gradient(180deg,#2a2a2c,#1a1a1c,#2a2a2c)", borderRadius: "2px 0 0 2px" }} />
-                      <div style={{ position: "absolute", right: -3, top: 136, width: 3, height: 58, background: "linear-gradient(180deg,#2a2a2c,#1a1a1c,#2a2a2c)", borderRadius: "0 2px 2px 0" }} />
+                      <div style={{ position: "absolute", left: -3, top: 100, width: 3, height: 24, background: "linear-gradient(180deg,#2a2a2c,#1a1a1c,#2a2a2c)", borderRadius: "2px 0 0 2px" }} />
+                      <div style={{ position: "absolute", left: -3, top: 136, width: 3, height: 52, background: "linear-gradient(180deg,#2a2a2c,#1a1a1c,#2a2a2c)", borderRadius: "2px 0 0 2px" }} />
+                      <div style={{ position: "absolute", left: -3, top: 200, width: 3, height: 52, background: "linear-gradient(180deg,#2a2a2c,#1a1a1c,#2a2a2c)", borderRadius: "2px 0 0 2px" }} />
+                      <div style={{ position: "absolute", right: -3, top: 160, width: 3, height: 72, background: "linear-gradient(180deg,#2a2a2c,#1a1a1c,#2a2a2c)", borderRadius: "0 2px 2px 0" }} />
 
                       {/* Screen */}
                       <div style={{ borderRadius: 42, overflow: "hidden", background: "#050505" }}>
@@ -463,7 +490,7 @@ function HowItWorks() {
                         </div>
 
                         {/* Screen content */}
-                        <div style={{ background: "#050505", minHeight: 240 }}>
+                        <div style={{ background: "#050505", minHeight: 360 }}>
                           <PhoneScreen step={step} color={step.color} />
                         </div>
 

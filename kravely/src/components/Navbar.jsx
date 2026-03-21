@@ -2,39 +2,26 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/kravely.logo.png";
 
-// ===================== FLIP LINK — regular anchor =====================
 function FlipLink({ href, children }) {
   return (
     <>
       <style>{`
         .flip-link {
-          position: relative;
-          overflow: hidden;
-          display: inline-flex;
-          flex-direction: column;
-          height: 20px;
-          text-decoration: none;
+          position: relative; overflow: hidden;
+          display: inline-flex; flex-direction: column;
+          height: 20px; text-decoration: none;
         }
         .flip-top {
-          display: block;
-          color: #d1fae5;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 15px;
-          font-weight: 500;
-          line-height: 20px;
-          white-space: nowrap;
+          display: block; color: #d1fae5;
+          font-family: 'DM Sans', sans-serif; font-size: 15px;
+          font-weight: 500; line-height: 20px; white-space: nowrap;
           transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
         }
         .flip-bottom {
-          display: block;
-          color: #22c55e;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 15px;
-          font-weight: 500;
-          line-height: 20px;
-          white-space: nowrap;
-          position: absolute;
-          top: 100%;
+          display: block; color: #22c55e;
+          font-family: 'DM Sans', sans-serif; font-size: 15px;
+          font-weight: 500; line-height: 20px; white-space: nowrap;
+          position: absolute; top: 100%;
           transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
         }
         .flip-link:hover .flip-top { transform: translateY(-100%); }
@@ -48,7 +35,6 @@ function FlipLink({ href, children }) {
   );
 }
 
-// ===================== FLIP ROUTER LINK — React Router =====================
 function FlipRouterLink({ to, children }) {
   return (
     <Link to={to} className="flip-link" style={{ textDecoration: "none" }}>
@@ -58,7 +44,6 @@ function FlipRouterLink({ to, children }) {
   );
 }
 
-// ===================== NAVBAR =====================
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -88,40 +73,27 @@ function Navbar() {
         .logo-wobble { animation: logoWobble 1s ease 0.5s 1; }
         .mobile-menu-anim { animation: slideDown 0.3s ease; }
         .ham-line {
-          display: block;
-          width: 24px;
-          height: 2px;
-          background: white;
-          border-radius: 2px;
-          transition: all 0.3s ease;
+          display: block; width: 24px; height: 2px;
+          background: white; border-radius: 2px; transition: all 0.3s ease;
         }
         .is-open .ham-line1 { transform: translateY(8px) rotate(45deg); }
         .is-open .ham-line2 { opacity: 0; }
         .is-open .ham-line3 { transform: translateY(-8px) rotate(-45deg); }
       `}</style>
 
-      {/* NAVBAR */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-black/95 backdrop-blur-md border-b border-white/10"
-          : "bg-transparent"
+        scrolled ? "bg-black/95 backdrop-blur-md border-b border-white/10" : "bg-transparent"
       }`}>
-        <div
-          className="relative max-w-7xl mx-auto flex items-center justify-between px-5 md:px-12"
-          style={{ height: "72px" }}
-        >
+        <div className="relative max-w-7xl mx-auto flex items-center justify-between px-5 md:px-12"
+          style={{ height: "72px" }}>
 
           {/* LOGO */}
           <Link to="/" className="flex items-center flex-shrink-0 z-10">
-            <img
-              src={logo}
-              alt="Kravely"
-              className="logo-wobble object-contain"
-              style={{ height: "100px", width: "auto", maxWidth: "160px", marginLeft: "-10px" }}
-            />
+            <img src={logo} alt="Kravely" className="logo-wobble object-contain"
+              style={{ height: "52px", width: "auto", maxWidth: "160px" }} />
           </Link>
 
-          {/* NAV LINKS — perfectly centered */}
+          {/* NAV LINKS */}
           <div className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
             <FlipRouterLink to="/">Home</FlipRouterLink>
             <FlipLink href="#">Vendors</FlipLink>
@@ -129,10 +101,10 @@ function Navbar() {
             <FlipRouterLink to="/about">About</FlipRouterLink>
           </div>
 
-          {/* ORDER NOW */}
+          {/* ✅ ORDER NOW → /order */}
           <div className="hidden md:flex items-center z-10">
             <Link
-              to="/login"
+              to="/order"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
               className="bg-green-500 text-black font-bold text-sm px-6 py-2.5 rounded-full transition-all duration-200 hover:bg-green-600 hover:scale-105 no-underline"
             >
@@ -162,22 +134,16 @@ function Navbar() {
             { label: "How It Works", to: "#" },
             { label: "About", to: "/about" },
           ].map(({ label, to }) => (
-            <Link
-              key={label}
-              to={to}
-              onClick={() => setMenuOpen(false)}
+            <Link key={label} to={to} onClick={() => setMenuOpen(false)}
               style={{ fontFamily: "'DM Sans', sans-serif" }}
-              className="text-green-100 text-lg font-semibold border-b border-white/10 pb-4 transition-colors duration-200 hover:text-green-500 no-underline"
-            >
+              className="text-green-100 text-lg font-semibold border-b border-white/10 pb-4 transition-colors duration-200 hover:text-green-500 no-underline">
               {label}
             </Link>
           ))}
-          <Link
-            to="/login"
-            onClick={() => setMenuOpen(false)}
+          {/* ✅ MOBILE ORDER NOW → /order */}
+          <Link to="/order" onClick={() => setMenuOpen(false)}
             style={{ fontFamily: "'DM Sans', sans-serif" }}
-            className="bg-green-500 text-black font-bold text-base text-center py-3.5 rounded-full no-underline hover:bg-green-600 transition-colors duration-200"
-          >
+            className="bg-green-500 text-black font-bold text-base text-center py-3.5 rounded-full no-underline hover:bg-green-600 transition-colors duration-200">
             Order Now
           </Link>
         </div>
