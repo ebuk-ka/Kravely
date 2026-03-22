@@ -90,7 +90,7 @@ function Navbar() {
           {/* LOGO */}
           <Link to="/" className="flex items-center flex-shrink-0 z-10">
             <img src={logo} alt="Kravely" className="logo-wobble object-contain"
-              style={{ height: "52px", width: "auto", maxWidth: "160px" }} />
+              style={{ height: "80px", width: "auto", maxWidth: "160px" }} />
           </Link>
 
           {/* NAV LINKS */}

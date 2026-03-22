@@ -314,7 +314,7 @@ function Hero() {
               delivered straight to your hostel or faculty. No stress.
             </p>
 
-            {/* ✅ CONNECTED BUTTONS */}
+            
             <div className="slide-up-5 flex gap-4 flex-wrap justify-center lg:justify-start">
               <Link
                 to="/order"

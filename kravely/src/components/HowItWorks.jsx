@@ -21,7 +21,7 @@ function HowItWorks() {
       tag: "🍽️ Choose",
       color: "#4ade80",
       screen: {
-        header: "Pearls Cuisine",
+        header: "Mama Nkechi's 🍲",
         subheader: "Local Delicacies",
         content: "menu",
       },
@@ -75,7 +75,7 @@ function HowItWorks() {
             ))}
           </div>
           {[
-            { name: "Pearls Cuisine", tag: "Local • ₦800+", icon: "🍲", rating: "4.8" },
+            { name: "Mama Nkechi's", tag: "Local • ₦800+", icon: "🍲", rating: "4.8" },
             { name: "Chukwu's Grill", tag: "Grills • ₦1,200+", icon: "🔥", rating: "4.6" },
             { name: "Campus Bites", tag: "Snacks • ₦500+", icon: "🥪", rating: "4.5" },
           ].map(v => (
@@ -158,7 +158,7 @@ function HowItWorks() {
               <span style={{ color, fontSize: 9, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>₦1,800</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span style={{ color, fontSize: 9, fontFamily: "'DM Sans', sans-serif" }}>On the way </span>
+              <span style={{ color, fontSize: 9, fontFamily: "'DM Sans', sans-serif" }}>On the way 🏃</span>
               <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 9 }}>12 min</span>
             </div>
             <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 4, height: 4 }}>
@@ -249,16 +249,19 @@ function HowItWorks() {
   };
 
   const onTouchStart = (e) => {
-    setIsDragging(true);
     setDragStartX(e.touches[0].clientX);
     dragOffsetRef.current = 0;
     setDragOffset(0);
   };
   const onTouchMove = (e) => {
-    if (!isDragging) return;
     const offset = e.touches[0].clientX - dragStartX;
-    dragOffsetRef.current = offset;
-    setDragOffset(offset);
+    // Only treat as horizontal drag if movement is clearly horizontal
+    if (Math.abs(offset) > 10) {
+      setIsDragging(true);
+      dragOffsetRef.current = offset;
+      setDragOffset(offset);
+      e.preventDefault(); // only prevent scroll when clearly swiping horizontally
+    }
   };
   const onTouchEnd = () => {
     if (!isDragging) return;
@@ -323,7 +326,7 @@ function HowItWorks() {
 
           {/* Header */}
           <div className="text-center mb-16">
-            <span className="text-green-700 text-xs font-semibold tracking-widest uppercase"
+            <span className="text-green-500 text-xs font-semibold tracking-widest uppercase"
               style={{ fontFamily: "'DM Sans', sans-serif" }}>
               Simple Process
             </span>
@@ -411,7 +414,7 @@ function HowItWorks() {
                 onMouseLeave={() => { onMouseUp(); setIsPaused(false); }}
                 onMouseEnter={() => setIsPaused(true)}
                 onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
+                onTouchMove={(e) => onTouchMove(e)}
                 onTouchEnd={onTouchEnd}
               >
                 {steps.map((step, i) => (
