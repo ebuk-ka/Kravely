@@ -7,6 +7,8 @@ import VendorCTA from './components/VendorCta'
 import OrderCTA from './components/OrderCta'
 import Footer from './components/Footer'
 import OrderNow from "./pages/OrderNow";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
 
 export default function App() {
   return (
@@ -24,6 +26,8 @@ export default function App() {
         } />
         <Route path="/about" element={<About />} />
         <Route path="/order" element={<OrderNow />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </div>
   )

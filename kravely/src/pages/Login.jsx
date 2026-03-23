@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -12,7 +13,10 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     // TODO: connect to backend
-    setTimeout(() => setLoading(false), 2000);
+    setTimeout(() => {
+      setLoading(false);
+      navigate("/order");
+    }, 2000);
   };
 
   return (
@@ -122,13 +126,13 @@ function Login() {
             </Link>
             <p className="text-gray-500 text-sm mb-10"
               style={{ fontFamily: "'DM Sans', sans-serif" }}>
-              Campus food delivery at FUTO 🎓
+              Campus food delivery at FUTO
             </p>
 
             {/* Heading */}
             <h2 className="text-white font-black mb-2"
               style={{ fontSize: "clamp(28px, 4vw, 38px)", fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>
-              Welcome back 👋
+              Welcome back
             </h2>
             <p className="text-gray-500 mb-8"
               style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15 }}>
@@ -186,7 +190,10 @@ function Login() {
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
                       style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18 }}
                     >
-                      {showPassword ? "🙈" : "👁️"}
+                      <span style={{
+                        textDecoration: showPassword ? 'none' : 'line-through',
+                        transition: 'text-decoration 0.3s ease'
+                      }}>👁️</span>
                     </button>
                   </div>
                 </div>
@@ -268,7 +275,6 @@ function Login() {
             style={{ backgroundImage: "linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
 
           <div className="relative z-10 text-center px-12">
-            <div className="text-8xl mb-8">🍔</div>
             <h3 className="text-white font-black text-4xl mb-4"
               style={{ fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>
               Hungry?<br />
@@ -285,13 +291,12 @@ function Login() {
             {/* Trust badges */}
             <div className="flex flex-col gap-3 mt-10 max-w-xs mx-auto">
               {[
-                { icon: "⚡", text: "Fast delivery on campus" },
-                { icon: "🔒", text: "Secure payments via Paystack" },
-                { icon: "🍽️", text: "Fresh food from real vendors" },
-              ].map(({ icon, text }) => (
-                <div key={text} className="flex items-center gap-3 text-left"
+                { text: "Fast delivery on campus" },
+                { text: "Secure payments via Paystack" },
+                { text: "Fresh food from real vendors" },
+              ].map(({ text }) => (
+                <div key={text} className="flex items-center text-left"
                   style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px" }}>
-                  <span className="text-xl">{icon}</span>
                   <span className="text-gray-400 text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>{text}</span>
                 </div>
               ))}
