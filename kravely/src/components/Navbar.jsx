@@ -96,6 +96,7 @@ function Navbar() {
           {/* NAV LINKS */}
           <div className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
             <FlipRouterLink to="/">Home</FlipRouterLink>
+            <FlipRouterLink to="/menu">Menu</FlipRouterLink>
             <FlipLink href="#">Vendors</FlipLink>
             <FlipLink href="#">How It Works</FlipLink>
             <FlipRouterLink to="/about">About</FlipRouterLink>
@@ -130,6 +131,7 @@ function Navbar() {
         <div className="mobile-menu-anim fixed top-[72px] left-0 right-0 z-40 bg-black/98 backdrop-blur-md border-b border-white/10 flex flex-col gap-6 px-8 pt-6 pb-8 md:hidden">
           {[
             { label: "Home", to: "/" },
+            { label: "Menu", to: "/menu" },
             { label: "Vendors", to: "#" },
             { label: "How It Works", to: "#" },
             { label: "About", to: "/about" },

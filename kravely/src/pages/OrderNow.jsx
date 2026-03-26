@@ -33,7 +33,7 @@ function LoginPrompt({ onClose }) {
             <Link to="/signup" style={{ background: "#22c55e", color: "#000", fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 15, padding: "14px", borderRadius: 14, textDecoration: "none", display: "block" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#16a34a"; e.currentTarget.style.transform = "translateY(-2px)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "#22c55e"; e.currentTarget.style.transform = "translateY(0)"; }}
-            >Create Free Account 🚀</Link>
+            >Create Free Account</Link>
             <Link to="/login" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 15, padding: "14px", borderRadius: 14, textDecoration: "none", display: "block" }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(34,197,94,0.4)"; e.currentTarget.style.color = "#22c55e"; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#fff"; }}
@@ -49,7 +49,140 @@ function LoginPrompt({ onClose }) {
   );
 }
 
-// ===================== CART SIDEBAR =====================
+// ===================== PEARL'S MENU MODAL =====================
+function PearlsMenuModal({ isOpen, onClose, onAddToCart }) {
+  const pearlsMenu = [
+    { id: "pearls-jumbo-rice", name: "Jumbo Rice Combo", description: "Large portion of jollof rice with chicken, plantain & salad", price: 3500, emoji: "🍱", popular: true },
+    { id: "pearls-bulk-rice", name: "Bulk Rice (10+ servings)", description: "Perfect for events and group gatherings", price: 25000, emoji: "🍚", popular: false },
+    { id: "pearls-fried-rice", name: "Fried Rice + Chicken", description: "Vegetable fried rice with grilled chicken", price: 2200, emoji: "🍚", popular: false },
+    { id: "pearls-jollof-rice", name: "Jollof Rice + Chicken", description: "Classic Nigerian jollof rice with chicken", price: 1800, emoji: "🍚", popular: false },
+    { id: "pearls-egusi", name: "Egusi Soup + Fufu", description: "Melon seed soup with pounded yam", price: 2000, emoji: "🍲", popular: false },
+    { id: "pearls-okra", name: "Okra Soup + Fufu", description: "Draw soup with pounded yam", price: 1900, emoji: "🍲", popular: false },
+    { id: "pearls-suya", name: "Suya Platter", description: "Grilled spiced beef with onions & pepper", price: 2800, emoji: "🔥", popular: false },
+    { id: "pearls-chicken", name: "Grilled Chicken", description: "Spicy grilled chicken with sides", price: 2400, emoji: "🍗", popular: false },
+    { id: "pearls-plantain", name: "Dodo (Fried Plantain)", description: "Sweet fried plantain", price: 800, emoji: "🍌", popular: false },
+    { id: "pearls-salad", name: "Fresh Salad", description: "Mixed vegetable salad", price: 600, emoji: "🥗", popular: false },
+  ];
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <style>{`
+        @keyframes menuSlideIn {
+          from { transform: translateY(50px) scale(0.95); opacity: 0; }
+          to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes menuFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .menu-overlay { animation: menuFadeIn 0.3s ease both; }
+        .menu-panel { animation: menuSlideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .menu-item { transition: all 0.2s ease; }
+        .menu-item:hover { background: rgba(255,255,255,0.04) !important; transform: translateX(4px); }
+        .add-btn { transition: all 0.2s ease; }
+        .add-btn:hover { background: #16a34a !important; transform: translateY(-1px); }
+      `}</style>
+
+      {/* Overlay */}
+      <div className="menu-overlay" onClick={onClose} style={{
+        position: "fixed", inset: 0, zIndex: 150,
+        background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)",
+      }} />
+
+      {/* Modal */}
+      <div className="menu-panel" onClick={e => e.stopPropagation()} style={{
+        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 151,
+        background: "#0a0a0a", borderTop: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: "24px 24px 0 0", maxHeight: "80vh", overflow: "hidden",
+        display: "flex", flexDirection: "column",
+      }}>
+
+        {/* Header */}
+        <div style={{ padding: "24px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h2 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 24, marginBottom: 4 }}>Pearl's Cuisine Menu</h2>
+            <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 14 }}>FUTO's #1 jumbo order specialists</p>
+          </div>
+          <button onClick={onClose} style={{
+            width: 40, height: 40, borderRadius: 50, background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.08)", color: "#fff", cursor: "pointer",
+            fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.2s"
+          }}
+            onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+            onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
+          >×</button>
+        </div>
+
+        {/* Menu Items */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {pearlsMenu.map((item) => (
+              <div key={item.id} className="menu-item" style={{
+                background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 16, padding: "16px", display: "flex", alignItems: "center", gap: 14,
+                position: "relative"
+              }}>
+                {item.popular && (
+                  <span style={{
+                    position: "absolute", top: 8, right: 8,
+                    background: "linear-gradient(135deg, #eab308, #ca8a04)",
+                    color: "#000", fontSize: 9, fontWeight: 800, padding: "2px 8px",
+                    borderRadius: 50, fontFamily: "'DM Sans', sans-serif"
+                  }}>⭐ Popular</span>
+                )}
+
+                {/* Emoji */}
+                <div style={{
+                  width: 50, height: 50, borderRadius: 12,
+                  background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24,
+                  flexShrink: 0
+                }}>
+                  {item.emoji}
+                </div>
+
+                {/* Details */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h4 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 2 }}>{item.name}</h4>
+                  <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 13, marginBottom: 6, lineHeight: 1.4 }}>{item.description}</p>
+                  <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 16 }}>₦{item.price.toLocaleString()}</span>
+                </div>
+
+                {/* Add Button */}
+                <button
+                  className="add-btn"
+                  onClick={() => {
+                    onAddToCart({ id: item.id, name: item.name, vendor: "Pearl's Cuisine", price: item.price, emoji: item.emoji });
+                    onClose();
+                  }}
+                  style={{
+                    background: "#22c55e", color: "#000", border: "none", borderRadius: 50,
+                    padding: "10px 20px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
+                    fontSize: 13, cursor: "pointer", flexShrink: 0
+                  }}
+                >
+                  Add +
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.5)" }}>
+          <p style={{ textAlign: "center", color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>
+            📍 Delivery within FUTO Campus • 🕐 30-60 mins • ⭐ 4.9 Rating
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
 function CartSidebar({ cart, isOpen, onClose, onIncrease, onDecrease, onRemove, onClear, onCheckout }) {
   const totalItems = cart.reduce((a, i) => a + i.qty, 0);
   const subtotal = cart.reduce((a, i) => a + i.price * i.qty, 0);
@@ -126,7 +259,6 @@ function CartSidebar({ cart, isOpen, onClose, onIncrease, onDecrease, onRemove, 
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 24px" }}>
             {cart.length === 0 ? (
               <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, paddingBottom: 80 }}>
-                <div style={{ fontSize: 56 }}>🛒</div>
                 <p style={{ color: "#4b5563", fontSize: 16, fontWeight: 600, fontFamily: "'Syne', sans-serif" }}>Your cart is empty</p>
                 <p style={{ color: "#374151", fontSize: 14, textAlign: "center", fontFamily: "'DM Sans', sans-serif", maxWidth: 220 }}>
                   Browse vendors and add your favourite meals to get started
@@ -185,10 +317,10 @@ function CartSidebar({ cart, isOpen, onClose, onIncrease, onDecrease, onRemove, 
                 <span style={{ color: "#22c55e", fontWeight: 800, fontSize: 18, fontFamily: "'Syne', sans-serif" }}>₦{total.toLocaleString()}</span>
               </div>
               <button className="checkout-btn" onClick={onCheckout} style={{ width: "100%", background: "#22c55e", color: "#000", fontWeight: 800, fontSize: 16, padding: "16px", borderRadius: 14, border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
-                Checkout 🍔
+                Checkout
               </button>
               <p style={{ textAlign: "center", color: "#374151", fontSize: 12, fontFamily: "'DM Sans', sans-serif", marginTop: 12 }}>
-                🔒 Secure payment via Paystack
+                Secure payment via Paystack
               </p>
             </div>
           )}
@@ -445,6 +577,7 @@ function OrderNow() {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [showPearlsMenu, setShowPearlsMenu] = useState(false);
 
   // Cart actions
   const addToCart = (item) => {
@@ -477,7 +610,7 @@ function OrderNow() {
   ];
 
   const vendors = [
-    { id: 1, name: "Pearl's Cuisine", tag: "Jumbo Orders · Bulk Delivery", rating: "4.9", time: "30–60 min", emoji: "👑", category: "combos", open: true, featured: true },
+    { id: 1, name: "Pearl's Cuisine", tag: "Jumbo Orders · Bulk Delivery", rating: "4.9", time: "2-4 hrs", emoji: "👑", category: "combos", open: true, featured: true },
     { id: 2, name: "Mama Nkechi's Kitchen", tag: "Local Delicacies", rating: "4.8", time: "15–25 min", emoji: "🍲", category: "local", open: true, featured: false },
     { id: 3, name: "Chukwu's Grill Spot", tag: "Grills & Suya", rating: "4.6", time: "20–30 min", emoji: "🔥", category: "local", open: true, featured: false },
     { id: 4, name: "Campus Bites", tag: "Snacks & Fast Food", rating: "4.5", time: "10–15 min", emoji: "🥪", category: "snacks", open: true, featured: false },
@@ -501,6 +634,12 @@ function OrderNow() {
       <div style={{ minHeight: "100vh", background: "#000" }}>
 
         {showLoginPrompt && <LoginPrompt onClose={() => setShowLoginPrompt(false)} />}
+
+        <PearlsMenuModal
+          isOpen={showPearlsMenu}
+          onClose={() => setShowPearlsMenu(false)}
+          onAddToCart={addToCart}
+        />
 
         <CartSidebar
           cart={cart}
@@ -555,10 +694,10 @@ function OrderNow() {
                     ))}
                   </div>
                 </div>
-                <button onClick={() => addToCart({ id: "pearl-jumbo", name: "Jumbo Rice Combo", vendor: "Pearl's Cuisine", price: 3500, emoji: "🍱" })} style={{ background: "linear-gradient(135deg, #eab308, #ca8a04)", color: "#000", border: "none", borderRadius: 50, padding: "12px 28px", fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 14, cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(234,179,8,0.3)" }}
+                <button onClick={() => setShowPearlsMenu(true)} style={{ background: "linear-gradient(135deg, #eab308, #ca8a04)", color: "#000", border: "none", borderRadius: 50, padding: "12px 28px", fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 14, cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(234,179,8,0.3)" }}
                   onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(234,179,8,0.4)"; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(234,179,8,0.3)"; }}
-                >Order from Pearl's →</button>
+                >View Menu →</button>
               </div>
             </div>
           </div>
