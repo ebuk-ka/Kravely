@@ -309,7 +309,7 @@ function HowItWorks() {
         .phone-card:active { cursor: grabbing; }
       `}</style>
 
-      <section className="bg-[#030303] py-24 overflow-hidden relative">
+      <section id="how-it-works" className="bg-[#030303] py-24 overflow-hidden relative">
 
         {/* Top/bottom edge fades */}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 120, background: "linear-gradient(to bottom, #000, transparent)", pointerEvents: "none", zIndex: 10 }} />

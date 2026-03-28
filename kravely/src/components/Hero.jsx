@@ -53,9 +53,9 @@ function PhoneMockup() {
   const [islandExpanded, setIslandExpanded] = useState(false);
 
   const orders = [
-    { name: "Jollof Rice + Chicken", vendor: "Mama Nkechi's", price: "₦1,800", status: "On the way 🏃", time: "12 min", progress: "75%" },
-    { name: "Suya Platter", vendor: "Chukwu's Grill", price: "₦2,200", status: "Being prepared 👨‍🍳", time: "8 min", progress: "45%" },
-    { name: "Pepper Soup", vendor: "Pepper Soup Corner", price: "₦1,500", status: "Delivered ✅", time: "Just now", progress: "100%" },
+    { name: "Jollof Rice + Chicken", vendor: "Mama Nkechi's", price: "₦1,800", status: "On the way", time: "12 min", progress: "75%" },
+    { name: "Suya Platter", vendor: "Chukwu's Grill", price: "₦2,200", status: "Being prepared", time: "8 min", progress: "45%" },
+    { name: "Pepper Soup", vendor: "Pepper Soup Corner", price: "₦1,500", status: "Delivered", time: "Just now", progress: "100%" }
   ];
 
   useEffect(() => {
@@ -149,7 +149,7 @@ function PhoneMockup() {
           <div className="px-4 pb-4">
             <div className="flex justify-between items-center py-2 mb-3">
               <div>
-                <p className="text-white/40 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>Good Day 👋</p>
+                <p className="text-white/40 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>Good Day </p>
                 <p className="text-white font-bold text-sm" style={{ fontFamily: "'Syne', sans-serif" }}>User</p>
               </div>
               <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
@@ -158,7 +158,7 @@ function PhoneMockup() {
             </div>
 
             <div className="bg-white/5 rounded-xl px-3 py-2 flex items-center gap-2 mb-3">
-              <span className="text-white/30 text-xs">🔍</span>
+              <span className="text-white/30 text-xs">Search</span>
               <span className="text-white/30 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>Search vendors, meals...</span>
             </div>
 
@@ -172,8 +172,8 @@ function PhoneMockup() {
             <p className="text-white/40 text-xs mb-2" style={{ fontFamily: "'DM Sans', sans-serif" }}>Popular near you</p>
             <div className="flex flex-col gap-2 mb-3">
               {[
-                { name: "Mama Nkechi's", tag: "Local • ₦800+", rating: "4.8", icon: "🍲" },
-                { name: "Chukwu's Grill", tag: "Grills • ₦1,200+", rating: "4.6", icon: "🔥" },
+                { name: "Mama Nkechi's", tag: "Local • ₦800+", rating: "4.8", icon: "" },
+                { name: "Chukwu's Grill", tag: "Grills • ₦1,200+", rating: "4.6", icon: "" },
               ].map((v) => (
                 <div key={v.name} className="bg-white/5 rounded-xl p-2.5 flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -183,7 +183,7 @@ function PhoneMockup() {
                       <p className="text-white/40 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>{v.tag}</p>
                     </div>
                   </div>
-                  <span className="text-green-500 text-xs font-bold">⭐ {v.rating}</span>
+                  <span className="text-green-500 text-xs font-bold">{v.rating}</span>
                 </div>
               ))}
             </div>
@@ -212,13 +212,13 @@ function PhoneMockup() {
 
       <div className="absolute -right-4 top-16 bg-black border border-green-500/30 rounded-2xl px-3 py-2 shadow-xl z-20"
         style={{ animation: "floatBadge 3s ease-in-out infinite" }}>
-        <p className="text-white text-xs font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>Order confirmed! ✅</p>
+        <p className="text-white text-xs font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>Order confirmed!</p>
         <p className="text-white/40 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>Est. 15 mins</p>
       </div>
 
       <div className="absolute -left-6 bottom-20 bg-black border border-green-500/30 rounded-2xl px-3 py-2 shadow-xl z-20"
         style={{ animation: "floatBadge 3s ease-in-out infinite 1.5s" }}>
-        <p className="text-green-500 text-xs font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>FUTO Campus 🎓</p>
+        <p className="text-green-500 text-xs font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>FUTO Campus</p>
         <p className="text-white/40 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>Fast delivery</p>
       </div>
     </div>
@@ -294,7 +294,7 @@ function Hero() {
             <div className="slide-up-1 flex items-center gap-2 bg-green-500/10 border border-green-500/30 rounded-full px-4 py-1.5 mb-7">
               <span className="w-2 h-2 bg-green-500 rounded-full inline-block" />
               <span className="text-green-500 text-sm font-medium" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                Coming soon to FUTO Campus 🎓
+                Coming soon to FUTO Campus
               </span>
             </div>
 
@@ -321,7 +321,7 @@ function Hero() {
                 className="pulse-btn inline-block bg-green-500 text-black font-extrabold px-9 py-4 rounded-full text-base transition-all duration-200 hover:bg-green-600 hover:-translate-y-1 hover:scale-105"
                 style={{ fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}
               >
-                Order Food Now 🍔
+                Order Food Now
               </Link>
               <Link
                 to="/vendor/signup"
@@ -333,7 +333,6 @@ function Hero() {
             </div>
 
             <div className="slide-up-6 mt-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-3">
-              <span className="text-2xl">🚀</span>
               <p className="text-gray-400 text-sm text-left" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                 Launching at FUTO very soon —{" "}
                 <span className="text-green-400 font-semibold">be the first to order!</span>
