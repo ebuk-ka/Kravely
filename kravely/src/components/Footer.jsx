@@ -19,7 +19,7 @@ function Footer() {
     {
       title: "Vendors",
       items: [
-        { label: "Join as Vendor", to: "/vendor/signup" },
+        { label: "Join as Vendor", href: "https://chat.whatsapp.com/Htvsu1kFSdg8TXOluHqS9K?mode=git" },
         { label: "Vendor Dashboard", to: "/vendor/dashboard" },
         { label: "Vendor Support", to: "/support" },
       ],
@@ -210,10 +210,16 @@ function Footer() {
                   {title}
                 </h4>
                 <div className="flex flex-col gap-3">
-                  {items.map(({ label, to }) => (
-                    <Link key={label} to={to} className="footer-link">
-                      {label}
-                    </Link>
+                  {items.map(({ label, to, href }) => (
+                    href ? (
+                      <a key={label} href={href} className="footer-link" target="_blank" rel="noreferrer">
+                        {label}
+                      </a>
+                    ) : (
+                      <Link key={label} to={to} className="footer-link">
+                        {label}
+                      </Link>
+                    )
                   ))}
                 </div>
               </div>

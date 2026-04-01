@@ -147,37 +147,77 @@ function VendorCTA() {
                 </h3>
                 <p className="text-gray-400 mb-8 max-w-lg mx-auto"
                   style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, lineHeight: 1.7 }}>
-                  Join Kravely today. It's completely free to get started —
-                  set up your shop in minutes and start receiving orders from FUTO students.
+                  We're still growing and carefully onboarding vendors to maintain quality.
                 </p>
+
+                {/* Locked state banner */}
+                <div style={{
+                  background: "rgba(59, 130, 246, 0.1)",
+                  border: "1.5px solid rgba(59, 130, 246, 0.3)",
+                  borderRadius: 16,
+                  padding: "16px 20px",
+                  marginBottom: 20,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  justifyContent: "center"
+                }}>
+                  <span style={{ fontSize: 20 }}>🔒</span>
+                  <div>
+                    <p style={{
+                      color: "#60a5fa",
+                      fontFamily: "'Syne', sans-serif",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      margin: 0
+                    }}>
+                      Vendor Registration Temporarily Closed
+                    </p>
+                    <p style={{
+                      color: "#94a3b8",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 13,
+                      margin: "4px 0 0 0"
+                    }}>
+                      We're not accepting new vendors right now. Check back soon!
+                    </p>
+                  </div>
+                </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
 
-                  {/* Register button */}
+                  {/* Register button - placeholder link path (update as needed) */}
                   <Link
-                    to="/vendor/signup"
-                    className="vendor-btn inline-block bg-green-500 text-black font-extrabold px-10 py-4 rounded-full text-base"
-                    style={{ fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}
+                    to="/vendor/signup" // TODO: replace with your final vendor sign-up route
+                    style={{
+                      background: "rgba(100, 116, 139, 0.3)",
+                      color: "#64748b",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontWeight: 700,
+                      padding: "14px 40px",
+                      borderRadius: 50,
+                      fontSize: 16,
+                      border: "1px solid rgba(100, 116, 139, 0.2)",
+                      cursor: "not-allowed",
+                      textDecoration: "none",
+                      display: "inline-block",
+                      pointerEvents: "none"
+                    }}
                   >
-                    Register as a Vendor 
-                  </Link>
-
-                  {/* Learn More button */}
-                  <Link
-                    to="/vendor/signup"
-                    className="vendor-btn inline-block bg-transparent text-white font-bold px-10 py-4 rounded-full text-base border border-white/20"
-                    style={{ fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#22c55e"; e.currentTarget.style.color = "#22c55e"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.color = "#fff"; }}
-                  >
-                    Learn More →
+                    Register as a Vendor (Coming Soon)
                   </Link>
 
                 </div>
 
+                <div style={{ marginTop: 12, padding: "14px 18px", border: "1px dashed rgba(148,163,184,0.5)", borderRadius: 18, background: "rgba(15, 23, 42, 0.6)" }}>
+                  <p style={{ margin: 0, color: "#cbd5e1", fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.6 }}>
+                    Interested in joining later? Send your interest to <strong style={{ color: "#22c55e" }}>vendors@kravely.com</strong> and we’ll follow up when we can onboard more high-quality partners.
+                  </p>
+                </div>
+
                 <p className="text-gray-600 text-xs mt-6"
                   style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                  Free to join &nbsp;·&nbsp; No hidden fees &nbsp;·&nbsp;  Cancel anytime
+                  �� Premium applicants are reviewed in weekly batches.
                 </p>
               </div>
 

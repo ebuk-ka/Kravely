@@ -323,13 +323,15 @@ function Hero() {
               >
                 Order Food Now
               </Link>
-              <Link
-                to="/vendor/signup"
+              <a
+                href="https://chat.whatsapp.com/Htvsu1kFSdg8TXOluHqS9K?mode=git"
+                target="_blank"
+                rel="noreferrer"
                 className="inline-block bg-transparent text-white font-bold px-9 py-4 rounded-full text-base border border-white/20 transition-all duration-200 hover:border-green-500 hover:text-green-500 hover:-translate-y-1"
                 style={{ fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}
               >
                 Join as Vendor →
-              </Link>
+              </a>
             </div>
 
             <div className="slide-up-6 mt-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-3">
@@ -342,7 +344,7 @@ function Hero() {
           </div>
 
           {/* RIGHT — iPhone */}
-          <div className="slide-right hidden lg:flex flex-1 items-center justify-center xl:justify-end">
+          <div className="slide-right lg:flex flex-1 items-center justify-center xl:justify-end">
             <PhoneMockup />
           </div>
 
