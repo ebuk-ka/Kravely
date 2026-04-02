@@ -173,7 +173,7 @@ function OverviewTab({ orders }) {
     { label: "Today's Revenue", value: `₦${todayRevenue.toLocaleString()}`, icon: "💰", color: "#22c55e" },
     { label: "Total Orders", value: orders.length, icon: "🛒", color: "#60a5fa" },
     { label: "Pending", value: pending, icon: "⏳", color: "#f97316" },
-    { label: "Rating", value: "4.9 ⭐", icon: "🌟", color: "#eab308" },
+    { label: "Delivered", value: delivered, icon: "✅", color: "#22c55e" },
   ];
 
   return (

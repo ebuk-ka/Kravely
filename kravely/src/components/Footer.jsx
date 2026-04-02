@@ -19,7 +19,7 @@ function Footer() {
     {
       title: "Vendors",
       items: [
-        { label: "Join as Vendor", href: "https://chat.whatsapp.com/Htvsu1kFSdg8TXOluHqS9K?mode=git" },
+        { label: "Join as Vendor", href: "https://chat.whatsapp.com/Htvsu1kFSdg8TXOIuHqS9k" },
         { label: "Vendor Dashboard", to: "/vendor/dashboard" },
         { label: "Vendor Support", to: "/support" },
       ],

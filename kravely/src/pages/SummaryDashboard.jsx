@@ -281,16 +281,16 @@ function SummaryDashboard() {
                       [`${data.totalOrders} orders`, "All time"],
                       [`${data.deliveryRate}%`, "Success rate"],
                     ].map(([v, l]) => (
-                      <div key={l}>
-                        <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 20 }}>{v}</p>
-                        <p style={{ color: "rgba(255,255,255,0.35)", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>{l}</p>
+                      <div key={l} style={{ minWidth: 170, flex: "1 1 auto", overflow: "hidden" }}>
+                        <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 20, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</p>
+                        <p style={{ color: "rgba(255,255,255,0.35)", fontFamily: "'DM Sans', sans-serif", fontSize: 12, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Stats */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14, marginBottom: 28 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14, marginBottom: 28 }}>
                   <StatCard icon="💰" label="Total Revenue (GMV)" value={`₦${data.totalRevenue.toLocaleString()}`} color="#22c55e" pulse />
                   <StatCard icon="📈" label="Today's Revenue" value={`₦${data.todayRevenue.toLocaleString()}`} color="#4ade80" pulse />
                   <StatCard icon="💸" label="Our Cut (15%)" value={`₦${data.kravelyCut.toLocaleString()}`} color="#eab308" />
@@ -399,7 +399,7 @@ function SummaryDashboard() {
             {/* ===== VENDORS ===== */}
             {activeSection === "vendors" && (
               <div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14, marginBottom: 24 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14, marginBottom: 24 }}>
                   {[
                     { label: "Active Vendors", value: `${data.activeVendors}`, color: "#22c55e" },
                     { label: "Inactive", value: "1", color: "#6b7280" },
@@ -454,7 +454,7 @@ function SummaryDashboard() {
             {activeSection === "revenue" && (
               <div>
                 {/* Revenue cards */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14, marginBottom: 28 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14, marginBottom: 28 }}>
                   {[
                     { label: "Total GMV", value: `₦${data.totalRevenue.toLocaleString()}`, color: "#22c55e", desc: "All vendor sales" },
                     { label: "Kravely Total (15%)", value: `₦${data.kravelyCut.toLocaleString()}`, color: "#eab308", desc: "Our commission" },

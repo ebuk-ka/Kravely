@@ -6,6 +6,7 @@ import Hero from './components/Hero'
 import HowItWorks from './components/HowItWorks'
 import VendorCTA from './components/VendorCta'
 import OrderCTA from './components/OrderCta'
+import FAQ from './components/FAQ'
 import Footer from './components/Footer'
 
 // Pages — these have their OWN navbars so don't wrap with Navbar
@@ -14,6 +15,7 @@ import OrderNow from './pages/OrderNow'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Contact from './pages/Contact'
+import Vendors from './pages/Vendors'
 import VendorDashboard from './pages/VendorDashboard'
 import PearlsCuisine from './pages/PearlsCuisine'
 import AdminDashboard from './pages/AdminDashboard'
@@ -44,6 +46,7 @@ export default function App() {
           <OrderCTA />
           <HowItWorks />
           <VendorCTA />
+          <FAQ />
           <Footer />
         </>
       } />
@@ -56,6 +59,8 @@ export default function App() {
           <Footer />
         </>
       } />
+
+      <Route path="/vendors" element={<Vendors />} />
 
     
       <Route path="/order"   element={<OrderNow />} />

@@ -324,7 +324,7 @@ function Hero() {
                 Order Food Now
               </Link>
               <a
-                href="https://chat.whatsapp.com/Htvsu1kFSdg8TXOluHqS9K?mode=git"
+                href="https://chat.whatsapp.com/Htvsu1kFSdg8TXOIuHqS9k"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-block bg-transparent text-white font-bold px-9 py-4 rounded-full text-base border border-white/20 transition-all duration-200 hover:border-green-500 hover:text-green-500 hover:-translate-y-1"

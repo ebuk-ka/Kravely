@@ -52,11 +52,26 @@ const ORDER_STATUS = {
   inactive:  { color: "#6b7280", bg: "rgba(107,114,128,0.1)", border: "rgba(107,114,128,0.3)" },
 };
 
+const RIDERS = [
+  { id: 1, name: "Chukwu Okoro", phone: "+234 812 345 6789", status: "active", deliveries: 45, rating: 4.8, joinDate: "Jan 2025" },
+  { id: 2, name: "Amina Adeleke", phone: "+234 823 456 7890", status: "active", deliveries: 38, rating: 4.9, joinDate: "Feb 2025" },
+  { id: 3, name: "Tunde Okonkwo", phone: "+234 834 567 8901", status: "active", deliveries: 52, rating: 4.7, joinDate: "Jan 2025" },
+  { id: 4, name: "Zainab Ibrahim", phone: "+234 845 678 9012", status: "assigned", deliveries: 21, rating: 4.6, joinDate: "Mar 2025" },
+  { id: 5, name: "Chisom Nwosu", phone: "+234 856 789 0123", status: "inactive", deliveries: 8, rating: 4.4, joinDate: "Apr 2025" },
+];
+
+const PENDING_DELIVERIES = [
+  { id: "KRV-047", customer: "Chidi Okafor", vendor: "Pearl's Cuisine", destination: "FUTO Campus", amount: 10500, status: "pending", isAssigned: false },
+  { id: "KRV-045", customer: "Emeka Nwosu", vendor: "Chukwu's Grill", destination: "Owerri City Center", amount: 3300, status: "pending", isAssigned: false },
+  { id: "KRV-044", customer: "Ngozi Obi", vendor: "Campus Bites", destination: "Federal Polytechnic", amount: 1300, status: "ready", isAssigned: false },
+];
+
 // ===================== SIDEBAR =====================
 function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }) {
   const nav = [
     { id: "overview",  icon: "📊", label: "Overview" },
     { id: "orders",    icon: "🛒", label: "All Orders" },
+    { id: "riders",    icon: "🏍️", label: "Riders" },
     { id: "vendors",   icon: "🏪", label: "Vendors" },
     { id: "users",     icon: "👥", label: "Users" },
     { id: "revenue",   icon: "💰", label: "Revenue" },
@@ -208,16 +223,16 @@ function OverviewTab() {
         </h2>
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
           {[["₦" + STATS.kravelyCut.toLocaleString(), "Your 15% cut (total)"], ["₦" + STATS.todayCut.toLocaleString(), "Today's earnings"], [STATS.totalOrders + " orders", "All time"], [STATS.deliveryRate + "%", "Delivery success rate"]].map(([v, l]) => (
-            <div key={l}>
-              <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 20 }}>{v}</p>
-              <p style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>{l}</p>
+            <div key={l} style={{ minWidth: 170, flex: "1 1 auto", overflow: "hidden" }}>
+              <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 20, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</p>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'DM Sans', sans-serif", fontSize: 12, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Stats grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16, marginBottom: 28 }}>
         <StatCard icon="💰" label="Total Revenue" value={`₦${STATS.totalRevenue.toLocaleString()}`} sub="All time" color="#22c55e" />
         <StatCard icon="📈" label="Today's Revenue" value={`₦${STATS.todayRevenue.toLocaleString()}`} sub="+12% ↑" color="#4ade80" />
         <StatCard icon="🛒" label="Total Orders" value={STATS.totalOrders} sub={`${STATS.todayOrders} today`} color="#60a5fa" />
@@ -316,7 +331,7 @@ function OrdersTab() {
                 <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{order.time}</p>
               </div>
               <span style={{ color: "rgba(255,255,255,0.6)", fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{order.vendor}</span>
-              <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14 }}>₦{order.amount.toLocaleString()}</span>
+              <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>₦{order.amount.toLocaleString()}</span>
               <span style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}`, fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", display: "inline-block" }}>{order.status}</span>
             </div>
           );
@@ -363,8 +378,8 @@ function VendorsTab() {
             {/* Stats */}
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
               {[["Orders", vendor.orders], ["Revenue", "₦" + vendor.revenue.toLocaleString()], ["Rating", "⭐ " + vendor.rating]].map(([label, value]) => (
-                <div key={label} style={{ textAlign: "center" }}>
-                  <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14 }}>{value}</p>
+                <div key={label} style={{ textAlign: "center", minWidth: 0 }}>
+                  <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</p>
                   <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{label}</p>
                 </div>
               ))}
@@ -411,7 +426,7 @@ function UsersTab() {
             </div>
             <span style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{user.joined}</span>
             <span style={{ color: "#60a5fa", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14 }}>{user.orders}</span>
-            <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14 }}>₦{user.spent.toLocaleString()}</span>
+            <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>₦{user.spent.toLocaleString()}</span>
             <span style={{ color: "#22c55e", background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)", fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif" }}>Active</span>
           </div>
         ))}
@@ -429,7 +444,7 @@ function RevenueTab() {
   return (
     <div>
       {/* Revenue summary */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,px-10 minmax(240px, 1fr))", gap: 20, marginBottom: 28 }}>
         {[
           { label: "Total GMV", value: `₦${STATS.totalRevenue.toLocaleString()}`, desc: "Gross merchandise value", color: "#22c55e" },
           { label: "Kravely Revenue (15%)", value: `₦${STATS.kravelyCut.toLocaleString()}`, desc: "Your commission cut", color: "#eab308" },
@@ -440,7 +455,7 @@ function RevenueTab() {
         ].map(({ label, value, desc, color }) => (
           <div key={label} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 18, padding: "20px 22px" }}>
             <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, marginBottom: 8 }}>{label}</p>
-            <p style={{ color, fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 22, marginBottom: 4 }}>{value}</p>
+            <p style={{ color, fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 22, marginBottom: 4, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</p>
             <p style={{ color: "#374151", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{desc}</p>
           </div>
         ))}
@@ -479,6 +494,135 @@ function RevenueTab() {
                 </div>
                 <div style={{ height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 3, overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${pct}%`, background: vendor.featured ? "linear-gradient(90deg, #eab308, #ca8a04)" : "linear-gradient(90deg, #22c55e, #4ade80)", borderRadius: 3, transition: "width 0.8s ease" }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===================== RIDERS TAB =====================
+function RidersTab() {
+  const [riders] = useState(RIDERS);
+  const [assignments, setAssignments] = useState({});
+
+  const assignRider = (deliveryId, riderId) => {
+    setAssignments(prev => ({ ...prev, [deliveryId]: riderId }));
+  };
+
+  const activeRiders = riders.filter(r => r.status === "active");
+  const totalDeliveries = PENDING_DELIVERIES.length;
+  const assignedDeliveries = PENDING_DELIVERIES.filter(d => assignments[d.id]).length;
+
+  return (
+    <div>
+      {/* Riders summary */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 24 }}>
+        <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: "18px 20px" }}>
+          <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, marginBottom: 8 }}>Total Riders</p>
+          <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 24 }}>{riders.length}</p>
+          <p style={{ color: "#374151", fontFamily: "'DM Sans', sans-serif", fontSize: 11, marginTop: 4 }}>{activeRiders.length} active</p>
+        </div>
+        <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: "18px 20px" }}>
+          <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, marginBottom: 8 }}>Pending Deliveries</p>
+          <p style={{ color: "#f97316", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 24 }}>{totalDeliveries - assignedDeliveries}</p>
+          <p style={{ color: "#374151", fontFamily: "'DM Sans', sans-serif", fontSize: 11, marginTop: 4 }}>{assignedDeliveries} assigned</p>
+        </div>
+        <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: "18px 20px" }}>
+          <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, marginBottom: 8 }}>Avg Rating</p>
+          <p style={{ color: "#eab308", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 24 }}>⭐ 4.7</p>
+          <p style={{ color: "#374151", fontFamily: "'DM Sans', sans-serif", fontSize: 11, marginTop: 4 }}>Overall performance</p>
+        </div>
+      </div>
+
+      {/* Assignment section */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20, marginBottom: 28 }}>
+        
+        {/* Pending deliveries */}
+        <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "22px 24px" }}>
+          <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 16, marginBottom: 16 }}>📦 Pending Deliveries</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {PENDING_DELIVERIES.map(delivery => (
+              <div key={delivery.id} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: 14, padding: "14px 16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{delivery.id}</p>
+                    <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{delivery.customer}</p>
+                  </div>
+                  <span style={{ color: delivery.status === "ready" ? "#22c55e" : "#eab308", fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, background: delivery.status === "ready" ? "rgba(34,197,94,0.1)" : "rgba(234,179,8,0.1)", padding: "3px 8px", borderRadius: 50 }}>{delivery.status}</span>
+                </div>
+                <p style={{ color: "#c084fc", fontFamily: "'DM Sans', sans-serif", fontSize: 11, marginBottom: 8 }}>📍 {delivery.destination}</p>
+                <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 12, marginBottom: 10 }}>₦{delivery.amount.toLocaleString()}</p>
+                <select 
+                  value={assignments[delivery.id] || ""} 
+                  onChange={(e) => assignRider(delivery.id, e.target.value)}
+                  style={{
+                    width: "100%", padding: "8px 10px", borderRadius: 8,
+                    background: "rgba(34,197,94,0.1)", color: "#fff", border: "1px solid rgba(34,197,94,0.25)",
+                    fontSize: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer"
+                  }}
+                >
+                  <option value="">Assign rider...</option>
+                  {activeRiders.map(rider => (
+                    <option key={rider.id} value={rider.id}>{rider.name}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Available riders */}
+        <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "22px 24px" }}>
+          <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 16, marginBottom: 16 }}>🏍️ Available Riders</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {activeRiders.map(rider => {
+              const assignedCount = Object.values(assignments).filter(v => v == rider.id).length;
+              return (
+                <div key={rider.id} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: 14, padding: "14px 16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 8 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13 }}>{rider.name}</p>
+                      <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{rider.phone}</p>
+                    </div>
+                    <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 13, color: "#22c55e", flexShrink: 0 }}>⭐ {rider.rating}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 12, marginTop: 8, fontSize: 11, color: "#6b7280", fontFamily: "'DM Sans', sans-serif" }}>
+                    <span>📦 {rider.deliveries} total</span>
+                    <span>🎯 {assignedCount} assigned</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* All riders management */}
+      <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "22px 24px" }}>
+        <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 16, marginBottom: 16 }}>👥 All Riders</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {riders.map((rider) => {
+            const statusColors = { active: "#22c55e", assigned: "#60a5fa", inactive: "#6b7280" };
+            return (
+              <div key={rider.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: 12, transition: "background 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.02)"}
+              >
+                <div style={{ width: 40, height: 40, borderRadius: 50, background: "linear-gradient(135deg, #7c3aed, #4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🏍️</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13 }}>{rider.name}</p>
+                  <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{rider.phone}</p>
+                </div>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+                  <div style={{ textAlign: "right" }}>
+                    <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 12 }}>{rider.deliveries}</p>
+                    <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 10 }}>deliveries</p>
+                  </div>
+                  <span style={{ color: statusColors[rider.status], background: `${statusColors[rider.status]}20`, fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif" }}>● {rider.status}</span>
                 </div>
               </div>
             );
@@ -624,6 +768,7 @@ function AdminDashboard() {
               <div className="tab-content" key={activeTab}>
                 {activeTab === "overview"  && <OverviewTab />}
                 {activeTab === "orders"    && <OrdersTab />}
+                {activeTab === "riders"    && <RidersTab />}
                 {activeTab === "vendors"   && <VendorsTab />}
                 {activeTab === "users"     && <UsersTab />}
                 {activeTab === "revenue"   && <RevenueTab />}

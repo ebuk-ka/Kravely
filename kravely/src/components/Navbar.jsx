@@ -96,7 +96,7 @@ function Navbar() {
           {/* NAV LINKS */}
           <div className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
             <FlipRouterLink to="/">Home</FlipRouterLink>
-            <FlipLink href="#">Vendors</FlipLink>
+            <FlipRouterLink to="/vendors">Vendors</FlipRouterLink>
             <FlipLink href="/#how-it-works">How It Works</FlipLink>
             <FlipRouterLink to="/about">About</FlipRouterLink>
           </div>
@@ -130,7 +130,7 @@ function Navbar() {
         <div className="mobile-menu-anim fixed top-[72px] left-0 right-0 z-40 bg-black/98 backdrop-blur-md border-b border-white/10 flex flex-col gap-6 px-8 pt-6 pb-8 md:hidden">
           {[
             { label: "Home", to: "/" },
-            { label: "Vendors", to: "#" },
+            { label: "Vendors", to: "/vendors" },
             { label: "How It Works", to: "/#how-it-works" },
             { label: "About", to: "/about" },
           ].map(({ label, to }) => (

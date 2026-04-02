@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 
 function Reveal({ children, delay = 0 }) {
   const ref = useRef(null);
@@ -186,26 +185,36 @@ function VendorCTA() {
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
 
-                  {/* Register button - placeholder link path (update as needed) */}
-                  <Link
-                    to="/vendor/signup" // TODO: replace with your final vendor sign-up route
+                  {/* WhatsApp Waitlist button */}
+                  <a
+                    href="https://chat.whatsapp.com/Htvsu1kFSdg8TXOIuHqS9k"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{
-                      background: "rgba(100, 116, 139, 0.3)",
-                      color: "#64748b",
+                      background: "#22c55e",
+                      color: "#fff",
                       fontFamily: "'DM Sans', sans-serif",
                       fontWeight: 700,
                       padding: "14px 40px",
                       borderRadius: 50,
                       fontSize: 16,
-                      border: "1px solid rgba(100, 116, 139, 0.2)",
-                      cursor: "not-allowed",
+                      border: "1px solid #22c55e",
+                      cursor: "pointer",
                       textDecoration: "none",
                       display: "inline-block",
-                      pointerEvents: "none"
+                      transition: "all 0.3s ease"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = "#16a34a";
+                      e.target.style.borderColor = "#16a34a";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = "#22c55e";
+                      e.target.style.borderColor = "#22c55e";
                     }}
                   >
-                    Register as a Vendor (Coming Soon)
-                  </Link>
+                    Join Our Waitlist on WhatsApp
+                  </a>
 
                 </div>
 

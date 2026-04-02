@@ -1,8 +1,37 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function PearlsCuisine() {
   const [activeTab, setActiveTab] = useState("rice");
+  const [toast, setToast] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(""), 1800);
+    return () => clearTimeout(id);
+  }, [toast]);
+
+  const addToCart = ({ id, name, price, size, emoji }) => {
+    const logged = localStorage.getItem("kravely_logged_in") === "true";
+    if (!logged) {
+      navigate("/login");
+      return;
+    }
+
+    const key = "kravely_cart";
+    const current = localStorage.getItem(key);
+    const cart = current ? JSON.parse(current) : [];
+    const existing = cart.find(item => item.id === `${id}-${size}`);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      cart.push({ id: `${id}-${size}`, name: `${name} (${size})`, vendor: "Pearl's Cuisine", price, emoji, qty: 1 });
+    }
+    localStorage.setItem(key, JSON.stringify(cart));
+    setToast(`${name} ( ${size} ) added to cart`);
+    navigate("/order");
+  };
 
   const menu = {
     rice: {
@@ -111,6 +140,11 @@ function PearlsCuisine() {
         </nav>
 
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 16px 80px" }}>
+          {toast && (
+            <div style={{ marginBottom: 16, background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", padding: "10px 14px", borderRadius: 12, color: "#d9f99d", fontFamily: "'DM Sans', sans-serif", textAlign: "center" }}>
+              {toast}
+            </div>
+          )}
 
           {/* ===== HERO BANNER ===== */}
           <div className="pearl-anim" style={{ borderRadius: 24, overflow: "hidden", marginBottom: 28, background: "linear-gradient(135deg, #1a0000 0%, #3d0505 50%, #1a0000 100%)", border: "1px solid rgba(139,0,0,0.4)", boxShadow: "0 0 60px rgba(139,0,0,0.12)", position: "relative" }}>
@@ -142,14 +176,11 @@ function PearlsCuisine() {
                   </div>
                 </div>
 
-                {/* Contact buttons */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <a href="tel:09068987178" className="call-btn" style={{ background: "linear-gradient(135deg, #991b1b, #7f1d1d)", color: "#fff", textDecoration: "none", padding: "11px 22px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 8, boxShadow: "0 4px 16px rgba(139,0,0,0.3)", whiteSpace: "nowrap" }}>
-                    📞 09068987178
-                  </a>
-                  <a href="https://tiktok.com/@pearlscuisine" target="_blank" rel="noopener noreferrer" className="call-btn" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", textDecoration: "none", padding: "11px 22px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
-                    🎵 @pearlscuisine
-                  </a>
+                {/* Removed direct contact info; order via cart flow */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+                  <span style={{ background: "rgba(34,197,94,0.1)", color: "#22c55e", padding: "8px 12px", borderRadius: 12, fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>
+                    All ordering now happens through Kravely cart - no vendor calls.
+                  </span>
                 </div>
               </div>
             </div>
@@ -198,8 +229,8 @@ function PearlsCuisine() {
                   {menu[activeTab].label}
                 </span>
                 <div style={{ display: "flex", gap: 0 }}>
-                  {Object.keys(menu[activeTab].items[0].prices).map((size, i) => (
-                    <span key={size} style={{ color: "rgba(255,255,255,0.85)", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, width: 80, textAlign: "center" }}>
+                  {Object.keys(menu[activeTab].items[0].prices).map((size) => (
+                    <span key={size} style={{ color: "rgba(255,255,255,0.85)", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, width: 92, textAlign: "center" }}>
                       {size}
                     </span>
                   ))}
@@ -220,15 +251,23 @@ function PearlsCuisine() {
                       <p style={{ color: "#9ca3af", fontFamily: "'DM Sans', sans-serif", fontSize: 11, marginTop: 3 }}>{item.note}</p>
                     )}
                   </div>
-                  <div style={{ display: "flex", gap: 0, flexShrink: 0 }}>
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
                     {Object.entries(item.prices).map(([size, price]) => (
-                      <span key={size} style={{
-                        color: price ? "#fca5a5" : "rgba(255,255,255,0.15)",
-                        fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
-                        fontSize: 13, width: 80, textAlign: "center",
-                      }}>
-                        {price ? fmt(price) : "—"}
-                      </span>
+                      <div key={size} style={{ width: 92, textAlign: "center", display: "flex", flexDirection: "column", gap: 6 }}>
+                        <span style={{ color: price ? "#fca5a5" : "rgba(255,255,255,0.15)", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 12 }}>
+                          {size}
+                        </span>
+                        <span style={{ color: price ? "#fff" : "#6b7280", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13 }}>
+                          {price ? fmt(price) : "—"}
+                        </span>
+                        {price ? (
+                          <button onClick={() => addToCart({ id: item.name.replace(/\s+/g, "-"), name: item.name, price, size, emoji: "🍚" })} style={{ background: "#22c55e", color: "#000", border: "none", borderRadius: 44, padding: "4px 0", fontSize: 11, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", cursor: "pointer" }}>
+                            Add
+                          </button>
+                        ) : (
+                          <span style={{ color: "#4b5563", fontSize: 11, fontFamily: "'DM Sans', sans-serif" }}>N/A</span>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -258,11 +297,11 @@ function PearlsCuisine() {
               Place your order at least <strong style={{ color: "#fca5a5" }}>3 hours</strong> before you want it delivered. Orders close at <strong style={{ color: "#fca5a5" }}>3pm daily</strong>.
             </p>
             <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-              <a href="tel:09068987178" className="call-btn" style={{ background: "linear-gradient(135deg, #991b1b, #7f1d1d)", color: "#fff", textDecoration: "none", padding: "14px 32px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 15, display: "flex", alignItems: "center", gap: 10, boxShadow: "0 4px 20px rgba(139,0,0,0.3)" }}>
-                📞 Call to Order
-              </a>
-              <Link to="/order" className="call-btn" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", textDecoration: "none", padding: "14px 32px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 15 }}>
-                ← Back to Kravely
+              <Link to="/order" className="call-btn" style={{ background: "#22c55e", color: "#000", textDecoration: "none", padding: "14px 32px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 15, display: "flex", alignItems: "center", gap: 10, boxShadow: "0 4px 20px rgba(34,197,94,0.3)" }}>
+                🛒 Go to Cart
+              </Link>
+              <Link to="/login" className="call-btn" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", textDecoration: "none", padding: "14px 32px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 15 }}>
+                🔐 Login to order
               </Link>
             </div>
           </div>
