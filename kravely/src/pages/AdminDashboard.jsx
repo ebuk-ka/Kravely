@@ -1,1232 +1,640 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-const SAMPLE_USERS = [
-  { id: "USR-001", name: "Chidi Okafor", email: "chidi@example.com", role: "vendor", status: "active", joined: "Jan 2024", orders: 45 },
-  { id: "USR-002", name: "Amaka Eze", email: "amaka@example.com", role: "customer", status: "active", joined: "Feb 2024", orders: 12 },
-  { id: "USR-003", name: "Emeka Nwosu", email: "emeka@example.com", role: "vendor", status: "inactive", joined: "Mar 2024", orders: 28 },
+// ===================== SAMPLE DATA =====================
+const STATS = {
+  totalRevenue: 1847500,
+  todayRevenue: 284300,
+  totalOrders: 342,
+  todayOrders: 47,
+  totalUsers: 1284,
+  newUsersToday: 23,
+  totalVendors: 8,
+  activeVendors: 6,
+  kravelyCut: 276825, // 15% of total
+  todayCut: 42645,
+  avgOrderValue: 5400,
+  deliveryRate: 98.2,
+};
+
+const VENDORS = [
+  { id: 1, name: "Pearl's Cuisine", category: "Jumbo Orders", orders: 89, revenue: 412000, rating: 4.9, status: "active", featured: true, joinDate: "Jan 2025" },
+  { id: 2, name: "Mama Nkechi's Kitchen", category: "Local Meals", orders: 76, revenue: 182400, rating: 4.8, status: "active", featured: false, joinDate: "Feb 2025" },
+  { id: 3, name: "Chukwu's Grill Spot", category: "Grills & Suya", orders: 54, revenue: 162000, rating: 4.6, status: "active", featured: false, joinDate: "Feb 2025" },
+  { id: 4, name: "Campus Bites", category: "Snacks", orders: 43, revenue: 86000, rating: 4.5, status: "active", featured: false, joinDate: "Mar 2025" },
+  { id: 5, name: "Owerri Rice Palace", category: "Rice Dishes", orders: 38, revenue: 114000, rating: 4.9, status: "active", featured: false, joinDate: "Mar 2025" },
+  { id: 6, name: "Pepper Soup Corner", category: "Soups", orders: 29, revenue: 72500, rating: 4.8, status: "active", featured: false, joinDate: "Apr 2025" },
+  { id: 7, name: "FreshJuice Hub", category: "Drinks", orders: 9, revenue: 18000, rating: 4.7, status: "inactive", featured: false, joinDate: "Apr 2025" },
+  { id: 8, name: "Combo King", category: "Combos", orders: 4, revenue: 9600, rating: 4.5, status: "pending", featured: false, joinDate: "May 2025" },
 ];
 
-const SAMPLE_VENDORS = [
-  { id: "VEN-001", name: "Pearl's Cuisine", owner: "Chidi Okafor", rating: 4.9, orders: 145, revenue: 285000, status: "active" },
-  { id: "VEN-002", name: "Jollof Hub", owner: "Amaka Eze", rating: 4.7, orders: 98, revenue: 192000, status: "active" },
-  { id: "VEN-003", name: "Rice Palace", owner: "Emeka Nwosu", rating: 4.5, orders: 67, revenue: 134000, status: "inactive" },
+const RECENT_ORDERS = [
+  { id: "KRV-047", customer: "Chidi Okafor", vendor: "Pearl's Cuisine", amount: 10500, status: "delivered", time: "2 min ago" },
+  { id: "KRV-046", customer: "Amaka Eze", vendor: "Mama Nkechi's", amount: 2100, status: "preparing", time: "8 min ago" },
+  { id: "KRV-045", customer: "Emeka Nwosu", vendor: "Chukwu's Grill", amount: 3300, status: "pending", time: "15 min ago" },
+  { id: "KRV-044", customer: "Ngozi Obi", vendor: "Campus Bites", amount: 1300, status: "delivered", time: "22 min ago" },
+  { id: "KRV-043", customer: "Kelechi Ibe", vendor: "Owerri Rice Palace", amount: 4200, status: "delivered", time: "31 min ago" },
+  { id: "KRV-042", customer: "Adaeze Uche", vendor: "Pearl's Cuisine", amount: 35000, status: "delivered", time: "45 min ago" },
 ];
 
-const SAMPLE_ORDERS = [
-  { id: "KRV-001", customer: "Chidi Okafor", vendor: "Pearl's Cuisine", items: 3, total: 3900, status: "delivered", time: "2 hrs ago" },
-  { id: "KRV-002", customer: "Amaka Eze", vendor: "Jollof Hub", items: 2, total: 2300, status: "preparing", time: "12 mins ago" },
+const USERS = [
+  { id: 1, name: "Chidi Okafor", email: "chidi@futo.edu.ng", orders: 12, spent: 48600, joined: "Jan 2025", status: "active" },
+  { id: 2, name: "Amaka Eze", email: "amaka@futo.edu.ng", orders: 8, spent: 22400, joined: "Feb 2025", status: "active" },
+  { id: 3, name: "Emeka Nwosu", email: "emeka@futo.edu.ng", orders: 6, spent: 18900, joined: "Feb 2025", status: "active" },
+  { id: 4, name: "Ngozi Obi", email: "ngozi@futo.edu.ng", orders: 4, spent: 9200, joined: "Mar 2025", status: "active" },
+  { id: 5, name: "Kelechi Ibe", email: "kelechi@futo.edu.ng", orders: 15, spent: 67500, joined: "Jan 2025", status: "active" },
 ];
 
-const SAMPLE_RIDERS = [
-  { id: "RDR-001", name: "Adaeze Nwankwo" },
-  { id: "RDR-002", name: "Tunde Bakare" },
-  { id: "RDR-003", name: "Amir Bello" },
-];
+const ORDER_STATUS = {
+  delivered: { color: "#22c55e", bg: "rgba(34,197,94,0.1)", border: "rgba(34,197,94,0.3)" },
+  preparing: { color: "#eab308", bg: "rgba(234,179,8,0.1)", border: "rgba(234,179,8,0.3)" },
+  pending:   { color: "#f97316", bg: "rgba(249,115,22,0.1)", border: "rgba(249,115,22,0.3)" },
+  inactive:  { color: "#6b7280", bg: "rgba(107,114,128,0.1)", border: "rgba(107,114,128,0.3)" },
+};
 
 // ===================== SIDEBAR =====================
-function AdminSidebar({ activeSection, setActiveSection }) {
-  const sections = [
-    { id: "dashboard", label: "Administrator Hub", icon: "[D]", desc: "System Overview" },
-    { id: "users", label: "User Management", icon: "[U]", desc: "Account Control" },
-    { id: "vendors", label: "Vendor Administration", icon: "[V]", desc: "Merchant Oversight" },
-    { id: "orders", label: "Order Control", icon: "[O]", desc: "Transaction Management" },
-    { id: "riders", label: "Rider Command", icon: "[R]", desc: "Track & Dispatch" },
-    { id: "reports", label: "Analytics Center", icon: "[A]", desc: "Data Insights" },
-    { id: "settings", label: "System Settings", icon: "[S]", desc: "Configuration" },
+function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }) {
+  const nav = [
+    { id: "overview",  icon: "📊", label: "Overview" },
+    { id: "orders",    icon: "🛒", label: "All Orders" },
+    { id: "vendors",   icon: "🏪", label: "Vendors" },
+    { id: "users",     icon: "👥", label: "Users" },
+    { id: "revenue",   icon: "💰", label: "Revenue" },
+    { id: "settings",  icon: "⚙️", label: "Settings" },
   ];
 
   return (
     <>
       <style>{`
-        .sidebar-item {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          cursor: pointer;
-          padding: 16px 20px;
-          border-radius: 12px;
-          margin-bottom: 8px;
-          position: relative;
-          overflow: hidden;
-          border: 1px solid transparent;
-        }
-        .sidebar-item::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(34,197,94,0.1), transparent);
-          transition: left 0.5s;
-        }
-        .sidebar-item:hover::before { left: 100%; }
-        .sidebar-item:hover {
-          background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(59,130,246,0.1));
-          border-color: rgba(34,197,94,0.3);
-          transform: translateX(8px) scale(1.02);
-          box-shadow: 0 8px 25px rgba(34,197,94,0.2);
-        }
-        .sidebar-item.active {
-          background: linear-gradient(135deg, #22c55e, #16a34a);
-          border-color: #22c55e;
-          color: #000 !important;
-          transform: translateX(12px) scale(1.05);
-          box-shadow: 0 12px 35px rgba(34,197,94,0.4);
-          animation: pulse 2s infinite;
-        }
-        .sidebar-item.active span:first-child { animation: spin 3s linear infinite; }
-        @keyframes pulse { 0%, 100% { transform: translateX(12px) scale(1.05); } 50% { transform: translateX(12px) scale(1.08); } }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .sidebar-container {
-          width: 280px;
-          background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
-          border-right: 2px solid #22c55e;
-          padding: 24px;
-          position: fixed;
-          height: 100vh;
-          overflow-y: auto;
-          box-shadow: inset -4px 0 20px rgba(34,197,94,0.1);
-        }
-        .sidebar-container::-webkit-scrollbar { width: 4px; }
-        .sidebar-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-        .sidebar-container::-webkit-scrollbar-thumb { background: #22c55e; border-radius: 2px; }
-
-        .main-content {
-          margin-left: 280px;
-          padding: 32px;
-          min-height: 100vh;
-          background: radial-gradient(circle at 20% 50%, rgba(34,197,94,0.05) 0%, transparent 50%),
-                      radial-gradient(circle at 80% 20%, rgba(59,130,246,0.05) 0%, transparent 50%),
-                      #000;
-          position: relative;
-        }
-        .main-content::before {
-          content: '';
-          position: fixed;
-          top: 0;
-          left: 280px;
-          right: 0;
-          height: 100vh;
-          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(34,197,94,0.03)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-          pointer-events: none;
-          z-index: -1;
-        }
-
-        @media (max-width: 1024px) {
-          .sidebar-container {
-            width: 240px;
-          }
-          .main-content {
-            margin-left: 240px;
-            padding: 24px;
-          }
-        }
-        @media (max-width: 768px) {
-          .sidebar-container {
-            width: 100%;
-            height: auto;
-            position: relative;
-            border-right: none;
-            border-bottom: 2px solid #22c55e;
-            padding: 12px;
-          }
-          .sidebar-item {
-            padding: 12px 16px;
-            margin-bottom: 4px;
-          }
-          .sidebar-item:hover {
-            transform: translateX(4px) scale(1);
-          }
-          .sidebar-item.active {
-            transform: translateX(6px) scale(1.02);
-          }
-          .main-content {
-            margin-left: 0;
-            padding: 16px 12px;
-          }
-          .main-content::before { left: 0; }
-        }
-        @media (max-width: 640px) {
-          .sidebar-item {
-            padding: 10px 12px;
-            margin-bottom: 2px;
-          }
-          .sidebar-item div {
-            gap: 8px;
-          }
-          .main-content {
-            padding: 12px 8px;
-          }
-        }
+        .sidebar-nav-btn { transition: all 0.2s ease; cursor: pointer; border: none; width: 100%; text-align: left; }
+        .sidebar-nav-btn:hover { background: rgba(34,197,94,0.08) !important; }
       `}</style>
-      <div className="sidebar-container">
-        <div style={{ marginBottom: 40, textAlign: "center" }}>
-          <div style={{
-            width: 80,
-            height: 80,
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #22c55e, #16a34a, #059669)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 16px",
-            boxShadow: "0 0 30px rgba(34,197,94,0.5)",
-            animation: "glow 3s ease-in-out infinite alternate"
-          }}>
-            <span style={{ fontSize: 24, fontWeight: 900 }}>EB</span>
-          </div>
-          <h2 style={{
-            color: "#fff",
-            fontFamily: "'Syne', sans-serif",
-            fontWeight: 900,
-            fontSize: 22,
-            marginBottom: 4,
-            textShadow: "0 0 20px rgba(34,197,94,0.5)"
-          }}>EBUKA • ADMIN</h2>
-          <p style={{
-            color: "#22c55e",
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 12,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "1px"
-          }}>Supreme Authority</p>
-        </div>
+      <div style={{
+        width: collapsed ? 64 : 240, flexShrink: 0,
+        background: "#030303", borderRight: "1px solid rgba(255,255,255,0.06)",
+        display: "flex", flexDirection: "column",
+        transition: "width 0.3s cubic-bezier(0.22,1,0.36,1)",
+        overflow: "hidden", position: "relative", zIndex: 10,
+      }}>
 
-        <nav>
-          {sections.map(section => (
-            <div key={section.id} className={`sidebar-item ${activeSection === section.id ? 'active' : ''}`} onClick={() => setActiveSection(section.id)}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14, position: "relative", zIndex: 2 }}>
-                <span style={{ fontSize: 20 }}>{section.icon}</span>
-                <div>
-                  <div style={{ color: activeSection === section.id ? "#000" : "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 15 }}>
-                    {section.label}
-                  </div>
-                  <div style={{ color: activeSection === section.id ? "#000" : "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>
-                    {section.desc}
-                  </div>
-                </div>
-              </div>
+        {/* Logo */}
+        <div style={{ padding: collapsed ? "20px 0" : "20px 20px", display: "flex", alignItems: "center", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.06)", justifyContent: collapsed ? "center" : "flex-start" }}>
+          <Link to="/" style={{ textDecoration: "none", flexShrink: 0 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #22c55e, #16a34a)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(34,197,94,0.3)" }}>
+              <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 18, color: "#000" }}>K</span>
             </div>
-          ))}
-        </nav>
-
-        <div style={{
-          marginTop: 40,
-          paddingTop: 20,
-          borderTop: "1px solid rgba(34,197,94,0.3)",
-          textAlign: "center"
-        }}>
-          <div style={{
-            background: "linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1))",
-            border: "1px solid rgba(34,197,94,0.3)",
-            borderRadius: 12,
-            padding: "16px",
-            marginBottom: 16
-          }}>
-            <div style={{ color: "#22c55e", fontSize: 24, marginBottom: 8 }}>⚡</div>
-            <div style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600 }}>
-              System Status: OPTIMAL
-            </div>
-            <div style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 10 }}>
-              All systems operational
-            </div>
-          </div>
-
-          <Link to="/" style={{
-            textDecoration: "none",
-            color: "#6b7280",
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 13,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "8px 16px",
-            borderRadius: 8,
-            transition: "all 0.3s",
-            border: "1px solid transparent"
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.color = "#22c55e";
-            e.currentTarget.style.borderColor = "rgba(34,197,94,0.3)";
-            e.currentTarget.style.background = "rgba(34,197,94,0.05)";
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.color = "#6b7280";
-            e.currentTarget.style.borderColor = "transparent";
-            e.currentTarget.style.background = "transparent";
-          }}
-          >
-            <span>Return to Realm</span>
           </Link>
+          {!collapsed && (
+            <div>
+              <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 16, letterSpacing: -0.5 }}>Kravely</p>
+              <p style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>ADMIN</p>
+            </div>
+          )}
         </div>
+
+        {/* Nav items */}
+        <div style={{ flex: 1, padding: "12px 8px", display: "flex", flexDirection: "column", gap: 4 }}>
+          {nav.map(item => (
+            <button key={item.id} className="sidebar-nav-btn" onClick={() => setActiveTab(item.id)} style={{
+              padding: collapsed ? "12px 0" : "12px 14px",
+              borderRadius: 12,
+              background: activeTab === item.id ? "rgba(34,197,94,0.12)" : "none",
+              border: activeTab === item.id ? "1px solid rgba(34,197,94,0.25)" : "1px solid transparent",
+              display: "flex", alignItems: "center", gap: 12,
+              justifyContent: collapsed ? "center" : "flex-start",
+            }}>
+              <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
+              {!collapsed && (
+                <span style={{ color: activeTab === item.id ? "#22c55e" : "rgba(255,255,255,0.55)", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14 }}>{item.label}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Collapse toggle */}
+        <button onClick={() => setCollapsed(!collapsed)} style={{
+          margin: "12px 8px", padding: "10px", borderRadius: 10,
+          background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+          color: "#6b7280", cursor: "pointer", display: "flex", alignItems: "center",
+          justifyContent: "center", transition: "all 0.2s",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#fff"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.color = "#6b7280"; }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            {collapsed ? <path d="M9 18l6-6-6-6"/> : <path d="M15 18l-6-6 6-6"/>}
+          </svg>
+        </button>
+
+        {/* Admin profile */}
+        {!collapsed && (
+          <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 50, background: "linear-gradient(135deg, #22c55e, #16a34a)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>👑</div>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Ebuka Okolo</p>
+              <p style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>Chief Technology Officer</p>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
 }
 
-// ===================== DASHBOARD SECTION =====================
-function DashboardSection({ users, vendors, orders }) {
-  const totalUsers = users.length;
-  const activeVendors = vendors.filter(v => v.status === "active").length;
-  const totalOrders = orders.length;
-  const totalRevenue = orders.reduce((a, o) => a + o.total, 0);
-
-  const stats = [
-    { label: "Total Subjects", value: totalUsers, icon: "�", color: "#60a5fa", desc: "Under your command" },
-    { label: "Active Merchants", value: activeVendors, icon: "🏰", color: "#22c55e", desc: "Loyal vassals" },
-    { label: "Order Transactions", value: totalOrders, icon: "⚖️", color: "#eab308", desc: "Realm activity" },
-    { label: "Empire Revenue", value: `₦${totalRevenue.toLocaleString()}`, icon: "💎", color: "#f97316", desc: "Your treasury" },
-  ];
-
-  return (
-    <div>
-      <div style={{ marginBottom: "clamp(24px, 5vw, 40px)", textAlign: "center" }}>
-        <h1 style={{
-          color: "#fff",
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 900,
-          fontSize: "clamp(24px, 6vw, 36px)",
-          marginBottom: "clamp(6px, 2vw, 8px)",
-          textShadow: "0 0 30px rgba(34,197,94,0.5)",
-          background: "linear-gradient(135deg, #fff, #22c55e)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text"
-        }}>COMMAND CENTER</h1>
-        <p style={{
-          color: "#22c55e",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: "clamp(13px, 4vw, 16px)",
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "1px"
-        }}>Welcome, Supreme Administrator</p>
-        <div style={{
-          width: "clamp(60px, 12vw, 100px)",
-          height: 4,
-          background: "linear-gradient(90deg, #22c55e, #16a34a, #059669)",
-          margin: "12px auto",
-          borderRadius: 2,
-          boxShadow: "0 0 20px rgba(34,197,94,0.5)"
-        }}></div>
-      </div>
-
-      {/* Stats Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(clamp(200px, 100%, 280px), 1fr))", gap: "clamp(16px, 4vw, 24px)", marginBottom: "clamp(32px, 8vw, 48px)" }}>
-        {stats.map(({ label, value, icon, color, desc }) => (
-          <div key={label} style={{
-            background: "linear-gradient(135deg, rgba(10,10,10,0.9), rgba(26,26,26,0.9))",
-            border: `2px solid ${color}40`,
-            borderRadius: "clamp(16px, 3vw, 20px)",
-            padding: "clamp(16px, 4vw, 28px)",
-            transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-            position: "relative",
-            overflow: "hidden",
-            cursor: "pointer"
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.borderColor = color;
-            e.currentTarget.style.transform = "translateY(-8px) scale(1.02)";
-            e.currentTarget.style.boxShadow = `0 20px 40px ${color}30`;
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.borderColor = `${color}40`;
-            e.currentTarget.style.transform = "translateY(0) scale(1)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-          >
-            <div style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: 80,
-              height: 80,
-              background: `radial-gradient(circle, ${color}20, transparent)`,
-              borderRadius: "50%",
-              transform: "translate(30px, -30px)"
-            }}></div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "clamp(12px, 2vw, 20px)", position: "relative", zIndex: 2 }}>
-              <span style={{ fontSize: "clamp(28px, 6vw, 36px)" }}>{icon}</span>
-              <span style={{ color, fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: "clamp(20px, 5vw, 28px)" }}>{value}</span>
-            </div>
-            <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(13px, 3vw, 16px)", marginBottom: 8, position: "relative", zIndex: 2 }}>{label}</p>
-            <p style={{ color: color, fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", position: "relative", zIndex: 2 }}>{desc}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent Activity */}
-      <div style={{
-        background: "linear-gradient(135deg, rgba(10,10,10,0.95), rgba(26,26,26,0.95))",
-        border: "2px solid rgba(34,197,94,0.3)",
-        borderRadius: "clamp(16px, 3vw, 20px)",
-        padding: "clamp(16px, 4vw, 32px)",
-        position: "relative",
-        overflow: "hidden"
-      }}>
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
-          background: "linear-gradient(90deg, #22c55e, #16a34a, #059669)"
-        }}></div>
-        <h2 style={{
-          color: "#fff",
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 800,
-          fontSize: "clamp(18px, 5vw, 24px)",
-          marginBottom: "clamp(16px, 3vw, 24px)",
-          display: "flex",
-          alignItems: "center",
-          gap: 12
-        }}>
-          <span style={{ fontSize: 28, color: "#eab308" }}>•</span>
-          Live Transaction Feed
-        </h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 20px)", maxHeight: "clamp(300px, 60vh, 600px)", overflowY: "auto" }}>
-          {orders.map(order => (
-            <div key={order.id} style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              padding: "clamp(12px, 3vw, 20px)",
-              gap: "12px",
-              background: "rgba(255,255,255,0.02)",
-              borderRadius: 16,
-              border: "1px solid rgba(34,197,94,0.2)",
-              transition: "all 0.3s",
-              cursor: "pointer"
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(34,197,94,0.05)";
-              e.currentTarget.style.borderColor = "#22c55e";
-              e.currentTarget.style.transform = "translateX(8px)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.02)";
-              e.currentTarget.style.borderColor = "rgba(34,197,94,0.2)";
-              e.currentTarget.style.transform = "translateX(0)";
-            }}
-            >
-              <div style={{ width: "100%" }}>
-                <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "clamp(14px, 4vw, 18px)" }}>{order.id}</p>
-                <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(11px, 3vw, 14px)", marginTop: "4px" }}>{order.customer} • {order.vendor}</p>
-              </div>
-              <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(16px, 4vw, 20px)" }}>₦{order.total.toLocaleString()}</p>
-                <p style={{ color: "#374151", fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(10px, 2.5vw, 12px)" }}>{order.time}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ===================== USERS SECTION =====================
-function UsersSection({ users }) {
-  const [filter, setFilter] = useState("all");
-
-  const filteredUsers = filter === "all" ? users : users.filter(u => u.status === filter);
-
-  return (
-    <div>
-      <div style={{ marginBottom: "clamp(24px, 5vw, 40px)", textAlign: "center" }}>
-        <h1 style={{
-          color: "#fff",
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 900,
-          fontSize: "clamp(24px, 6vw, 36px)",
-          marginBottom: "clamp(6px, 2vw, 8px)",
-          textShadow: "0 0 30px rgba(96,165,250,0.5)",
-          background: "linear-gradient(135deg, #fff, #60a5fa)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text"
-        }}>USER EMPIRE</h1>
-        <p style={{
-          color: "#60a5fa",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: "clamp(13px, 4vw, 16px)",
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "1px"
-        }}>Control Your Subjects</p>
-        <div style={{
-          width: "clamp(60px, 12vw, 100px)",
-          height: 4,
-          background: "linear-gradient(90deg, #60a5fa, #3b82f6, #1d4ed8)",
-          margin: "12px auto",
-          borderRadius: 2,
-          boxShadow: "0 0 20px rgba(96,165,250,0.5)"
-        }}></div>
-      </div>
-
-      {/* Filters */}
-      <div style={{ display: "flex", gap: "clamp(8px, 2vw, 12px)", marginBottom: 24, flexWrap: "wrap" }}>
-        {["all", "active", "inactive"].map(status => (
-          <button key={status} onClick={() => setFilter(status)} style={{
-            padding: "clamp(6px, 2vw, 8px) clamp(12px, 3vw, 16px)", borderRadius: 20, border: "none", cursor: "pointer", fontSize: "clamp(12px, 2.5vw, 14px)",
-            background: filter === status ? "#22c55e" : "rgba(255,255,255,0.05)",
-            color: filter === status ? "#000" : "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600
-          }}>
-            {status.charAt(0).toUpperCase() + status.slice(1)} ({status === "all" ? users.length : users.filter(u => u.status === status).length})
-          </button>
-        ))}
-      </div>
-
-      {/* Users List */}
-      <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, overflow: "hidden" }}>
-        <div style={{ padding: "clamp(12px, 3vw, 20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "clamp(16px, 4vw, 18px)" }}>Users</h3>
-        </div>
-        <div style={{ maxHeight: "clamp(300px, 60vh, 600px)", overflowY: "auto" }}>
-          {filteredUsers.map(user => (
-            <div key={user.id} style={{ padding: "clamp(12px, 2.5vw, 16px) clamp(12px, 3vw, 20px)", borderBottom: "1px solid rgba(255,255,255,0.03)", display: "flex", flexDirection: "column", gap: "8px", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div style={{ width: "100%" }}>
-                <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "clamp(14px, 3.5vw, 16px)" }}>{user.name}</p>
-                <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(11px, 2.5vw, 13px)", marginTop: "2px" }}>{user.email} • {user.role}</p>
-              </div>
-              <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ background: user.status === "active" ? "rgba(34,197,94,0.2)" : "rgba(107,114,128,0.2)", color: user.status === "active" ? "#22c55e" : "#6b7280", padding: "4px 12px", borderRadius: 12, fontSize: "clamp(10px, 2vw, 12px)", fontWeight: 600 }}>
-                  {user.status}
-                </span>
-                <p style={{ color: "#374151", fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(10px, 2vw, 12px)" }}>{user.orders} orders</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function VendorsSection({ vendors }) {
-  const [filter, setFilter] = useState("all");
-
-  const filteredVendors = filter === "all" ? vendors : vendors.filter(v => v.status === filter);
-
-  return (
-    <div>
-      <div style={{ marginBottom: "clamp(24px, 5vw, 40px)", textAlign: "center" }}>
-        <h1 style={{
-          color: "#fff",
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 900,
-          fontSize: "clamp(24px, 6vw, 36px)",
-          marginBottom: "clamp(6px, 2vw, 8px)",
-          textShadow: "0 0 30px rgba(249,115,22,0.5)",
-          background: "linear-gradient(135deg, #fff, #f97316)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text"
-        }}>MERCHANT ALLIANCE</h1>
-        <p style={{
-          color: "#f97316",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: "clamp(13px, 4vw, 16px)",
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "1px"
-        }}>Your Loyal Vassals</p>
-        <div style={{
-          width: "clamp(60px, 12vw, 100px)",
-          height: 4,
-          background: "linear-gradient(90deg, #f97316, #ea580c, #c2410c)",
-          margin: "12px auto",
-          borderRadius: 2,
-          boxShadow: "0 0 20px rgba(249,115,22,0.5)"
-        }}></div>
-      </div>
-
-      {/* Filters */}
-      <div style={{ display: "flex", gap: "clamp(8px, 2vw, 12px)", marginBottom: 24, flexWrap: "wrap" }}>
-        {["all", "active", "inactive"].map(status => (
-          <button key={status} onClick={() => setFilter(status)} style={{
-            padding: "clamp(6px, 2vw, 8px) clamp(12px, 3vw, 16px)", borderRadius: 20, border: "none", cursor: "pointer", fontSize: "clamp(12px, 2.5vw, 14px)",
-            background: filter === status ? "linear-gradient(135deg, #f97316, #ea580c)" : "rgba(255,255,255,0.05)",
-            color: filter === status ? "#000" : "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
-            transition: "all 0.3s",
-            textShadow: filter === status ? "0 0 10px rgba(249,115,22,0.5)" : "none"
-          }}
-          onMouseEnter={e => {
-            if (filter !== status) {
-              e.currentTarget.style.background = "rgba(249,115,22,0.1)";
-              e.currentTarget.style.transform = "scale(1.05)";
-            }
-          }}
-          onMouseLeave={e => {
-            if (filter !== status) {
-              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-              e.currentTarget.style.transform = "scale(1)";
-            }
-          }}
-          >
-            {status.charAt(0).toUpperCase() + status.slice(1)} ({status === "all" ? vendors.length : vendors.filter(v => v.status === status).length})
-          </button>
-        ))}
-      </div>
-
-      {/* Vendors Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(clamp(250px, 100%, 350px), 1fr))", gap: "clamp(16px, 4vw, 24px)" }}>
-        {filteredVendors.map(vendor => (
-          <div key={vendor.id} style={{
-            background: "linear-gradient(135deg, rgba(10,10,10,0.9), rgba(26,26,26,0.9))",
-            border: `2px solid ${vendor.status === "active" ? "rgba(249,115,22,0.3)" : "rgba(107,114,128,0.3)"}`,
-            borderRadius: "clamp(16px, 3vw, 20px)",
-            padding: "clamp(16px, 4vw, 28px)",
-            position: "relative",
-            overflow: "hidden",
-            transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = "translateY(-8px) scale(1.02)";
-            e.currentTarget.style.boxShadow = `0 20px 40px ${vendor.status === "active" ? "rgba(249,115,22,0.3)" : "rgba(107,114,128,0.3)"}`;
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = "translateY(0) scale(1)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-          >
-            <div style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: 80,
-              height: 80,
-              background: `radial-gradient(circle, ${vendor.status === "active" ? "#f9731620" : "#6b728020"}, transparent)`,
-              borderRadius: "50%",
-              transform: "translate(30px, -30px)"
-            }}></div>
-            <div style={{ display: "flex", alignItems: "center", gap: "clamp(12px, 3vw, 16px)", marginBottom: "clamp(12px, 2vw, 20px)", position: "relative", zIndex: 2 }}>
-              <div style={{
-                width: "clamp(50px, 10vw, 60px)",
-                height: "clamp(50px, 10vw, 60px)",
-                borderRadius: 12,
-                background: "linear-gradient(135deg, #f97316, #ea580c)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "clamp(20px, 5vw, 28px)",
-                flexShrink: 0
-              }}>🏰</div>
-              <div style={{ minWidth: 0 }}>
-                <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(16px, 4vw, 20px)", marginBottom: 4, overflowWrap: "break-word" }}>{vendor.name}</h3>
-                <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(12px, 3vw, 14px)", marginTop: "2px" }}>{vendor.owner}</p>
-              </div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", zIndex: 2, gap: "12px" }}>
-              <div>
-                <p style={{ color: "#f97316", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(18px, 4vw, 24px)" }}>₦{vendor.revenue.toLocaleString()}</p>
-                <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(10px, 2.5vw, 12px)", marginTop: "2px" }}>{vendor.orders} transactions</p>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 12 }}>
-                  <span style={{ color: "#eab308", fontSize: "clamp(14px, 3vw, 16px)" }}>⭐</span>
-                  <span style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "clamp(14px, 3vw, 16px)" }}>{vendor.rating}</span>
-                </div>
-                <span style={{
-                  background: vendor.status === "active" ? "rgba(249,115,22,0.2)" : "rgba(107,114,128,0.2)",
-                  color: vendor.status === "active" ? "#f97316" : "#6b7280",
-                  padding: "6px 16px",
-                  borderRadius: 20,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  border: `1px solid ${vendor.status === "active" ? "#f97316" : "#6b7280"}`,
-                  textTransform: "uppercase",
-                  letterSpacing: "1px"
-                }}>
-                  {vendor.status === "active" ? "Vassal" : "Inactive"}
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ===================== ORDERS SECTION =====================
-function OrdersSection({ orders, riders, assignedRiders, setAssignedRiders }) {
-  const [filter, setFilter] = useState("all");
-
-  const filteredOrders = filter === "all" ? orders : orders.filter(o => o.status === filter);
-
-  return (
-    <div>
-      <div style={{ marginBottom: 40, textAlign: "center" }}>
-        <h1 style={{
-          color: "#fff",
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 900,
-          fontSize: 36,
-          marginBottom: 8,
-          textShadow: "0 0 30px rgba(234,179,8,0.5)",
-          background: "linear-gradient(135deg, #fff, #eab308)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text"
-        }}>TRANSACTION THRONE</h1>
-        <p style={{
-          color: "#eab308",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 16,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "2px"
-        }}>Monitor the Flow of Wealth</p>
-        <div style={{
-          width: 100,
-          height: 4,
-          background: "linear-gradient(90deg, #eab308, #d97706, #b45309)",
-          margin: "16px auto",
-          borderRadius: 2,
-          boxShadow: "0 0 20px rgba(234,179,8,0.5)"
-        }}></div>
-      </div>
-
-      {/* Filters */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
-        {["all", "pending", "preparing", "ready", "delivered"].map(status => (
-          <button key={status} onClick={() => setFilter(status)} style={{
-            padding: "10px 20px", borderRadius: 20, border: "none", cursor: "pointer",
-            background: filter === status ? "linear-gradient(135deg, #eab308, #d97706)" : "rgba(255,255,255,0.05)",
-            color: filter === status ? "#000" : "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
-            transition: "all 0.3s",
-            textShadow: filter === status ? "0 0 10px rgba(234,179,8,0.5)" : "none",
-            textTransform: "capitalize"
-          }}
-          onMouseEnter={e => {
-            if (filter !== status) {
-              e.currentTarget.style.background = "rgba(234,179,8,0.1)";
-              e.currentTarget.style.transform = "scale(1.05)";
-            }
-          }}
-          onMouseLeave={e => {
-            if (filter !== status) {
-              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-              e.currentTarget.style.transform = "scale(1)";
-            }
-          }}
-          >
-            {status === "all" ? "All Transactions" : status} ({status === "all" ? orders.length : orders.filter(o => o.status === status).length})
-          </button>
-        ))}
-      </div>
-
-      {/* Orders List */}
-      <div style={{
-        background: "linear-gradient(135deg, rgba(10,10,10,0.9), rgba(26,26,26,0.9))",
-        border: "2px solid rgba(234,179,8,0.3)",
-        borderRadius: 20,
-        overflow: "hidden",
-        position: "relative"
-      }}>
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
-          background: "linear-gradient(90deg, #eab308, #d97706, #b45309)"
-        }}></div>
-        <div style={{ padding: "20px", borderBottom: "1px solid rgba(234,179,8,0.2)" }}>
-          <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 18 }}>Royal Transactions</h3>
-        </div>
-        <div style={{ maxHeight: "600px", overflowY: "auto" }}>
-          {filteredOrders.map(order => (
-            <div key={order.id} style={{
-              padding: "20px",
-              borderBottom: "1px solid rgba(255,255,255,0.03)",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              transition: "all 0.3s",
-              cursor: "pointer"
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(234,179,8,0.05)";
-              e.currentTarget.style.transform = "translateX(8px)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.transform = "translateX(0)";
-            }}
-            >
-              <div>
-                <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 16 }}>{order.id}</p>
-                <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{order.customer} • {order.vendor} • {order.items} items</p>
-              </div>
-              <div style={{ textAlign: "right", display: "grid", gap: 8 }}>
-                <p style={{ color: "#eab308", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20 }}>₦{order.total.toLocaleString()}</p>
-                <span style={{
-                  background: "rgba(249,115,22,0.2)",
-                  color: "#f97316",
-                  padding: "6px 16px",
-                  borderRadius: 20,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  border: "1px solid #f97316",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px"
-                }}>
-                  {order.status}
-                </span>
-                <label style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontSize: 12, marginTop: 4 }}>Assign Rider</label>
-                <select value={assignedRiders[order.id] || ""} onChange={e => setAssignedRiders(prev => ({ ...prev, [order.id]: e.target.value }))} style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: 8,
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  background: "rgba(0,0,0,0.6)",
-                  color: "#fff"
-                }}>
-                  <option value="" disabled>Select a rider</option>
-                  {riders.map(rider => (
-                    <option key={rider.id} value={rider.name}>{rider.name}</option>
-                  ))}
-                </select>
-                {assignedRiders[order.id] && (
-                  <span style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600 }}>
-                    Rider assigned: {assignedRiders[order.id]}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ===================== RIDERS SECTION =====================
-function RidersSection({ riders, setRiders, orders, assignedRiders, setAssignedRiders }) {
-  const [statusFilter, setStatusFilter] = useState("all");
-
-  const filteredRiders = statusFilter === "all" ? riders : riders.filter(r => r.status === statusFilter);
-
-  const assignedOrderMap = Object.entries(assignedRiders).reduce((acc, [orderId, riderName]) => {
-    acc[riderName] = acc[riderName] ? acc[riderName].concat(orderId) : [orderId];
-    return acc;
-  }, {});
-
-  const statusCycle = { available: "on-duty", "on-duty": "offline", offline: "available" };
-
-  const toggleStatus = riderId => {
-    setRiders(prev => prev.map(r => (r.id === riderId ? { ...r, status: statusCycle[r.status] || "available" } : r)));
+// ===================== TOP BAR =====================
+function TopBar({ activeTab }) {
+  const titles = {
+    overview: "Dashboard Overview",
+    orders: "All Orders",
+    vendors: "Vendor Management",
+    users: "User Management",
+    revenue: "Revenue & Earnings",
+    settings: "Settings",
   };
 
   return (
+    <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 5 }}>
+      <div>
+        <h1 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 22, letterSpacing: -0.5 }}>{titles[activeTab]}</h1>
+        <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 13, marginTop: 2 }}>
+          {new Date().toLocaleDateString("en-NG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+        </p>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {/* Live indicator */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)", borderRadius: 50, padding: "6px 14px" }}>
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", animation: "pulse 2s infinite" }} />
+          <span style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700 }}>Live</span>
+        </div>
+        <Link to="/" style={{ textDecoration: "none", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", padding: "8px 16px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600 }}>
+          ← Back to Site
+        </Link>
+        <Link to="/summary/dashboard" style={{ textDecoration: "none", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", padding: "8px 16px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600 }}>
+          Summary Dashboard
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ===================== STAT CARD =====================
+function StatCard({ icon, label, value, sub, color, subColor }) {
+  return (
+    <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "22px 24px", transition: "all 0.2s" }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}40`; e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 16px 40px ${color}10`; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+        <span style={{ fontSize: 28 }}>{icon}</span>
+        {sub && <span style={{ color: subColor || "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, background: `${subColor || "#22c55e"}15`, padding: "3px 8px", borderRadius: 50 }}>{sub}</span>}
+      </div>
+      <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, marginBottom: 8 }}>{label}</p>
+      <p style={{ color, fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 28, letterSpacing: -1 }}>{value}</p>
+    </div>
+  );
+}
+
+// ===================== OVERVIEW TAB =====================
+function OverviewTab() {
+  return (
     <div>
-      <div style={{ marginBottom: 40, textAlign: "center" }}>
-        <h1 style={{
-          color: "#fff",
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 900,
-          fontSize: 36,
-          marginBottom: 8,
-          textShadow: "0 0 30px rgba(39, 194, 255, 0.5)",
-          background: "linear-gradient(135deg, #fff, #22c55e)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text"
-        }}>RIDER COMMAND</h1>
-        <p style={{
-          color: "#22c55e",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 16,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "2px"
-        }}>Track Team, Dispatch Assignments</p>
+      {/* CEO Welcome */}
+      <div style={{ background: "linear-gradient(135deg, #0a1f0a, #0f2d0f)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: 22, padding: "28px 32px", marginBottom: 28, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", right: -20, top: -20, fontSize: 120, opacity: 0.04 }}>👑</div>
+        <p style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Good day, CEO 👑</p>
+        <h2 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: "clamp(22px, 3vw, 32px)", letterSpacing: -1, marginBottom: 12 }}>
+          Kravely is growing fast.<br />
+          <span style={{ background: "linear-gradient(90deg, #22c55e, #4ade80)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Here's your empire. 🚀</span>
+        </h2>
+        <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+          {[["₦" + STATS.kravelyCut.toLocaleString(), "Your 15% cut (total)"], ["₦" + STATS.todayCut.toLocaleString(), "Today's earnings"], [STATS.totalOrders + " orders", "All time"], [STATS.deliveryRate + "%", "Delivery success rate"]].map(([v, l]) => (
+            <div key={l}>
+              <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 20 }}>{v}</p>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>{l}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
-        <label style={{ color: "#9ca3af", fontFamily: "'DM Sans', sans-serif" }}>Filter riders:</label>
-        { ["all", "available", "on-duty", "offline"].map(s => (
-          <button key={s} onClick={() => setStatusFilter(s)} style={{
-            padding: "6px 14px",
-            borderRadius: 999,
-            border: "1px solid rgba(255,255,255,0.2)",
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 12,
-            background: statusFilter===s ? "rgba(34,197,94,0.25)" : "rgba(255,255,255,0.05)",
-            color: "#fff",
-            cursor: "pointer"
+      {/* Stats grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16, marginBottom: 28 }}>
+        <StatCard icon="💰" label="Total Revenue" value={`₦${STATS.totalRevenue.toLocaleString()}`} sub="All time" color="#22c55e" />
+        <StatCard icon="📈" label="Today's Revenue" value={`₦${STATS.todayRevenue.toLocaleString()}`} sub="+12% ↑" color="#4ade80" />
+        <StatCard icon="🛒" label="Total Orders" value={STATS.totalOrders} sub={`${STATS.todayOrders} today`} color="#60a5fa" />
+        <StatCard icon="👥" label="Total Users" value={STATS.totalUsers.toLocaleString()} sub={`+${STATS.newUsersToday} today`} color="#a78bfa" />
+        <StatCard icon="🏪" label="Active Vendors" value={STATS.activeVendors} sub={`of ${STATS.totalVendors}`} color="#f97316" />
+        <StatCard icon="💸" label="Your Cut (15%)" value={`₦${STATS.kravelyCut.toLocaleString()}`} sub="Total earned" color="#eab308" />
+      </div>
+
+      {/* Two columns */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
+
+        {/* Recent orders */}
+        <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "20px 24px" }}>
+          <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 16, marginBottom: 16 }}>🔴 Live Orders</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {RECENT_ORDERS.slice(0, 5).map(order => {
+              const s = ORDER_STATUS[order.status];
+              return (
+                <div key={order.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", borderRadius: 12, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div>
+                    <p style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13 }}>{order.customer}</p>
+                    <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{order.vendor} · {order.time}</p>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 13 }}>₦{order.amount.toLocaleString()}</p>
+                    <span style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}`, fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif" }}>{order.status}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Top vendors */}
+        <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "20px 24px" }}>
+          <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 16, marginBottom: 16 }}>🏆 Top Vendors</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {VENDORS.slice(0, 5).map((vendor, i) => (
+              <div key={vendor.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 12, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                <span style={{ color: i === 0 ? "#eab308" : i === 1 ? "#9ca3af" : i === 2 ? "#cd7c2f" : "#4b5563", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 14, width: 20 }}>#{i + 1}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13 }}>{vendor.name}</p>
+                  <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{vendor.orders} orders</p>
+                </div>
+                <p style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 13 }}>₦{vendor.revenue.toLocaleString()}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+// ===================== ORDERS TAB =====================
+function OrdersTab() {
+  const [filter, setFilter] = useState("all");
+  const filters = ["all", "pending", "preparing", "delivered"];
+  const filtered = filter === "all" ? RECENT_ORDERS : RECENT_ORDERS.filter(o => o.status === filter);
+
+  return (
+    <div>
+      {/* Filter chips */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        {filters.map(f => (
+          <button key={f} onClick={() => setFilter(f)} style={{
+            padding: "8px 18px", borderRadius: 50, border: "none", cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13,
+            background: filter === f ? "#22c55e" : "rgba(255,255,255,0.05)",
+            color: filter === f ? "#000" : "rgba(255,255,255,0.6)",
+            transition: "all 0.2s",
           }}>
-            {s.toUpperCase()}
+            {f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
       </div>
 
-      <div style={{ background: "rgba(15,15,15,0.95)", border: "2px solid rgba(34,197,94,0.25)", borderRadius: 16, overflow: "hidden" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", padding: "14px", background: "rgba(255,255,255,0.03)", fontFamily: "'DM Sans', sans-serif", color: "#9ca3af", fontSize: 12, textTransform: "uppercase", letterSpacing: "1px" }}>
-          <div>ID</div>
-          <div>Name</div>
-          <div>Status</div>
-          <div>Assigned Orders</div>
-          <div>Action</div>
+      <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, overflow: "hidden" }}>
+        {/* Table header */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 100px 120px", padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+          {["Order ID", "Customer", "Vendor", "Amount", "Status"].map(h => (
+            <span key={h} style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</span>
+          ))}
         </div>
-        {filteredRiders.length === 0 ? (
-          <div style={{ padding: "30px", textAlign: "center", color: "#9ca3af" }}>No riders at this status.</div>
-        ) : filteredRiders.map(rider => (
-          <div key={rider.id} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", padding: "14px", color: "#fff", fontFamily: "'DM Sans', sans-serif", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-            <div>{rider.id}</div>
-            <div>{rider.name}</div>
-            <div>{rider.status}</div>
-            <div>{(assignedOrderMap[rider.name] || []).join(", ") || "None"}</div>
-            <div>
-              <button onClick={() => toggleStatus(rider.id)} style={{
-                width: "100%",
-                padding: "6px 10px",
-                borderRadius: 8,
-                border: "none",
-                background: "rgba(34,197,94,0.2)",
-                color: "#fff",
-                cursor: "pointer"
-              }}>
-                Next state
+        {filtered.map((order, i) => {
+          const s = ORDER_STATUS[order.status];
+          return (
+            <div key={order.id} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 100px 120px", padding: "14px 20px", borderBottom: i < filtered.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center", transition: "background 0.15s" }}
+              onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.02)"}
+              onMouseLeave={e => e.currentTarget.style.background = "none"}
+            >
+              <span style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13 }}>{order.id}</span>
+              <div>
+                <p style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{order.customer}</p>
+                <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{order.time}</p>
+              </div>
+              <span style={{ color: "rgba(255,255,255,0.6)", fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{order.vendor}</span>
+              <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14 }}>₦{order.amount.toLocaleString()}</span>
+              <span style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}`, fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", display: "inline-block" }}>{order.status}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ===================== VENDORS TAB =====================
+function VendorsTab() {
+  const [vendors, setVendors] = useState(VENDORS);
+
+  const toggleFeatured = (id) => setVendors(prev => prev.map(v => v.id === id ? { ...v, featured: !v.featured } : v));
+  const toggleStatus  = (id) => setVendors(prev => prev.map(v => v.id === id ? { ...v, status: v.status === "active" ? "inactive" : "active" } : v));
+
+  const statusColors = { active: "#22c55e", inactive: "#6b7280", pending: "#f97316" };
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+        <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 14 }}>{vendors.filter(v => v.status === "active").length} active vendors · {vendors.filter(v => v.status === "pending").length} pending approval</p>
+        <button style={{ background: "#22c55e", color: "#000", border: "none", borderRadius: 50, padding: "10px 20px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+          + Add Vendor
+        </button>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {vendors.map(vendor => (
+          <div key={vendor.id} style={{ background: "#0a0a0a", border: `1px solid ${vendor.featured ? "rgba(234,179,8,0.3)" : "rgba(255,255,255,0.06)"}`, borderRadius: 18, padding: "18px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", transition: "all 0.2s" }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = vendor.featured ? "rgba(234,179,8,0.5)" : "rgba(34,197,94,0.2)"}
+            onMouseLeave={e => e.currentTarget.style.borderColor = vendor.featured ? "rgba(234,179,8,0.3)" : "rgba(255,255,255,0.06)"}
+          >
+            {/* Info */}
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+                <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 15 }}>{vendor.name}</p>
+                {vendor.featured && <span style={{ background: "rgba(234,179,8,0.15)", color: "#eab308", fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif" }}>👑 Featured</span>}
+                <span style={{ color: statusColors[vendor.status], fontSize: 10, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>● {vendor.status}</span>
+              </div>
+              <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>{vendor.category} · Joined {vendor.joinDate}</p>
+            </div>
+
+            {/* Stats */}
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+              {[["Orders", vendor.orders], ["Revenue", "₦" + vendor.revenue.toLocaleString()], ["Rating", "⭐ " + vendor.rating]].map(([label, value]) => (
+                <div key={label} style={{ textAlign: "center" }}>
+                  <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14 }}>{value}</p>
+                  <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button onClick={() => toggleFeatured(vendor.id)} style={{ background: vendor.featured ? "rgba(234,179,8,0.15)" : "rgba(255,255,255,0.05)", border: `1px solid ${vendor.featured ? "rgba(234,179,8,0.3)" : "rgba(255,255,255,0.1)"}`, color: vendor.featured ? "#eab308" : "#6b7280", padding: "7px 14px", borderRadius: 50, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 12, transition: "all 0.2s" }}>
+                {vendor.featured ? "👑 Featured" : "Set Featured"}
+              </button>
+              <button onClick={() => toggleStatus(vendor.id)} style={{ background: vendor.status === "active" ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)", border: `1px solid ${vendor.status === "active" ? "rgba(239,68,68,0.3)" : "rgba(34,197,94,0.3)"}`, color: vendor.status === "active" ? "#ef4444" : "#22c55e", padding: "7px 14px", borderRadius: 50, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 12, transition: "all 0.2s" }}>
+                {vendor.status === "active" ? "Deactivate" : "Activate"}
               </button>
             </div>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
 
-      <div style={{ marginTop: 24, padding: "20px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16 }}>
-        <h4 style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", marginBottom: 8 }}>Live Rider Dispatch</h4>
-        <div style={{ color: "#d1d5db", fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>
-          Assigned riders and orders are synced with the Orders page. Update order assignment there and watch Rider Command reflect your team status.
+// ===================== USERS TAB =====================
+function UsersTab() {
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 14 }}>{STATS.totalUsers.toLocaleString()} total registered users</p>
+      </div>
+
+      <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, overflow: "auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 80px 120px 100px", padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)", minWidth: 600 }}>
+          {["Name / Email", "Joined", "Orders", "Total Spent", "Status"].map(h => (
+            <span key={h} style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</span>
+          ))}
         </div>
+        {USERS.map((user, i) => (
+          <div key={user.id} style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 80px 120px 100px", padding: "14px 20px", borderBottom: i < USERS.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center", minWidth: 600, transition: "background 0.15s" }}
+            onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.02)"}
+            onMouseLeave={e => e.currentTarget.style.background = "none"}
+          >
+            <div>
+              <p style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14 }}>{user.name}</p>
+              <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>{user.email}</p>
+            </div>
+            <span style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{user.joined}</span>
+            <span style={{ color: "#60a5fa", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14 }}>{user.orders}</span>
+            <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14 }}>₦{user.spent.toLocaleString()}</span>
+            <span style={{ color: "#22c55e", background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)", fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif" }}>Active</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-// ===================== REPORTS SECTION =====================
-function ReportsSection({ users, vendors, orders }) {
-  const totalRevenue = orders.reduce((a, o) => a + o.total, 0);
-  const avgOrderValue = orders.length ? Math.round(totalRevenue / orders.length) : 0;
-
-  const reports = [
-    { title: "Empire Treasury", value: `₦${totalRevenue.toLocaleString()}`, description: "Total wealth accumulated", icon: "💰", color: "#eab308" },
-    { title: "Average Tribute", value: `₦${avgOrderValue.toLocaleString()}`, description: "Mean transaction value", icon: "⚖️", color: "#f97316" },
-    { title: "Loyal Subjects", value: users.filter(u => u.status === "active").length, description: "Active user population", icon: "👑", color: "#60a5fa" },
-    { title: "Merchant Vassals", value: vendors.filter(v => v.status === "active").length, description: "Approved vendor allies", icon: "🏰", color: "#22c55e" },
-  ];
+// ===================== REVENUE TAB =====================
+function RevenueTab() {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  const revenues = [120000, 185000, 240000, 310000, 428000, 564500];
+  const maxRev = Math.max(...revenues);
 
   return (
     <div>
-      <div style={{ marginBottom: 40, textAlign: "center" }}>
-        <h1 style={{
-          color: "#fff",
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 900,
-          fontSize: 36,
-          marginBottom: 8,
-          textShadow: "0 0 30px rgba(139,69,19,0.5)",
-          background: "linear-gradient(135deg, #fff, #8b4513)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text"
-        }}>ROYAL LEDGERS</h1>
-        <p style={{
-          color: "#8b4513",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 16,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "2px"
-        }}>The Books of Power</p>
-        <div style={{
-          width: 100,
-          height: 4,
-          background: "linear-gradient(90deg, #8b4513, #a0522d, #654321)",
-          margin: "16px auto",
-          borderRadius: 2,
-          boxShadow: "0 0 20px rgba(139,69,19,0.5)"
-        }}></div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 48 }}>
-        {reports.map(report => (
-          <div key={report.title} style={{
-            background: "linear-gradient(135deg, rgba(10,10,10,0.9), rgba(26,26,26,0.9))",
-            border: `2px solid ${report.color}40`,
-            borderRadius: 20,
-            padding: "28px",
-            transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-            position: "relative",
-            overflow: "hidden",
-            cursor: "pointer"
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.borderColor = report.color;
-            e.currentTarget.style.transform = "translateY(-8px) scale(1.02)";
-            e.currentTarget.style.boxShadow = `0 20px 40px ${report.color}30`;
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.borderColor = `${report.color}40`;
-            e.currentTarget.style.transform = "translateY(0) scale(1)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-          >
-            <div style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: 80,
-              height: 80,
-              background: `radial-gradient(circle, ${report.color}20, transparent)`,
-              borderRadius: "50%",
-              transform: "translate(30px, -30px)"
-            }}></div>
-            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20, position: "relative", zIndex: 2 }}>
-              <span style={{ fontSize: 36 }}>{report.icon}</span>
-              <div>
-                <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 4 }}>{report.title}</h3>
-                <p style={{ color: report.color, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1px" }}>{report.description}</p>
-              </div>
-            </div>
-            <p style={{ color: report.color, fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 28, position: "relative", zIndex: 2 }}>{report.value}</p>
+      {/* Revenue summary */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 28 }}>
+        {[
+          { label: "Total GMV", value: `₦${STATS.totalRevenue.toLocaleString()}`, desc: "Gross merchandise value", color: "#22c55e" },
+          { label: "Kravely Revenue (15%)", value: `₦${STATS.kravelyCut.toLocaleString()}`, desc: "Your commission cut", color: "#eab308" },
+          { label: "Today's GMV", value: `₦${STATS.todayRevenue.toLocaleString()}`, desc: "Revenue today", color: "#60a5fa" },
+          { label: "Today's Cut", value: `₦${STATS.todayCut.toLocaleString()}`, desc: "Your cut today", color: "#a78bfa" },
+          { label: "Avg Order Value", value: `₦${STATS.avgOrderValue.toLocaleString()}`, desc: "Per order", color: "#f97316" },
+          { label: "Delivery Rate", value: `${STATS.deliveryRate}%`, desc: "Success rate", color: "#4ade80" },
+        ].map(({ label, value, desc, color }) => (
+          <div key={label} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 18, padding: "20px 22px" }}>
+            <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, marginBottom: 8 }}>{label}</p>
+            <p style={{ color, fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 22, marginBottom: 4 }}>{value}</p>
+            <p style={{ color: "#374151", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{desc}</p>
           </div>
         ))}
       </div>
 
-      <div style={{
-        background: "linear-gradient(135deg, rgba(10,10,10,0.95), rgba(26,26,26,0.95))",
-        border: "2px solid rgba(139,69,19,0.3)",
-        borderRadius: 20,
-        padding: "32px",
-        position: "relative",
-        overflow: "hidden",
-        textAlign: "center"
-      }}>
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
-          background: "linear-gradient(90deg, #8b4513, #a0522d, #654321)"
-        }}></div>
-        <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 24, marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
-          <span style={{ fontSize: 28 }}>📊</span>
-          Imperial Analytics
-        </h3>
-        <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 16 }}>
-          📈 Advanced charts and visualizations would be displayed here
+      {/* Revenue chart */}
+      <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "24px" }}>
+        <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 18, marginBottom: 24 }}>📈 Revenue Growth (2025)</h3>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 180, paddingBottom: 28, position: "relative" }}>
+          {/* Y axis lines */}
+          {[0, 25, 50, 75, 100].map(pct => (
+            <div key={pct} style={{ position: "absolute", left: 0, right: 0, bottom: `${pct * 1.44 + 28}px`, height: 1, background: "rgba(255,255,255,0.04)" }} />
+          ))}
+          {revenues.map((rev, i) => {
+            const height = (rev / maxRev) * 140;
+            return (
+              <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, position: "relative" }}>
+                <span style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700 }}>₦{(rev / 1000).toFixed(0)}k</span>
+                <div style={{ width: "100%", height, background: `linear-gradient(to top, #22c55e, #4ade80)`, borderRadius: "6px 6px 0 0", transition: "height 0.5s ease", boxShadow: "0 0 20px rgba(34,197,94,0.2)" }} />
+                <span style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11 }}>{months[i]}</span>
+              </div>
+            );
+          })}
         </div>
-        <p style={{ color: "#8b4513", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, marginTop: 16 }}>
-          Real-time insights into your domain's performance
-        </p>
-      </div>
-    </div>
-  );
-}
 
-// ===================== SETTINGS SECTION =====================
-function SettingsSection() {
-  return (
-    <div>
-      <div style={{ marginBottom: 40, textAlign: "center" }}>
-        <h1 style={{
-          color: "#fff",
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 900,
-          fontSize: 36,
-          marginBottom: 8,
-          textShadow: "0 0 30px rgba(168,85,247,0.5)",
-          background: "linear-gradient(135deg, #fff, #a855f7)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text"
-        }}>IMPERIAL DECREES</h1>
-        <p style={{
-          color: "#a855f7",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 16,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "2px"
-        }}>Shape the Realm's Destiny</p>
-        <div style={{
-          width: 100,
-          height: 4,
-          background: "linear-gradient(90deg, #a855f7, #9333ea, #7c3aed)",
-          margin: "16px auto",
-          borderRadius: 2,
-          boxShadow: "0 0 20px rgba(168,85,247,0.5)"
-        }}></div>
-      </div>
-
-      <div style={{
-        background: "linear-gradient(135deg, rgba(10,10,10,0.9), rgba(26,26,26,0.9))",
-        border: "2px solid rgba(168,85,247,0.3)",
-        borderRadius: 20,
-        padding: "32px",
-        position: "relative",
-        overflow: "hidden"
-      }}>
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
-          background: "linear-gradient(90deg, #a855f7, #9333ea, #7c3aed)"
-        }}></div>
-        <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 24, marginBottom: 24, display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 28 }}>⚙️</span>
-          Royal Configuration
-        </h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
-          <div style={{ position: "relative" }}>
-            <label style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, display: "block", marginBottom: 12, fontSize: 16 }}>Empire Name</label>
-            <input type="text" defaultValue="Kravley" style={{
-              width: "100%",
-              padding: "16px 20px",
-              background: "rgba(255,255,255,0.05)",
-              border: "2px solid rgba(168,85,247,0.3)",
-              borderRadius: 12,
-              color: "#fff",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 16,
-              outline: "none",
-              transition: "all 0.3s"
-            }}
-            onFocus={e => e.currentTarget.style.borderColor = "#a855f7"}
-            onBlur={e => e.currentTarget.style.borderColor = "rgba(168,85,247,0.3)"}
-            />
-          </div>
-          <div style={{ position: "relative" }}>
-            <label style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, display: "block", marginBottom: 12, fontSize: 16 }}>Royal Tax Rate (%)</label>
-            <input type="number" defaultValue="10" style={{
-              width: "100%",
-              padding: "16px 20px",
-              background: "rgba(255,255,255,0.05)",
-              border: "2px solid rgba(168,85,247,0.3)",
-              borderRadius: 12,
-              color: "#fff",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 16,
-              outline: "none",
-              transition: "all 0.3s"
-            }}
-            onFocus={e => e.currentTarget.style.borderColor = "#a855f7"}
-            onBlur={e => e.currentTarget.style.borderColor = "rgba(168,85,247,0.3)"}
-            />
-          </div>
-          <div style={{ position: "relative" }}>
-            <label style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, display: "block", marginBottom: 12, fontSize: 16 }}>Imperial Support</label>
-            <input type="email" defaultValue="support@kravley.com" style={{
-              width: "100%",
-              padding: "16px 20px",
-              background: "rgba(255,255,255,0.05)",
-              border: "2px solid rgba(168,85,247,0.3)",
-              borderRadius: 12,
-              color: "#fff",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 16,
-              outline: "none",
-              transition: "all 0.3s"
-            }}
-            onFocus={e => e.currentTarget.style.borderColor = "#a855f7"}
-            onBlur={e => e.currentTarget.style.borderColor = "rgba(168,85,247,0.3)"}
-            />
-          </div>
-          <div style={{ position: "relative" }}>
-            <label style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, display: "block", marginBottom: 12, fontSize: 16 }}>Realm Status</label>
-            <select style={{
-              width: "100%",
-              padding: "16px 20px",
-              background: "rgba(255,255,255,0.05)",
-              border: "2px solid rgba(168,85,247,0.3)",
-              borderRadius: 12,
-              color: "#fff",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 16,
-              outline: "none",
-              transition: "all 0.3s",
-              cursor: "pointer"
-            }}
-            onFocus={e => e.currentTarget.style.borderColor = "#a855f7"}
-            onBlur={e => e.currentTarget.style.borderColor = "rgba(168,85,247,0.3)"}
-            >
-              <option value="false" style={{ background: "#0a0a0a", color: "#fff" }}>Open for Business</option>
-              <option value="true" style={{ background: "#0a0a0a", color: "#fff" }}>Under Royal Maintenance</option>
-            </select>
-          </div>
-        </div>
-        <div style={{ marginTop: 32, textAlign: "center" }}>
-          <button style={{
-            padding: "16px 32px",
-            background: "linear-gradient(135deg, #a855f7, #9333ea)",
-            border: "none",
-            borderRadius: 12,
-            color: "#fff",
-            fontFamily: "'DM Sans', sans-serif",
-            fontWeight: 600,
-            fontSize: 16,
-            cursor: "pointer",
-            transition: "all 0.3s",
-            textTransform: "uppercase",
-            letterSpacing: "1px",
-            boxShadow: "0 8px 20px rgba(168,85,247,0.4)"
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = "scale(1.05)";
-            e.currentTarget.style.boxShadow = "0 12px 30px rgba(168,85,247,0.6)";
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.boxShadow = "0 8px 20px rgba(168,85,247,0.4)";
-          }}
-          >
-            Enact Royal Decree
-          </button>
+        {/* Vendor revenue breakdown */}
+        <div style={{ marginTop: 24, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24 }}>
+          <h4 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Revenue by Vendor</h4>
+          {VENDORS.map(vendor => {
+            const pct = Math.round((vendor.revenue / STATS.totalRevenue) * 100);
+            return (
+              <div key={vendor.id} style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ color: "#fff", fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{vendor.name}</span>
+                  <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13 }}>₦{vendor.revenue.toLocaleString()} ({pct}%)</span>
+                </div>
+                <div style={{ height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${pct}%`, background: vendor.featured ? "linear-gradient(90deg, #eab308, #ca8a04)" : "linear-gradient(90deg, #22c55e, #4ade80)", borderRadius: 3, transition: "width 0.8s ease" }} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
 
-// ===================== MAIN DASHBOARD =====================
-function AdminDashboard() {
-  const [activeSection, setActiveSection] = useState("dashboard");
-  const [users] = useState(SAMPLE_USERS);
-  const [vendors] = useState(SAMPLE_VENDORS);
-  const [orders] = useState(SAMPLE_ORDERS);
-  const [riders, setRiders] = useState(SAMPLE_RIDERS);
-  const [assignedRiders, setAssignedRiders] = useState({});
+// ===================== SETTINGS TAB =====================
+function SettingsTab() {
+  const [commission, setCommission] = useState(15);
+  const [deliveryFee, setDeliveryFee] = useState(300);
 
-  const renderSection = () => {
-    switch (activeSection) {
-      case "dashboard": return <DashboardSection users={users} vendors={vendors} orders={orders} />;
-      case "users": return <UsersSection users={users} />;
-      case "vendors": return <VendorsSection vendors={vendors} />;
-      case "orders": return <OrdersSection orders={orders} riders={riders} assignedRiders={assignedRiders} setAssignedRiders={setAssignedRiders} />;
-      case "riders": return <RidersSection riders={riders} setRiders={setRiders} orders={orders} assignedRiders={assignedRiders} setAssignedRiders={setAssignedRiders} />;
-      case "reports": return <ReportsSection users={users} vendors={vendors} orders={orders} />;
-      case "settings": return <SettingsSection />;
-      default: return <DashboardSection users={users} vendors={vendors} orders={orders} />;
-    }
+  const inputStyle = {
+    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 12, padding: "12px 16px", color: "#fff",
+    fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none", width: "100%",
+    boxSizing: "border-box",
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#000" }}>
-      <AdminSidebar activeSection={activeSection} setActiveSection={setActiveSection} />
-      <div className="main-content">
-        {renderSection()}
+    <div style={{ maxWidth: 600 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+        {[
+          {
+            title: "💰 Commission Rate",
+            desc: "Percentage Kravely takes from each order",
+            content: (
+              <div>
+                <label style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, display: "block", marginBottom: 8 }}>Commission % (currently {commission}%)</label>
+                <input type="number" value={commission} onChange={e => setCommission(e.target.value)} style={inputStyle} min="1" max="50" />
+                <p style={{ color: "#374151", fontFamily: "'DM Sans', sans-serif", fontSize: 12, marginTop: 6 }}>
+                  At {commission}%, on a ₦2,000 order you earn ₦{(2000 * commission / 100).toLocaleString()}
+                </p>
+              </div>
+            )
+          },
+          {
+            title: "🚚 Delivery Fee",
+            desc: "Fee charged to students per order",
+            content: (
+              <div>
+                <label style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12, display: "block", marginBottom: 8 }}>Delivery fee (₦)</label>
+                <input type="number" value={deliveryFee} onChange={e => setDeliveryFee(e.target.value)} style={inputStyle} />
+              </div>
+            )
+          },
+          {
+            title: "🌐 Site Status",
+            desc: "Control whether Kravely is open for orders",
+            content: (
+              <div style={{ display: "flex", gap: 12 }}>
+                {["Open", "Maintenance", "Closed"].map((s, i) => (
+                  <button key={s} style={{ padding: "10px 20px", borderRadius: 50, border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, background: i === 0 ? "#22c55e" : "rgba(255,255,255,0.05)", color: i === 0 ? "#000" : "rgba(255,255,255,0.5)", transition: "all 0.2s" }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )
+          },
+        ].map(({ title, desc, content }) => (
+          <div key={title} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 18, padding: "22px 24px" }}>
+            <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 4 }}>{title}</h3>
+            <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 13, marginBottom: 16 }}>{desc}</p>
+            {content}
+          </div>
+        ))}
+
+        <button style={{ background: "#22c55e", color: "#000", border: "none", borderRadius: 50, padding: "14px 32px", fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 15, cursor: "pointer", alignSelf: "flex-start", transition: "all 0.2s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#16a34a"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "#22c55e"; e.currentTarget.style.transform = "translateY(0)"; }}
+        >
+          Save Changes ✓
+        </button>
+
       </div>
     </div>
+  );
+}
+
+// ===================== MAIN ADMIN DASHBOARD =====================
+function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  return (
+    <>
+      <style>{`
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .tab-content { animation: fadeInUp 0.4s ease both; }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+          .admin-layout { flex-direction: column !important; }
+          .admin-sidebar { display: none !important; }
+          .admin-sidebar.open { display: flex !important; position: fixed; inset: 0; z-index: 100; width: 240px !important; }
+          .admin-mobile-bar { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+          .admin-mobile-bar { display: none !important; }
+        }
+      `}</style>
+
+      <div style={{ minHeight: "100vh", background: "#000", display: "flex", flexDirection: "column" }}>
+
+        {/* Mobile top bar */}
+        <div className="admin-mobile-bar" style={{ display: "none", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "#030303", borderBottom: "1px solid rgba(255,255,255,0.06)", position: "sticky", top: 0, zIndex: 50 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #22c55e, #16a34a)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 16, color: "#000" }}>K</span>
+            </div>
+            <span style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 15 }}>Admin</span>
+          </div>
+          <button onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "8px 12px", color: "#fff", cursor: "pointer", fontSize: 18 }}>☰</button>
+        </div>
+
+        {/* Mobile sidebar overlay */}
+        {mobileSidebarOpen && (
+          <div onClick={() => setMobileSidebarOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99, backdropFilter: "blur(4px)" }} />
+        )}
+
+        <div className="admin-layout" style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+
+          {/* Sidebar */}
+          <div className={`admin-sidebar ${mobileSidebarOpen ? "open" : ""}`} style={{ display: "flex" }}>
+            <Sidebar
+              activeTab={activeTab}
+              setActiveTab={(tab) => { setActiveTab(tab); setMobileSidebarOpen(false); }}
+              collapsed={collapsed}
+              setCollapsed={setCollapsed}
+            />
+          </div>
+
+          {/* Main content */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "auto", minWidth: 0 }}>
+            <TopBar activeTab={activeTab} />
+            <div style={{ padding: "24px 20px 80px", flex: 1 }}>
+              <div className="tab-content" key={activeTab}>
+                {activeTab === "overview"  && <OverviewTab />}
+                {activeTab === "orders"    && <OrdersTab />}
+                {activeTab === "vendors"   && <VendorsTab />}
+                {activeTab === "users"     && <UsersTab />}
+                {activeTab === "revenue"   && <RevenueTab />}
+                {activeTab === "settings"  && <SettingsTab />}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </>
   );
 }
 
