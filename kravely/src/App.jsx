@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import HowItWorks from './components/HowItWorks'
+import CoverageMap from './components/CoverageMap'
 import VendorCTA from './components/VendorCta'
 import OrderCTA from './components/OrderCta'
 import FAQ from './components/FAQ'
@@ -45,6 +46,7 @@ export default function App() {
           <Hero />
           <OrderCTA />
           <HowItWorks />
+          <CoverageMap />
           <VendorCTA />
           <FAQ />
           <Footer />
