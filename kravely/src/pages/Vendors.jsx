@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 // Vendor data - easy to add more later
 const VENDORS_DATA = [
   { id: 1, name: "Pearl's Cuisine", category: "Jumbo Orders", orders: 89, revenue: 412000, rating: 4.9, status: "active", featured: true, joinDate: "Jan 2025", image: "🍽️", route: "/pearls" },
-  { id: 2, name: "Mama Nkechi's Kitchen", category: "Local Meals", orders: 76, revenue: 182400, rating: 4.8, status: "active", featured: false, joinDate: "Feb 2025", image: "🥘", route: null },
+  { id: 2, name: "Chrissy Cuisine", category: "Rice and Dishes", orders: 76, revenue: 182400, rating: 4.8, status: "active", featured: true, joinDate: "Feb 2025", image: "🥘", route: "/chrissy" },
   { id: 3, name: "Chukwu's Grill Spot", category: "Grills & Suya", orders: 54, revenue: 162000, rating: 4.6, status: "active", featured: false, joinDate: "Feb 2025", image: "🔥", route: null },
   { id: 4, name: "Campus Bites", category: "Snacks", orders: 43, revenue: 86000, rating: 4.5, status: "active", featured: false, joinDate: "Mar 2025", image: "🍿", route: null },
   { id: 5, name: "Owerri Rice Palace", category: "Rice Dishes", orders: 38, revenue: 114000, rating: 4.9, status: "active", featured: false, joinDate: "Mar 2025", image: "🍚", route: null },

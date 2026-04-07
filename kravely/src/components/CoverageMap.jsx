@@ -15,8 +15,8 @@ const DELIVERY_ZONES = [
 ];
 
 const VENDORS = [
-  { id: 1, name: "Pearl's Cuisine",       tag: "Jumbo Orders · Bulk",    emoji: "👑", rating: 4.9, time: "30–60 min", featured: true,  open: true  },
-  { id: 2, name: "Mama Nkechi's Kitchen", tag: "Local Delicacies",       emoji: "🍲", rating: 4.8, time: "15–25 min", featured: false, open: true  },
+  { id: 1, name: "Pearl's Cuisine",       tag: "Jumbo Orders · Bulk",    emoji: "👑", rating: 4.9, time: "3-4hrs min", featured: true,  open: true  },
+  { id: 2, name: "Chrissy Cuisine",      tag: "Local Delicacies",       emoji: "👑", rating: 4.8, time: "15–25 min", featured: false, open: true  },
   { id: 3, name: "Chukwu's Grill Spot",  tag: "Grills & Suya",          emoji: "🔥", rating: 4.6, time: "20–30 min", featured: false, open: true  },
   { id: 4, name: "Campus Bites",          tag: "Snacks & Fast Food",     emoji: "🥪", rating: 4.5, time: "10–15 min", featured: false, open: true  },
   { id: 5, name: "Owerri Rice Palace",    tag: "Rice Dishes",            emoji: "🍚", rating: 4.9, time: "25–35 min", featured: false, open: true  },

@@ -19,7 +19,7 @@ const STATS = {
 
 const VENDORS = [
   { id: 1, name: "Pearl's Cuisine", category: "Jumbo Orders", orders: 89, revenue: 412000, rating: 4.9, status: "active", featured: true, joinDate: "Jan 2025" },
-  { id: 2, name: "Mama Nkechi's Kitchen", category: "Local Meals", orders: 76, revenue: 182400, rating: 4.8, status: "active", featured: false, joinDate: "Feb 2025" },
+  { id: 2, name: "Chrissy cuisine", category: "Local Meals", orders: 76, revenue: 182400, rating: 4.8, status: "active", featured: true, joinDate: "Feb 2025" },
   { id: 3, name: "Chukwu's Grill Spot", category: "Grills & Suya", orders: 54, revenue: 162000, rating: 4.6, status: "active", featured: false, joinDate: "Feb 2025" },
   { id: 4, name: "Campus Bites", category: "Snacks", orders: 43, revenue: 86000, rating: 4.5, status: "active", featured: false, joinDate: "Mar 2025" },
   { id: 5, name: "Owerri Rice Palace", category: "Rice Dishes", orders: 38, revenue: 114000, rating: 4.9, status: "active", featured: false, joinDate: "Mar 2025" },
@@ -69,13 +69,13 @@ const PENDING_DELIVERIES = [
 // ===================== SIDEBAR =====================
 function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }) {
   const nav = [
-    { id: "overview",  icon: "📊", label: "Overview" },
-    { id: "orders",    icon: "🛒", label: "All Orders" },
-    { id: "riders",    icon: "🏍️", label: "Riders" },
-    { id: "vendors",   icon: "🏪", label: "Vendors" },
-    { id: "users",     icon: "👥", label: "Users" },
-    { id: "revenue",   icon: "💰", label: "Revenue" },
-    { id: "settings",  icon: "⚙️", label: "Settings" },
+    { id: "overview", label: "Overview" },
+    { id: "orders",   label: "All Orders" },
+    { id: "riders",   label: "Riders" },
+    { id: "vendors",  label: "Vendors" },
+    { id: "users",    label: "Users" },
+    { id: "revenue",  label: "Revenue" },
+    { id: "settings", label: "Settings" },
   ];
 
   return (
@@ -216,7 +216,7 @@ function OverviewTab() {
       {/* CEO Welcome */}
       <div style={{ background: "linear-gradient(135deg, #0a1f0a, #0f2d0f)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: 22, padding: "28px 32px", marginBottom: 28, position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", right: -20, top: -20, fontSize: 120, opacity: 0.04 }}>👑</div>
-        <p style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Good day, CEO 👑</p>
+        <p style={{ color: "#22c55e", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Good day, CTO </p>
         <h2 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: "clamp(22px, 3vw, 32px)", letterSpacing: -1, marginBottom: 12 }}>
           Kravely is growing fast.<br />
           <span style={{ background: "linear-gradient(90deg, #22c55e, #4ade80)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Here's your empire. 🚀</span>
@@ -233,12 +233,12 @@ function OverviewTab() {
 
       {/* Stats grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16, marginBottom: 28 }}>
-        <StatCard icon="💰" label="Total Revenue" value={`₦${STATS.totalRevenue.toLocaleString()}`} sub="All time" color="#22c55e" />
-        <StatCard icon="📈" label="Today's Revenue" value={`₦${STATS.todayRevenue.toLocaleString()}`} sub="+12% ↑" color="#4ade80" />
-        <StatCard icon="🛒" label="Total Orders" value={STATS.totalOrders} sub={`${STATS.todayOrders} today`} color="#60a5fa" />
-        <StatCard icon="👥" label="Total Users" value={STATS.totalUsers.toLocaleString()} sub={`+${STATS.newUsersToday} today`} color="#a78bfa" />
-        <StatCard icon="🏪" label="Active Vendors" value={STATS.activeVendors} sub={`of ${STATS.totalVendors}`} color="#f97316" />
-        <StatCard icon="💸" label="Your Cut (15%)" value={`₦${STATS.kravelyCut.toLocaleString()}`} sub="Total earned" color="#eab308" />
+        <StatCard  label="Total Revenue" value={`₦${STATS.totalRevenue.toLocaleString()}`} sub="All time" color="#22c55e" />
+        <StatCard  label="Today's Revenue" value={`₦${STATS.todayRevenue.toLocaleString()}`} sub="+12% ↑" color="#4ade80" />
+        <StatCard  label="Total Orders" value={STATS.totalOrders} sub={`${STATS.todayOrders} today`} color="#60a5fa" />
+        <StatCard  label="Total Users" value={STATS.totalUsers.toLocaleString()} sub={`+${STATS.newUsersToday} today`} color="#a78bfa" />
+        <StatCard  label="Active Vendors" value={STATS.activeVendors} sub={`of ${STATS.totalVendors}`} color="#f97316" />
+        <StatCard  label="Your Cut (15%)" value={`₦${STATS.kravelyCut.toLocaleString()}`} sub="Total earned" color="#eab308" />
       </div>
 
       {/* Two columns */}
@@ -463,7 +463,7 @@ function RevenueTab() {
 
       {/* Revenue chart */}
       <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "24px" }}>
-        <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 18, marginBottom: 24 }}>📈 Revenue Growth (2025)</h3>
+        <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 18, marginBottom: 24 }}>Revenue Growth (2025)</h3>
         <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 180, paddingBottom: 28, position: "relative" }}>
           {/* Y axis lines */}
           {[0, 25, 50, 75, 100].map(pct => (

@@ -22,6 +22,7 @@ import PearlsCuisine from './pages/PearlsCuisine'
 import AdminDashboard from './pages/AdminDashboard'
 import RiderDashboard from './pages/RiderDashboard'
 import SummaryDashboard from './pages/SummaryDashboard'
+import ChrissyCuisine from './pages/ChrissyCuisine'
 
 // ===================== PROTECTED ROUTE =====================
 // DEV_MODE = true means you can see the dashboard while building
@@ -70,6 +71,7 @@ export default function App() {
       <Route path="/login"   element={<Login />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/pearls"  element={<PearlsCuisine />} />
+      <Route path='/chrissy' element={<ChrissyCuisine/>}/>
 
       {/* ===== VENDOR ROUTES ===== */}
       <Route path="/vendor/login"  element={<Login />} />

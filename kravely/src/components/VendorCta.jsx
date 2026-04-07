@@ -220,13 +220,13 @@ function VendorCTA() {
 
                 <div style={{ marginTop: 12, padding: "14px 18px", border: "1px dashed rgba(148,163,184,0.5)", borderRadius: 18, background: "rgba(15, 23, 42, 0.6)" }}>
                   <p style={{ margin: 0, color: "#cbd5e1", fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.6 }}>
-                    Interested in joining later? Send your interest to <strong style={{ color: "#22c55e" }}>vendors@kravely.com</strong> and we’ll follow up when we can onboard more high-quality partners.
+                    Interested in joining later? Send your interest to <strong style={{ color: "#22c55e" }}>kravelyhelp@gmail.com</strong> and we’ll follow up when we can onboard more high-quality partners.
                   </p>
                 </div>
 
                 <p className="text-gray-600 text-xs mt-6"
                   style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                  �� Premium applicants are reviewed in weekly batches.
+                  �� Premium applicants are reviewed in batches.
                 </p>
               </div>
 

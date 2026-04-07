@@ -21,7 +21,7 @@ function HowItWorks() {
       tag: "🍽️ Choose",
       color: "#4ade80",
       screen: {
-        header: "Mama Nkechi's 🍲",
+        header: "Chrissy Cuisine",
         subheader: "Local Delicacies",
         content: "menu",
       },
@@ -75,8 +75,8 @@ function HowItWorks() {
             ))}
           </div>
           {[
-            { name: "Mama Nkechi's", tag: "Local • ₦800+", icon: "🍲", rating: "4.8" },
-            { name: "Chukwu's Grill", tag: "Grills • ₦1,200+", icon: "🔥", rating: "4.6" },
+            { name: "Pearls Cuisine", tag: "Bulk Orders • 20000+", icon: "🍲", rating: "4.8" },
+            { name: "Chrissy Cuisine ", tag: "Foods • ₦5000+", icon: "🔥", rating: "4.6" },
             { name: "Campus Bites", tag: "Snacks • ₦500+", icon: "🥪", rating: "4.5" },
           ].map(v => (
             <div key={v.name} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "8px 10px", display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -96,10 +96,10 @@ function HowItWorks() {
       return (
         <div style={{ padding: "0 12px 12px" }}>
           {[
-            { name: "Jollof Rice + Chicken", price: "₦1,800", icon: "🍚" },
-            { name: "Egusi Soup + Fufu", price: "₦1,500", icon: "🍲" },
-            { name: "Fried Rice + Turkey", price: "₦2,000", icon: "🍛" },
-            { name: "Pepper Soup", price: "₦1,200", icon: "🍜" },
+            { name: "Party Jollof Rice", price: "₦4,500", icon: "🍚" },
+            { name: "Egusi Soup + Fufu", price: "₦6000", icon: "🍲" },
+            { name: "Asun pasta", price: "₦6000", icon: "🍛" },
+            { name: "Pepper Soup", price: "₦8000", icon: "🍜" },
           ].map((item, i) => (
             <div key={item.name} style={{ background: i === 0 ? `${color}15` : "rgba(255,255,255,0.04)", border: i === 0 ? `1px solid ${color}30` : "1px solid transparent", borderRadius: 10, padding: "8px 10px", display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
               <span style={{ fontSize: 18 }}>{item.icon}</span>
@@ -119,7 +119,7 @@ function HowItWorks() {
         <div style={{ padding: "0 12px 12px" }}>
           <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
             <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 9, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Order Summary</p>
-            {[["Jollof Rice + Chicken", "₦1,800"], ["Delivery fee", "₦300"]].map(([k, v]) => (
+            {[["Jollof Rice + Chicken", "₦9500"], ["Delivery fee", "₦600"]].map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                 <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 9, fontFamily: "'DM Sans', sans-serif" }}>{k}</span>
                 <span style={{ color: "#fff", fontSize: 9, fontFamily: "'DM Sans', sans-serif" }}>{v}</span>
@@ -128,7 +128,7 @@ function HowItWorks() {
             <div style={{ height: 1, background: "rgba(255,255,255,0.08)", margin: "8px 0" }} />
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>Total</span>
-              <span style={{ color, fontSize: 11, fontWeight: 800, fontFamily: "'Syne', sans-serif" }}>₦2,100</span>
+              <span style={{ color, fontSize: 11, fontWeight: 800, fontFamily: "'Syne', sans-serif" }}>₦10,100</span>
             </div>
           </div>
           <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
@@ -535,7 +535,7 @@ function HowItWorks() {
           {/* Drag hint */}
           <p className="text-center text-gray-600 mt-8 text-sm"
             style={{ fontFamily: "'DM Sans', sans-serif" }}>
-            ← Drag or hover to control · Click dots to jump →
+            You Crave We deliver
           </p>
 
         </div>

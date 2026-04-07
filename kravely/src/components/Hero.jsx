@@ -53,8 +53,8 @@ function PhoneMockup() {
   const [islandExpanded, setIslandExpanded] = useState(false);
 
   const orders = [
-    { name: "Jollof Rice + Chicken", vendor: "Mama Nkechi's", price: "₦1,800", status: "On the way", time: "12 min", progress: "75%" },
-    { name: "Suya Platter", vendor: "Chukwu's Grill", price: "₦2,200", status: "Being prepared", time: "8 min", progress: "45%" },
+    { name: "Jollof Rice + Chicken", vendor: "Pearls Cuisine", price: "₦25000", status: "On the way", time: "30min", progress: "75%" },
+    { name: "Suya Platter", vendor: "Chrissy Cuisine", price: "₦2,200", status: "Being prepared", time: "8 min", progress: "45%" },
     { name: "Pepper Soup", vendor: "Pepper Soup Corner", price: "₦1,500", status: "Delivered", time: "Just now", progress: "100%" }
   ];
 
@@ -172,8 +172,8 @@ function PhoneMockup() {
             <p className="text-white/40 text-xs mb-2" style={{ fontFamily: "'DM Sans', sans-serif" }}>Popular near you</p>
             <div className="flex flex-col gap-2 mb-3">
               {[
-                { name: "Mama Nkechi's", tag: "Local • ₦800+", rating: "4.8", icon: "" },
-                { name: "Chukwu's Grill", tag: "Grills • ₦1,200+", rating: "4.6", icon: "" },
+                { name: "Pearls Cuisine", tag: "Bulk Order • 35000", rating: "4.8", icon: "" },
+                { name: "Chrissy Cuisine", tag: "Grills • ₦1,200+", rating: "4.6", icon: "" },
               ].map((v) => (
                 <div key={v.name} className="bg-white/5 rounded-xl p-2.5 flex justify-between items-center">
                   <div className="flex items-center gap-2">

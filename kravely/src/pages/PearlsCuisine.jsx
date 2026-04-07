@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import pearlsLogo from "../assets/images/pearlslogo.jpeg"
 
 function PearlsCuisine() {
   const [activeTab, setActiveTab] = useState("rice");
@@ -124,7 +125,7 @@ function PearlsCuisine() {
         {/* ===== NAVBAR ===== */}
         <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(8,0,0,0.97)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(139,0,0,0.2)", padding: "12px 20px" }}>
           <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Link to="/order" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10, color: "#9ca3af", fontSize: 14, fontFamily: "'DM Sans', sans-serif", transition: "color 0.2s" }}
+            <Link to="/vendors" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10, color: "#9ca3af", fontSize: 14, fontFamily: "'DM Sans', sans-serif", transition: "color 0.2s" }}
               onMouseEnter={e => e.currentTarget.style.color = "#fff"}
               onMouseLeave={e => e.currentTarget.style.color = "#9ca3af"}
             >
@@ -157,8 +158,8 @@ function PearlsCuisine() {
               <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>
 
                 {/* Logo */}
-                <div style={{ width: 88, height: 88, borderRadius: 20, background: "rgba(139,0,0,0.25)", border: "2px solid rgba(139,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, flexShrink: 0 }}>
-                  👩‍🍳
+                <div className="w-30">
+                  <img src={pearlsLogo} alt="Pearls Logo"  className="flex items-center rounded-2xl h-50 w-auto" />
                 </div>
 
                 <div style={{ flex: 1, minWidth: 200 }}>
@@ -296,7 +297,7 @@ function PearlsCuisine() {
             <p style={{ color: "#9ca3af", fontFamily: "'DM Sans', sans-serif", fontSize: 14, marginBottom: 24, lineHeight: 1.8, maxWidth: 420, margin: "0 auto 24px" }}>
               Place your order at least <strong style={{ color: "#fca5a5" }}>3 hours</strong> before you want it delivered. Orders close at <strong style={{ color: "#fca5a5" }}>3pm daily</strong>.
             </p>
-            <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 14, justifyContent: "c enter", flexWrap: "wrap" }}>
               <Link to="/order" className="call-btn" style={{ background: "#22c55e", color: "#000", textDecoration: "none", padding: "14px 32px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 15, display: "flex", alignItems: "center", gap: 10, boxShadow: "0 4px 20px rgba(34,197,94,0.3)" }}>
                 🛒 Go to Cart
               </Link>
