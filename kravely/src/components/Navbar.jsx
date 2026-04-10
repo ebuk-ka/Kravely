@@ -97,7 +97,7 @@ function Navbar() {
           <div className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
             <FlipRouterLink to="/">Home</FlipRouterLink>
             <FlipRouterLink to="/vendors">Vendors</FlipRouterLink>
-            <FlipLink href="/#how-it-works">How It Works</FlipLink>
+            <FlipLink href="/riders">Riders</FlipLink>
             <FlipRouterLink to="/about">About</FlipRouterLink>
           </div>
 
@@ -115,10 +115,10 @@ function Navbar() {
           {/* HAMBURGER */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`md:hidden flex flex-col gap-1.5 bg-transparent border-none cursor-pointer p-2 z-10 ${menuOpen ? "is-open" : ""}`}
+            className={`md:hidden flex flex-col gap-1.5 bg-green border-none cursor-pointer p-2 z-10 ${menuOpen ? "is-open" : ""}`}
           >
             <span className="ham-line ham-line1" />
-            <span className="ham-line ham-line2" />
+           
             <span className="ham-line ham-line3" />
           </button>
 
@@ -131,7 +131,7 @@ function Navbar() {
           {[
             { label: "Home", to: "/" },
             { label: "Vendors", to: "/vendors" },
-            { label: "How It Works", to: "/#how-it-works" },
+            { label: "Riders", to: "/riders" },
             { label: "About", to: "/about" },
           ].map(({ label, to }) => (
             <Link key={label} to={to} onClick={() => setMenuOpen(false)}

@@ -159,6 +159,8 @@ function OrderCTA() {
                   {  text: "Secure Payments" },
                   {  text: "Fresh Food" },
                   {  text: "FUTO Campus Only" },
+                  {  text: "Browse favourite Vendors"},
+                 
                 ].map(({ icon, text }, i) => (
                   <div
                     key={text}

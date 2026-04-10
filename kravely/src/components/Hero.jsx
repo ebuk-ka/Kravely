@@ -300,8 +300,8 @@ function Hero() {
 
             <h1 className="slide-up-2 font-black text-white leading-tight mb-6"
               style={{ fontSize: "clamp(44px, 5vw, 80px)", letterSpacing: -3, fontFamily: "'Syne', sans-serif", lineHeight: 1.05 }}>
-              Campus food,<br />
-              <span className="shimmer-text">delivered fast.</span>
+              You don chow,<br />
+              <span className="shimmer-text">Order Now.</span>
             </h1>
 
             <div className="slide-up-3 flex justify-center lg:justify-start w-full">
@@ -310,8 +310,8 @@ function Hero() {
 
             <p className="slide-up-4 text-gray-400 leading-relaxed mb-10 max-w-md"
               style={{ fontSize: 17, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.8 }}>
-              Order from your favourite FUTO vendors and get hot food
-              delivered straight to your hostel or faculty. No stress.
+              Order from your favourite vendors and get hot food
+              delivered straight to you. No stress.
             </p>
 
             
