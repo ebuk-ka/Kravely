@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Zap, ShieldCheck, Users } from "lucide-react";
 
 function Reveal({ children, delay = 0 }) {
   const ref = useRef(null);
@@ -43,10 +44,10 @@ function About() {
   ];
 
   const values = [
-    { icon: "⚡", title: "Speed", desc: "We know you're hungry. Every part of Kravely is built to get food to you as fast as possible." },
-    { icon: "🔒", title: "Trust", desc: "Your payments are secure, your orders are tracked and your vendors are verified." },
-    { icon: "🤝", title: "Community", desc: "Kravely isn't just an app — it's a bridge between students and the campus vendors who feed them every day." },
-  ];
+  { icon: Zap, title: "Speed", desc: "We know you're hungry. Every part of Kravely is built to get food to you as fast as possible." },
+  { icon: ShieldCheck, title: "Trust", desc: "Your payments are secure, your orders are tracked and your vendors are verified." },
+  { icon: Users, title: "Community", desc: "Kravely isn't just an app — it's a bridge between students and the campus vendors who feed them every day." },
+];
 
   return (
     <>
@@ -167,11 +168,16 @@ function About() {
           </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {values.map(({ icon, title, desc }, i) => (
+            {values.map(({ icon: Icon, title, desc }, i) => (
               <Reveal key={title} delay={i * 120}>
                 <div className="value-card rounded-2xl p-7 border border-white/5"
                   style={{ background: "#0a0a0a" }}>
-                  <span className="text-3xl mb-4 block">{icon}</span>
+                  <div className="mb-4">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center 
+                    bg-green-500/10 border border-green-500/20">
+                    <Icon size={22} className="text-green-400" />
+                  </div>
+                </div>
                   <h3 className="text-white font-bold text-lg mb-2"
                     style={{ fontFamily: "'Syne', sans-serif" }}>
                     {title}

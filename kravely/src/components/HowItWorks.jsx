@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { Search, Flame, UtensilsCrossed, Sandwich, Star, CreditCard, Landmark, Smartphone, Lock, Bike, MapPinned, Home, ShoppingCart, User } from "lucide-react";
 
 function HowItWorks() {
   const steps = [
@@ -6,10 +7,11 @@ function HowItWorks() {
       step: "01",
       title: "Browse Vendors",
       desc: "Explore all FUTO campus food vendors near your hostel or faculty. Filter by location, food type or rating.",
-      tag: "🔍 Discover",
+      tag: "Discover",
+      icon: Search,
       color: "#22c55e",
       screen: {
-        header: "Good Day 👋",
+        header: "Good Day",
         subheader: "What are you craving?",
         content: "vendors",
       },
@@ -18,7 +20,8 @@ function HowItWorks() {
       step: "02",
       title: "Pick Your Meal",
       desc: "Choose from jollof rice, pepper soup, suya and more. Add to cart in seconds.",
-      tag: "🍽️ Choose",
+      tag: "Choose",
+      icon: UtensilsCrossed,
       color: "#4ade80",
       screen: {
         header: "Chrissy Cuisine",
@@ -30,7 +33,8 @@ function HowItWorks() {
       step: "03",
       title: "Pay Securely",
       desc: "Checkout fast with Paystack. Card, bank transfer or USSD — always protected.",
-      tag: "💳 Pay",
+      tag: "Pay",
+      icon: CreditCard,
       color: "#86efac",
       screen: {
         header: "Checkout",
@@ -42,7 +46,8 @@ function HowItWorks() {
       step: "04",
       title: "Fast Delivery",
       desc: "Your food arrives hot to your hostel or faculty. Track your order live.",
-      tag: "🏃 Delivered",
+      tag: "Delivered",
+      icon: Bike,
       color: "#22c55e",
       screen: {
         header: "Order Tracking",
@@ -61,7 +66,7 @@ function HowItWorks() {
         <div style={{ padding: "0 12px 12px" }}>
           <div style={{ marginBottom: 10 }}>
             <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 10, padding: "8px 12px", display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 10, opacity: 0.3 }}>🔍</span>
+              <Search size={12} style={{ opacity: 0.3, flexShrink: 0 }} />
               <span style={{ color: "rgba(255,255,255,0.25)", fontSize: 10, fontFamily: "'DM Sans', sans-serif" }}>Search vendors...</span>
             </div>
           </div>
@@ -75,17 +80,17 @@ function HowItWorks() {
             ))}
           </div>
           {[
-            { name: "Pearls Cuisine", tag: "Bulk Orders • 20000+", icon: "🍲", rating: "4.8" },
-            { name: "Chrissy Cuisine ", tag: "Foods • ₦5000+", icon: "🔥", rating: "4.6" },
-            { name: "Campus Bites", tag: "Snacks • ₦500+", icon: "🥪", rating: "4.5" },
+            { name: "Pearls Cuisine", tag: "Bulk Orders • 20000+", icon: UtensilsCrossed, rating: "4.8" },
+            { name: "Chrissy Cuisine ", tag: "Foods • ₦5000+", icon: Flame, rating: "4.6" },
+            { name: "Campus Bites", tag: "Snacks • ₦500+", icon: Sandwich, rating: "4.5" },
           ].map(v => (
             <div key={v.name} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "8px 10px", display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>{v.icon}</div>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><v.icon size={14} color={color} /></div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{v.name}</p>
                 <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 9, fontFamily: "'DM Sans', sans-serif" }}>{v.tag}</p>
               </div>
-              <span style={{ color, fontSize: 9, fontWeight: 700 }}>⭐ {v.rating}</span>
+              <span style={{ color, fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}><Star size={10} fill={color} color={color} /> {v.rating}</span>
             </div>
           ))}
         </div>
@@ -96,13 +101,13 @@ function HowItWorks() {
       return (
         <div style={{ padding: "0 12px 12px" }}>
           {[
-            { name: "Party Jollof Rice", price: "₦4,500", icon: "🍚" },
-            { name: "Egusi Soup + Fufu", price: "₦6000", icon: "🍲" },
-            { name: "Asun pasta", price: "₦6000", icon: "🍛" },
-            { name: "Pepper Soup", price: "₦8000", icon: "🍜" },
+            { name: "Party Jollof Rice", price: "₦4,500", icon: UtensilsCrossed },
+            { name: "Egusi Soup + Fufu", price: "₦6000", icon: UtensilsCrossed },
+            { name: "Asun pasta", price: "₦6000", icon: Flame },
+            { name: "Pepper Soup", price: "₦8000", icon: UtensilsCrossed },
           ].map((item, i) => (
             <div key={item.name} style={{ background: i === 0 ? `${color}15` : "rgba(255,255,255,0.04)", border: i === 0 ? `1px solid ${color}30` : "1px solid transparent", borderRadius: 10, padding: "8px 10px", display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <span style={{ fontSize: 18 }}>{item.icon}</span>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={15} color={color} /></div>
               <div style={{ flex: 1 }}>
                 <p style={{ color: "#fff", fontSize: 10, fontWeight: 600, fontFamily: "'Syne', sans-serif" }}>{item.name}</p>
                 <p style={{ color, fontSize: 10, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>{item.price}</p>
@@ -134,13 +139,17 @@ function HowItWorks() {
           <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
             <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 9, fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>Payment Method</p>
             <div style={{ display: "flex", gap: 6 }}>
-              {["💳 Card", "🏦 Transfer", "📱 USSD"].map((m, i) => (
-                <span key={m} style={{ fontSize: 8, padding: "5px 8px", borderRadius: 8, fontFamily: "'DM Sans', sans-serif", background: i === 0 ? `${color}20` : "rgba(255,255,255,0.05)", color: i === 0 ? color : "rgba(255,255,255,0.4)", border: i === 0 ? `1px solid ${color}40` : "1px solid transparent" }}>{m}</span>
+              {[
+                { icon: CreditCard, label: "Card" },
+                { icon: Landmark, label: "Transfer" },
+                { icon: Smartphone, label: "USSD" },
+              ].map(({ icon: Icon, label }, i) => (
+                <span key={label} style={{ fontSize: 8, padding: "5px 8px", borderRadius: 8, fontFamily: "'DM Sans', sans-serif", background: i === 0 ? `${color}20` : "rgba(255,255,255,0.05)", color: i === 0 ? color : "rgba(255,255,255,0.4)", border: i === 0 ? `1px solid ${color}40` : "1px solid transparent", display: "flex", alignItems: "center", gap: 4 }}><Icon size={10} /> {label}</span>
               ))}
             </div>
           </div>
           <div style={{ background: color, borderRadius: 10, padding: "10px", textAlign: "center", cursor: "pointer" }}>
-            <span style={{ color: "#000", fontSize: 11, fontWeight: 800, fontFamily: "'DM Sans', sans-serif" }}>Pay Now 🔒</span>
+            <span style={{ color: "#000", fontSize: 11, fontWeight: 800, fontFamily: "'DM Sans', sans-serif", display: "inline-flex", alignItems: "center", gap: 6 }}><Lock size={12} /> Pay Now</span>
           </div>
         </div>
       );
@@ -158,7 +167,7 @@ function HowItWorks() {
               <span style={{ color, fontSize: 9, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>₦1,800</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span style={{ color, fontSize: 9, fontFamily: "'DM Sans', sans-serif" }}>On the way 🏃</span>
+              <span style={{ color, fontSize: 9, fontFamily: "'DM Sans', sans-serif", display: "inline-flex", alignItems: "center", gap: 4 }}><Bike size={10} /> On the way</span>
               <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 9 }}>12 min</span>
             </div>
             <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 4, height: 4 }}>
@@ -169,7 +178,7 @@ function HowItWorks() {
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, height: 80, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, rgba(34,197,94,0.05) 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
             <div style={{ textAlign: "center" }}>
-              <span style={{ fontSize: 20 }}>🗺️</span>
+              <MapPinned size={20} color={color} />
               <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 8, fontFamily: "'DM Sans', sans-serif", marginTop: 4 }}>Live tracking</p>
             </div>
           </div>
@@ -352,7 +361,7 @@ function HowItWorks() {
                     padding: "6px 16px", borderRadius: 50,
                     fontSize: 13, fontWeight: 700,
                     fontFamily: "'DM Sans', sans-serif",
-                  }}>{current.tag}</span>
+                  }}>{(() => { const StepIcon = current.icon; return <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><StepIcon size={14} /> {current.tag}</span>; })()}</span>
                 </div>
 
                 {/* Step number */}
@@ -499,8 +508,8 @@ function HowItWorks() {
 
                         {/* Bottom nav */}
                         <div style={{ background: "#050505", borderTop: "1px solid rgba(255,255,255,0.04)", padding: "8px 16px", display: "flex", justifyContent: "space-around" }}>
-                          {["🏠", "🔍", "🛒", "👤"].map((icon, j) => (
-                            <span key={j} style={{ fontSize: 14, opacity: j === [0,0,2,0][i] ? 1 : 0.25 }}>{icon}</span>
+                          {[Home, Search, ShoppingCart, User].map((Icon, j) => (
+                            <span key={j} style={{ opacity: j === [0,0,2,0][i] ? 1 : 0.25, display: "flex", alignItems: "center", justifyContent: "center" }}><Icon size={14} color={j === [0,0,2,0][i] ? step.color : "rgba(255,255,255,0.7)"} /></span>
                           ))}
                         </div>
 

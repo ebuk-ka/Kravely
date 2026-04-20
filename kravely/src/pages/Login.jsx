@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { Eye, EyeOff } from "lucide-react";
+import { AlertTriangle } from "lucide-react"
+import { Sparkles, Truck, ShieldCheck, UtensilsCrossed } from "lucide-react";
+
 
 function Login() {
   const { signIn, signInWithGoogle } = useAuth();
@@ -15,6 +19,12 @@ function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
   };
+
+  const features = [
+  { icon: Truck, text: "Fast delivery on campus" },
+  { icon: ShieldCheck, text: "Secure payments via Paystack" },
+  { icon: UtensilsCrossed, text: "Fresh food from real vendors" },
+];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,15 +79,15 @@ function Login() {
             <Link to="/" style={{ textDecoration: "none" }}>
               <h1 className="shimmer-logo font-black text-3xl mb-2" style={{ fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>Kravely</h1>
             </Link>
-            <p className="text-gray-500 text-sm mb-10" style={{ fontFamily: "'DM Sans', sans-serif" }}>Campus food delivery at FUTO 🎓</p>
+            <p className="text-gray-500 text-sm mb-10" style={{ fontFamily: "'DM Sans', sans-serif" }}>Login and order your favoutrite meals with us</p>
 
-            <h2 className="text-white font-black mb-2" style={{ fontSize: "clamp(28px, 4vw, 38px)", fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>Welcome back 👋</h2>
+            <h2 className="text-white font-black mb-2" style={{ fontSize: "clamp(28px, 4vw, 38px)", fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>Welcome back</h2>
             <p className="text-gray-500 mb-8" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15 }}>Sign in to order from your favourite FUTO vendors</p>
 
             {/* Error message */}
             {error && (
               <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 16 }}>⚠️</span>
+                <span style={{ fontSize: 16 }}><AlertTriangle size={18} className="text-red-500" /></span>
                 <p style={{ color: "#ef4444", fontFamily: "'DM Sans', sans-serif", fontSize: 14, margin: 0 }}>{error}</p>
               </div>
             )}
@@ -95,12 +105,26 @@ function Login() {
                     <label className="text-gray-400 text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: "'DM Sans', sans-serif" }}>Password</label>
                     <Link to="/forgot-password" className="text-green-500 text-xs font-semibold hover:text-green-400 transition-colors" style={{ fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>Forgot password?</Link>
                   </div>
-                  <div className="relative">
-                    <input className={`input-field ${error ? "error" : ""}`} type={showPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange} placeholder="Enter your password" required style={{ paddingRight: 50 }} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 18 }}>
-                      {showPassword ? "🙈" : "👁️"}
-                    </button>
-                  </div>
+                  
+                </div><div className="relative">
+                     <input
+                       className={`input-field ${error ? "error" : ""}`}
+                       type={showPassword ? "text" : "password"}
+                       name="password"
+                       value={form.password}
+                       onChange={handleChange}
+                       placeholder="Enter your password"
+                       required
+                       style={{ paddingRight: 50 }}
+                     />
+                   
+                     <button
+                       type="button"
+                       onClick={() => setShowPassword(!showPassword)}
+                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 transition"
+                     >
+                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                     </button>
                 </div>
 
               </div>
@@ -147,26 +171,85 @@ function Login() {
         </div>
 
         {/* RIGHT — Visual panel */}
-        <div className="hidden lg:flex flex-1 relative overflow-hidden items-center justify-center" style={{ background: "#050505", borderLeft: "1px solid rgba(255,255,255,0.05)" }}>
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(34,197,94,0.1) 0%, transparent 65%)" }} />
-          <div className="absolute inset-0 pointer-events-none opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
-          <div className="relative z-10 text-center px-12">
-            <div className="text-8xl mb-8">🍔</div>
-            <h3 className="text-white font-black text-4xl mb-4" style={{ fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>
-              Hungry?<br />
-              <span style={{ background: "linear-gradient(90deg, #22c55e, #4ade80)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>We got you.</span>
-            </h3>
-            <p className="text-gray-500 text-lg max-w-xs mx-auto" style={{ fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7 }}>
-              Order from your favourite FUTO vendors and get hot food delivered fast.
-            </p>
-            <div className="flex flex-col gap-3 mt-10 max-w-xs mx-auto">
-              {[["⚡", "Fast delivery on campus"], ["🔒", "Secure payments via Paystack"], ["🍽️", "Fresh food from real vendors"]].map(([icon, text]) => (
-                <div key={text} className="flex items-center gap-3 text-left" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px" }}>
-                  <span className="text-xl">{icon}</span>
-                  <span className="text-gray-400 text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>{text}</span>
-                </div>
-              ))}
-            </div>
+        <div className="hidden lg:flex flex-1 relative overflow-hidden items-center justify-center"
+  style={{
+    background: "#050505",
+    borderLeft: "1px solid rgba(255,255,255,0.05)",
+  }}
+>
+  <div
+    className="absolute inset-0 pointer-events-none"
+    style={{
+      background:
+        "radial-gradient(ellipse at 50% 50%, rgba(34,197,94,0.1) 0%, transparent 65%)",
+    }}
+  />
+  <div
+    className="absolute inset-0 pointer-events-none opacity-[0.04]"
+    style={{
+      backgroundImage:
+        "linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)",
+      backgroundSize: "48px 48px",
+    }}
+  />
+
+  <div className="relative z-10 text-center px-12 max-w-md">
+    <div className="flex justify-center mb-5">
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center ">
+        <Sparkles size={100} className="text-green-400" />
+      </div>
+    </div>
+
+    <h3
+      className="text-white font-black text-4xl mb-4 leading-tight"
+      style={{ fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}
+    >
+      Hungry?
+      <br />
+      <span
+        style={{
+          background: "linear-gradient(90deg, #22c55e, #4ade80)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        We got you.
+      </span>
+    </h3>
+
+    <p
+      className="text-gray-500 text-lg max-w-xs mx-auto"
+      style={{ fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7 }}
+    >
+      Order from your favourite FUTO vendors and get hot food delivered fast.
+    </p>
+
+    <div className="flex flex-col gap-3 mt-10 max-w-xs mx-auto">
+      {features.map(({ icon: Icon, text }) => (
+        <div
+          key={text}
+          className="flex items-center gap-3 text-left transition-all duration-300 hover:-translate-y-1"
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: 14,
+            padding: "14px 16px",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-green-500/10 border border-green-500/10 shrink-0">
+            <Icon size={17} className="text-green-400" />
+          </div>
+
+          <span
+            className="text-gray-300 text-sm"
+            style={{ fontFamily: "'DM Sans', sans-serif" }}
+          >
+            {text}
+          </span>
+        </div>
+  ))}
+</div>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import {  Lock, AlertTriangle, Eye, EyeOff } from "lucide-react"
 
 function Signup() {
   const { signUp, signInWithGoogle } = useAuth();
@@ -47,7 +48,7 @@ function Signup() {
       });
       setSuccess(true);
       // Some Supabase projects require email confirmation
-      // If email confirmation is disabled in Supabase, redirect directly
+      
       setTimeout(() => navigate("/order"), 2000);
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
@@ -107,7 +108,15 @@ function Signup() {
           <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(34,197,94,0.1) 0%, transparent 65%)" }} />
           <div className="absolute inset-0 pointer-events-none opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
           <div className="relative z-10 text-center px-12">
-            <div className="text-8xl mb-8">🚀</div>
+           <div className="flex justify-center mb-8">
+               <div className="w-16 h-16 rounded-2xl flex items-center justify-center 
+                 bg-gradient-to-br from-green-500/20 to-green-400/5 
+                 border border-green-500/20 
+                 shadow-[0_0_30px_rgba(34,197,94,0.15)]">
+                 
+                 <Lock size={26} className="text-green-400" />
+               </div>
+             </div>
             <h3 className="text-white font-black text-4xl mb-4" style={{ fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>
               Join thousands<br />
               <span style={{ background: "linear-gradient(90deg, #22c55e, #4ade80)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>of FUTO students.</span>
@@ -116,7 +125,7 @@ function Signup() {
               Sign up free and start ordering hot food from your favourite campus vendors.
             </p>
             <div className="flex flex-col gap-3 mt-10 max-w-xs mx-auto">
-              {[["01", "Create your free account"], ["02", "Browse FUTO vendors"], ["03", "Order and enjoy! 🍔"]].map(([step, text]) => (
+              {[["01", "Create your free account"], ["02", "Browse FUTO vendors"], ["03", "Order and enjoy!"]].map(([step, text]) => (
                 <div key={step} className="flex items-center gap-3 text-left" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px" }}>
                   <span className="font-black text-xs flex-shrink-0" style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif" }}>{step}</span>
                   <span className="text-gray-400 text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>{text}</span>
@@ -135,7 +144,7 @@ function Signup() {
             <Link to="/" style={{ textDecoration: "none" }}>
               <h1 className="shimmer-logo font-black text-3xl mb-2" style={{ fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>Kravely</h1>
             </Link>
-            <p className="text-gray-500 text-sm mb-8" style={{ fontFamily: "'DM Sans', sans-serif" }}>Campus food delivery at FUTO 🎓</p>
+            <p className="text-gray-500 text-sm mb-8" style={{ fontFamily: "'DM Sans', sans-serif" }}>Campus food delivery at FUTO </p>
 
             <h2 className="text-white font-black mb-2" style={{ fontSize: "clamp(26px, 4vw, 36px)", fontFamily: "'Syne', sans-serif", letterSpacing: -1 }}>Create your account</h2>
             <p className="text-gray-500 mb-7" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15 }}>Join Kravely and order food on FUTO campus</p>
@@ -143,7 +152,7 @@ function Signup() {
             {/* Error */}
             {error && (
               <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 16 }}>⚠️</span>
+                <span style={{ fontSize: 16 }}><AlertTriangle size={18} className="text-red-500" /></span>
                 <p style={{ color: "#ef4444", fontFamily: "'DM Sans', sans-serif", fontSize: 14, margin: 0 }}>{error}</p>
               </div>
             )}
@@ -186,11 +195,25 @@ function Signup() {
                 <div>
                   <label className="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wider" style={{ fontFamily: "'DM Sans', sans-serif" }}>Password</label>
                   <div className="relative">
-                    <input className="input-field" type={showPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange} placeholder="Create a strong password" required style={{ paddingRight: 50 }} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 18 }}>
-                      {showPassword ? "🙈" : "👁️"}
-                    </button>
-                  </div>
+                     <input
+                       className={`input-field ${error ? "error" : ""}`}
+                       type={showPassword ? "text" : "password"}
+                       name="password"
+                       value={form.password}
+                       onChange={handleChange}
+                       placeholder="Enter your password"
+                       required
+                       style={{ paddingRight: 50 }}
+                     />
+                   
+                     <button
+                       type="button"
+                       onClick={() => setShowPassword(!showPassword)}
+                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 transition"
+                     >
+                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                     </button>
+                </div>
                   {strength && (
                     <div className="mt-2">
                       <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
@@ -231,13 +254,13 @@ function Signup() {
                     </svg>
                     Creating account...
                   </span>
-                ) : "Create Account 🚀"}
+                ) : "Create Account "}
               </button>
             </form>
 
             <p className="text-center text-gray-500 text-sm mt-6" style={{ fontFamily: "'DM Sans', sans-serif" }}>
               Already have an account?{" "}
-              <Link to="/login" className="text-green-500 font-bold hover:text-green-400 transition-colors" style={{ textDecoration: "none" }}>Sign in</Link>
+              <Link to="/login" className="text-green-500 font-bold hover:text-green-400 transition-colors" style={{ textDecoration: "none" }}>Login</Link>
             </p>
             
 

@@ -90,6 +90,7 @@ export default function App() {
       {/* ===== CATCH ALL — redirect to home ===== */}
       <Route path="*" element={<Navigate to="/" replace />} />
 
+
     </Routes>
   )
 }

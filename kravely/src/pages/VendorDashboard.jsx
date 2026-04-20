@@ -1,414 +1,359 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+// src/pages/VendorDashboard.jsx
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+import { useVendorOwnOrders, useVendorMenu, fmt, STATUS_STYLE } from "../hooks/useKravelyData";
 
-const SAMPLE_ORDERS = [
-  { id: "KRV-001", customer: "Chidi Okafor", items: [{ name: "Jollof Rice + Chicken", qty: 2, price: 1800 }], total: 3900, status: "pending", time: "2 mins ago", location: "Hostel B, Room 14" },
-  { id: "KRV-002", customer: "Amaka Eze", items: [{ name: "Egusi Soup + Fufu", qty: 1, price: 1500 }, { name: "Fried Plantain", qty: 1, price: 500 }], total: 2300, status: "preparing", time: "12 mins ago", location: "Faculty of Engineering" },
-  { id: "KRV-003", customer: "Emeka Nwosu", items: [{ name: "Jumbo Rice Combo", qty: 3, price: 3500 }], total: 10800, status: "ready", time: "25 mins ago", location: "Hostel D, Room 7" },
-  { id: "KRV-004", customer: "Ngozi Obi", items: [{ name: "Pepper Soup", qty: 2, price: 1200 }], total: 2700, status: "delivered", time: "1 hr ago", location: "ICT Building" },
-  { id: "KRV-005", customer: "Kelechi Ibe", items: [{ name: "Native Rice", qty: 4, price: 2000 }], total: 8300, status: "delivered", time: "2 hrs ago", location: "Hostel A, Room 32" },
-];
+function Badge({ status }) {
+  const s = STATUS_STYLE[status] || STATUS_STYLE.inactive;
+  return <span style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}`, fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 50, fontFamily: "'DM Sans',sans-serif", whiteSpace: "nowrap" }}>{status}</span>;
+}
 
-const SAMPLE_MENU = [
-  { id: "mn1", name: "Jollof Rice + Chicken", price: 1800, category: "Rice", emoji: "🍚", available: true },
-  { id: "mn2", name: "Fried Rice + Turkey", price: 2200, category: "Rice", emoji: "🍚", available: true },
-  { id: "mn3", name: "Egusi Soup + Fufu", price: 1500, category: "Soup", emoji: "🍲", available: true },
-  { id: "mn4", name: "Okra Soup + Fufu", price: 1400, category: "Soup", emoji: "🍲", available: false },
-  { id: "mn5", name: "Jumbo Rice Combo", price: 3500, category: "Combos", emoji: "🍱", available: true },
-  { id: "mn6", name: "Pepper Soup", price: 1200, category: "Soup", emoji: "🌶️", available: true },
-];
+const NEXT = { pending: { status: "confirmed", label: "Confirm Order" }, confirmed: { status: "preparing", label: "Start Preparing" }, preparing: { status: "ready", label: "Mark as Ready" }, ready: { status: "delivered", label: "Mark Delivered ✓" } };
 
-const STATUS = {
-  pending:   { label: "Pending",   color: "#f97316", bg: "rgba(249,115,22,0.1)",  border: "rgba(249,115,22,0.3)",  next: "preparing", nextLabel: "Start Preparing" },
-  preparing: { label: "Preparing", color: "#eab308", bg: "rgba(234,179,8,0.1)",   border: "rgba(234,179,8,0.3)",   next: "ready",     nextLabel: "Mark as Ready" },
-  ready:     { label: "Ready ✓",   color: "#22c55e", bg: "rgba(34,197,94,0.1)",   border: "rgba(34,197,94,0.3)",   next: "delivered", nextLabel: "Mark Delivered" },
-  delivered: { label: "Delivered", color: "#6b7280", bg: "rgba(107,114,128,0.1)", border: "rgba(107,114,128,0.3)", next: null,        nextLabel: null },
-};
+// ─── ADD ITEM MODAL ──────────────────────────────────────────
+function AddItemModal({ onClose, onSave }) {
+  const [form, setForm]       = useState({ name: "", description: "", price: "", emoji: "🍽️", category: "local" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+  const inp = { width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "11px 14px", color: "#fff", fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none", boxSizing: "border-box" };
 
-// ===================== NAVBAR =====================
-function VendorNavbar({ vendorName, activeTab, setActiveTab, pendingCount }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const tabs = [
-    { id: "overview", label: "Overview", icon: "📊" },
-    { id: "orders",   label: "Orders",   icon: "🛒" },
-    { id: "menu",     label: "Menu",     icon: "🍽️" },
-    { id: "history",  label: "History",  icon: "📋" },
-  ];
+  const save = async () => {
+    if (!form.name.trim()) return setError("Name is required");
+    if (!form.price || parseFloat(form.price) <= 0) return setError("Valid price is required");
+    setLoading(true); setError("");
+    try {
+      await onSave({ name: form.name.trim(), description: form.description.trim() || null, price: Math.round(parseFloat(form.price) * 100), emoji: form.emoji || "🍽️", category: form.category, is_available: true });
+      onClose();
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  };
 
   return (
-    <>
-      <style>{`
-        .vd-tab { transition: all 0.2s ease; cursor: pointer; white-space: nowrap; }
-        .vd-tab:hover { color: #22c55e !important; border-color: rgba(34,197,94,0.3) !important; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .mobile-tabs { animation: slideDown 0.25s ease both; }
-      `}</style>
-      <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(0,0,0,0.97)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
-
-          {/* Left */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Link to="/" style={{ textDecoration: "none" }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg, #22c55e, #16a34a)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 17, color: "#000" }}>K</span>
-              </div>
-            </Link>
-            <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.1)" }} />
-            <div>
-              <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 10 }}>Vendor Dashboard</p>
-              <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13 }}>{vendorName}</p>
-            </div>
-          </div>
-
-          {/* Desktop tabs */}
-          <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }} className="desktop-tabs">
-            {tabs.map(tab => (
-              <button key={tab.id} className="vd-tab" onClick={() => setActiveTab(tab.id)} style={{
-                background: activeTab === tab.id ? "rgba(34,197,94,0.1)" : "none",
-                border: activeTab === tab.id ? "1px solid rgba(34,197,94,0.3)" : "1px solid transparent",
-                color: activeTab === tab.id ? "#22c55e" : "rgba(255,255,255,0.5)",
-                padding: "7px 14px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif",
-                fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 5,
-                position: "relative",
-              }}>
-                {tab.icon} {tab.label}
-                {tab.id === "orders" && pendingCount > 0 && (
-                  <span style={{ background: "#f97316", color: "#fff", fontSize: 9, fontWeight: 800, width: 16, height: 16, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", top: -4, right: -4 }}>{pendingCount}</span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Right — profile + hamburger */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 50, background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontSize: 16 }}>👩‍🍳</span>
-            </div>
-            {/* Hamburger — mobile only */}
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "none" }} className="mobile-hamburger">
-              <div style={{ width: 22, height: 2, background: "#fff", borderRadius: 2, marginBottom: 5, transition: "all 0.3s", transform: mobileMenuOpen ? "rotate(45deg) translate(5px, 5px)" : "none" }} />
-              <div style={{ width: 22, height: 2, background: "#fff", borderRadius: 2, marginBottom: 5, opacity: mobileMenuOpen ? 0 : 1, transition: "all 0.3s" }} />
-              <div style={{ width: 22, height: 2, background: "#fff", borderRadius: 2, transition: "all 0.3s", transform: mobileMenuOpen ? "rotate(-45deg) translate(5px, -5px)" : "none" }} />
-            </button>
-          </div>
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 22, padding: "24px", width: "100%", maxWidth: 440 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <h2 style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, margin: 0 }}>Add Menu Item</h2>
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: "#fff", width: 32, height: 32, borderRadius: 8, cursor: "pointer", fontSize: 18, lineHeight: 1 }}>×</button>
         </div>
-
-        {/* Mobile tab bar — always visible on mobile */}
-        <div style={{ overflowX: "auto", padding: "0 16px 10px", display: "flex", gap: 8, borderTop: "1px solid rgba(255,255,255,0.04)" }} className="mobile-tab-bar">
-          {tabs.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-              background: activeTab === tab.id ? "rgba(34,197,94,0.1)" : "none",
-              border: activeTab === tab.id ? "1px solid rgba(34,197,94,0.3)" : "1px solid rgba(255,255,255,0.06)",
-              color: activeTab === tab.id ? "#22c55e" : "rgba(255,255,255,0.5)",
-              padding: "7px 14px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 600, fontSize: 12, display: "flex", alignItems: "center", gap: 5,
-              cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, position: "relative",
-              transition: "all 0.2s",
-            }}>
-              {tab.icon} {tab.label}
-              {tab.id === "orders" && pendingCount > 0 && (
-                <span style={{ background: "#f97316", color: "#fff", fontSize: 9, fontWeight: 800, width: 16, height: 16, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", top: -4, right: -4 }}>{pendingCount}</span>
-              )}
-            </button>
+        {error && <p style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontFamily: "'DM Sans',sans-serif", marginBottom: 14 }}>{error}</p>}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {[["Item Name *","name","Jollof Rice + Chicken"],["Emoji","emoji","🍽️"],["Price (₦) *","price","1800"],["Description","description","What's in this meal"]].map(([l,k,ph]) => (
+            <div key={k}>
+              <label style={{ color: "#6b7280", fontSize: 11, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 5 }}>{l}</label>
+              <input value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })} placeholder={ph} type={k === "price" ? "number" : "text"} style={inp} />
+            </div>
           ))}
+          <div>
+            <label style={{ color: "#6b7280", fontSize: 11, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 5 }}>Category</label>
+            <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={{ ...inp, cursor: "pointer" }}>
+              {["local","rice","soups","snacks","drinks","combos","protein"].map(c => <option key={c} value={c} style={{ background: "#111" }}>{c[0].toUpperCase()+c.slice(1)}</option>)}
+            </select>
+          </div>
         </div>
-      </nav>
-
-      <style>{`
-        @media (min-width: 768px) {
-          .desktop-tabs { display: flex !important; }
-          .mobile-tab-bar { display: none !important; }
-          .mobile-hamburger { display: none !important; }
-        }
-        @media (max-width: 767px) {
-          .desktop-tabs { display: none !important; }
-          .mobile-tab-bar { display: flex !important; }
-        }
-      `}</style>
-    </>
-  );
-}
-
-// ===================== ORDER CARD =====================
-function OrderCard({ order, onStatusChange }) {
-  const s = STATUS[order.status];
-  return (
-    <div style={{ background: "#0a0a0a", border: `1px solid ${s.border}`, borderRadius: 16, padding: "16px", transition: "all 0.2s" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-            <span style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 14 }}>{order.id}</span>
-            <span style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif" }}>{s.label}</span>
-          </div>
-          <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>👤 {order.customer}</p>
-          <p style={{ color: "#4b5563", fontFamily: "'DM Sans', sans-serif", fontSize: 12, marginTop: 2 }}>📍 {order.location} · 🕐 {order.time}</p>
+        <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+          <button onClick={onClose} style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", padding: "12px", borderRadius: 12, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, fontSize: 14 }}>Cancel</button>
+          <button onClick={save} disabled={loading} style={{ flex: 2, background: "#22c55e", color: "#000", border: "none", padding: "12px", borderRadius: 12, cursor: loading ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 800, fontSize: 14, opacity: loading ? 0.6 : 1 }}>
+            {loading ? "Saving…" : "Add Item ✓"}
+          </button>
         </div>
-        <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 18 }}>₦{order.total.toLocaleString()}</span>
-      </div>
-      <div style={{ background: "rgba(255,255,255,0.02)", borderRadius: 10, padding: "8px 12px", marginBottom: s.next ? 12 : 0 }}>
-        {order.items.map((item, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: i < order.items.length - 1 ? 4 : 0 }}>
-            <span style={{ color: "#d1fae5", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>x{item.qty} {item.name}</span>
-            <span style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>₦{(item.price * item.qty).toLocaleString()}</span>
-          </div>
-        ))}
-      </div>
-      {s.next && onStatusChange && (
-        <button onClick={() => onStatusChange(order.id, s.next)} style={{ width: "100%", background: s.color, color: "#000", border: "none", borderRadius: 10, padding: "11px", fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 13, cursor: "pointer", transition: "all 0.2s" }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-        >✓ {s.nextLabel}</button>
-      )}
-    </div>
-  );
-}
-
-// ===================== OVERVIEW =====================
-function OverviewTab({ orders }) {
-  const todayRevenue = orders.reduce((a, o) => a + o.total, 0);
-  const pending = orders.filter(o => o.status === "pending").length;
-  const delivered = orders.filter(o => o.status === "delivered").length;
-
-  const stats = [
-    { label: "Today's Revenue", value: `₦${todayRevenue.toLocaleString()}`, icon: "💰", color: "#22c55e" },
-    { label: "Total Orders", value: orders.length, icon: "🛒", color: "#60a5fa" },
-    { label: "Pending", value: pending, icon: "⏳", color: "#f97316" },
-    { label: "Delivered", value: delivered, icon: "✅", color: "#22c55e" },
-  ];
-
-  return (
-    <div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 28 }}>
-        {stats.map(({ label, value, icon, color }) => (
-          <div key={label} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: "16px", transition: "all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}40`; e.currentTarget.style.transform = "translateY(-3px)"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = "translateY(0)"; }}
-          >
-            <div style={{ fontSize: 24, marginBottom: 10 }}>{icon}</div>
-            <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11, marginBottom: 4 }}>{label}</p>
-            <p style={{ color, fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: "clamp(20px, 3vw, 28px)" }}>{value}</p>
-          </div>
-        ))}
-      </div>
-      <h2 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 18, marginBottom: 14 }}>🔴 Active Orders</h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {orders.filter(o => o.status !== "delivered").map(order => (
-          <OrderCard key={order.id} order={order} />
-        ))}
-        {orders.filter(o => o.status !== "delivered").length === 0 && (
-          <div style={{ textAlign: "center", padding: "40px 0", color: "#4b5563", fontFamily: "'DM Sans', sans-serif" }}>No active orders right now 🎉</div>
-        )}
       </div>
     </div>
   );
 }
 
-// ===================== ORDERS TAB =====================
-function OrdersTab({ orders, onStatusChange }) {
-  const [filter, setFilter] = useState("all");
-  const filters = ["all", "pending", "preparing", "ready", "delivered"];
-  const filtered = filter === "all" ? orders : orders.filter(o => o.status === filter);
+// ─── MAIN EXPORT ─────────────────────────────────────────────
+export default function VendorDashboard() {
+  const navigate = useNavigate();
+  const [tab,          setTab]          = useState("orders");
+  const [showAddItem,  setShowAddItem]  = useState(false);
+  const [user,         setUser]         = useState(null);
+  const [vendor,       setVendor]       = useState(null);
+  const [authLoading,  setAuthLoading]  = useState(true);
+  const [shopToggling, setShopToggling] = useState(false);
 
-  return (
-    <div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 20, overflowX: "auto", paddingBottom: 4 }}>
-        {filters.map(f => {
-          const count = f === "all" ? orders.length : orders.filter(o => o.status === f).length;
-          return (
-            <button key={f} onClick={() => setFilter(f)} style={{ padding: "8px 14px", borderRadius: 50, border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 12, whiteSpace: "nowrap", background: filter === f ? "#22c55e" : "rgba(255,255,255,0.05)", color: filter === f ? "#000" : "rgba(255,255,255,0.6)", transition: "all 0.2s" }}>
-              {f.charAt(0).toUpperCase() + f.slice(1)} ({count})
-            </button>
-          );
-        })}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {filtered.map(order => <OrderCard key={order.id} order={order} onStatusChange={onStatusChange} />)}
-        {filtered.length === 0 && (
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
-            <p style={{ color: "#4b5563", fontFamily: "'DM Sans', sans-serif" }}>No {filter} orders</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) { navigate("/login"); return; }
+      setUser(session.user);
+      supabase.from("vendors").select("*").eq("owner_id", session.user.id).maybeSingle()
+        .then(({ data }) => { setVendor(data || null); setAuthLoading(false); });
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (!session) navigate("/login");
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
-// ===================== MENU TAB =====================
-function MenuTab({ menu, setMenu }) {
-  const [showForm, setShowForm] = useState(false);
-  const [newItem, setNewItem] = useState({ name: "", price: "", category: "Rice", emoji: "🍽️" });
+  const { orders, loading: oL, updateStatus }         = useVendorOwnOrders(vendor?.id);
+  const { items,  loading: mL, toggleAvailability, addItem, deleteItem } = useVendorMenu(vendor?.id);
 
-  const toggleAvailable = (id) => setMenu(prev => prev.map(item => item.id === id ? { ...item, available: !item.available } : item));
-  const deleteItem = (id) => setMenu(prev => prev.filter(item => item.id !== id));
-  const addItem = () => {
-    if (!newItem.name || !newItem.price) return;
-    setMenu(prev => [...prev, { ...newItem, id: `mn${Date.now()}`, price: parseInt(newItem.price), available: true }]);
-    setNewItem({ name: "", price: "", category: "Rice", emoji: "🍽️" });
-    setShowForm(false);
+  const handleSignOut = async () => { await supabase.auth.signOut(); navigate("/"); };
+
+  const toggleShop = async () => {
+    if (!vendor || shopToggling) return;
+    setShopToggling(true);
+    const { error } = await supabase.from("vendors").update({ is_open: !vendor.is_open }).eq("id", vendor.id);
+    if (!error) setVendor(v => ({ ...v, is_open: !v.is_open }));
+    setShopToggling(false);
   };
 
-  const inputStyle = { width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "11px 14px", color: "#fff", fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none", boxSizing: "border-box" };
+  const today       = new Date().toISOString().split("T")[0];
+  const todayOrders = orders.filter(o => (o.placed_at || "").startsWith(today));
+  const todayRev    = todayOrders.reduce((s, o) => s + (o.subtotal || 0), 0);
+  const pending     = orders.filter(o => o.status === "pending").length;
+  const totalRev    = orders.filter(o => o.status === "delivered").reduce((s, o) => s + (o.subtotal || 0), 0);
 
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
-        <div>
-          <h2 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20 }}>Menu Items</h2>
-          <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 13, marginTop: 4 }}>{menu.filter(m => m.available).length}/{menu.length} available</p>
-        </div>
-        <button onClick={() => setShowForm(!showForm)} style={{ background: "#22c55e", color: "#000", border: "none", borderRadius: 50, padding: "10px 20px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer", transition: "all 0.2s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "#16a34a"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "#22c55e"; e.currentTarget.style.transform = "translateY(0)"; }}
-        >+ Add Item</button>
-      </div>
-
-      {showForm && (
-        <div style={{ background: "#0a0a0a", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 18, padding: "20px", marginBottom: 20 }}>
-          <h3 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Add New Item</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 14 }}>
-            <div>
-              <label style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11, display: "block", marginBottom: 5 }}>Item Name</label>
-              <input style={inputStyle} placeholder="e.g. Jollof Rice" value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} />
-            </div>
-            <div>
-              <label style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11, display: "block", marginBottom: 5 }}>Price (₦)</label>
-              <input style={inputStyle} type="number" placeholder="e.g. 1800" value={newItem.price} onChange={e => setNewItem({ ...newItem, price: e.target.value })} />
-            </div>
-            <div>
-              <label style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11, display: "block", marginBottom: 5 }}>Category</label>
-              <select style={{ ...inputStyle, cursor: "pointer" }} value={newItem.category} onChange={e => setNewItem({ ...newItem, category: e.target.value })}>
-                {["Rice", "Soup", "Pasta", "Combos", "Drinks", "Snacks"].map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11, display: "block", marginBottom: 5 }}>Emoji</label>
-              <input style={inputStyle} placeholder="e.g. 🍚" value={newItem.emoji} onChange={e => setNewItem({ ...newItem, emoji: e.target.value })} />
-            </div>
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg,#22c55e,#16a34a)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: 20, color: "#000" }}>K</span>
           </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button onClick={addItem} style={{ background: "#22c55e", color: "#000", border: "none", borderRadius: 10, padding: "11px 24px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Add ✓</button>
-            <button onClick={() => setShowForm(false)} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", borderRadius: 10, padding: "11px 24px", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+          <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14 }}>Loading your dashboard…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!vendor) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+        <div style={{ textAlign: "center", maxWidth: 380 }}>
+          <p style={{ fontSize: 52, marginBottom: 16 }}>🏪</p>
+          <h2 style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: 22, marginBottom: 10 }}>No vendor account found</h2>
+          <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14, lineHeight: 1.7, marginBottom: 22 }}>
+            Your account isn't linked to a vendor yet. Contact Ebuka to set it up — he'll update your vendor row with your user ID in Supabase.
+          </p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            <Link to="/" style={{ background: "#22c55e", color: "#000", textDecoration: "none", borderRadius: 50, padding: "11px 24px", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 14 }}>Back to Kravely</Link>
+            <button onClick={handleSignOut} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#6b7280", borderRadius: 50, padding: "11px 24px", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, fontSize: 14 }}>Sign Out</button>
           </div>
         </div>
-      )}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {menu.map(item => (
-          <div key={item.id} style={{ background: "#0a0a0a", border: `1px solid ${item.available ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.02)"}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, opacity: item.available ? 1 : 0.5 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(34,197,94,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{item.emoji}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
-              <div style={{ display: "flex", gap: 10, marginTop: 3 }}>
-                <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 13 }}>₦{item.price.toLocaleString()}</span>
-                <span style={{ color: "#4b5563", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>{item.category}</span>
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-              {/* Toggle */}
-              <div onClick={() => toggleAvailable(item.id)} style={{ width: 40, height: 22, borderRadius: 50, cursor: "pointer", position: "relative", background: item.available ? "#22c55e" : "rgba(255,255,255,0.1)", transition: "all 0.3s", flexShrink: 0 }}>
-                <div style={{ position: "absolute", top: 3, left: item.available ? 21 : 3, width: 16, height: 16, borderRadius: "50%", background: "#fff", transition: "all 0.3s" }} />
-              </div>
-              {/* Delete */}
-              <button onClick={() => deleteItem(item.id)} style={{ width: 30, height: 30, borderRadius: 8, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.2)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(239,68,68,0.1)"}
-              >🗑</button>
-            </div>
-          </div>
-        ))}
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-// ===================== HISTORY TAB =====================
-function HistoryTab({ orders }) {
-  const delivered = orders.filter(o => o.status === "delivered");
-  const totalEarned = delivered.reduce((a, o) => a + o.total, 0);
-
-  return (
-    <div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 }}>
-        {[
-          { label: "Total Earned", value: `₦${totalEarned.toLocaleString()}`, color: "#22c55e" },
-          { label: "Completed", value: delivered.length, color: "#60a5fa" },
-          { label: "Avg Order", value: delivered.length ? `₦${Math.round(totalEarned / delivered.length).toLocaleString()}` : "₦0", color: "#eab308" },
-        ].map(({ label, value, color }) => (
-          <div key={label} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, padding: "16px" }}>
-            <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 11, marginBottom: 6 }}>{label}</p>
-            <p style={{ color, fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: "clamp(18px, 3vw, 24px)" }}>{value}</p>
-          </div>
-        ))}
-      </div>
-      <h2 style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 18, marginBottom: 14 }}>Completed Orders</h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {delivered.map(order => (
-          <div key={order.id} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.04)", borderRadius: 14, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 10 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-                <span style={{ color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13 }}>{order.id}</span>
-                <span style={{ color: "#22c55e", background: "rgba(34,197,94,0.1)", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 50, fontFamily: "'DM Sans', sans-serif" }}>✓ Delivered</span>
-              </div>
-              <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}>👤 {order.customer} · {order.items.map(i => `${i.qty}x ${i.name}`).join(", ")}</p>
-              <p style={{ color: "#374151", fontFamily: "'DM Sans', sans-serif", fontSize: 11, marginTop: 2 }}>🕐 {order.time}</p>
-            </div>
-            <span style={{ color: "#22c55e", fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: 16 }}>₦{order.total.toLocaleString()}</span>
-          </div>
-        ))}
-        {delivered.length === 0 && (
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
-            <p style={{ color: "#4b5563", fontFamily: "'DM Sans', sans-serif" }}>No completed orders yet</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ===================== MAIN DASHBOARD =====================
-function VendorDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [orders, setOrders] = useState(SAMPLE_ORDERS);
-  const [menu, setMenu] = useState(SAMPLE_MENU);
-  const pendingCount = orders.filter(o => o.status === "pending").length;
-
-  const handleStatusChange = (orderId, newStatus) => {
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-  };
+  const tabs = [{ id: "orders", icon: "🛒", label: "Orders" }, { id: "menu", icon: "🍽️", label: "Menu" }, { id: "stats", icon: "📊", label: "Stats" }];
 
   return (
     <>
       <style>{`
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-        .tab-content { animation: fadeInUp 0.4s ease both; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .tc { animation: fadeInUp 0.35s ease both; }
+        .oc:hover { border-color: rgba(34,197,94,0.2) !important; }
       `}</style>
 
       <div style={{ minHeight: "100vh", background: "#000" }}>
-        <VendorNavbar vendorName="Pearl's Cuisine" activeTab={activeTab} setActiveTab={setActiveTab} pendingCount={pendingCount} />
-
-        {/* Pending alert */}
-        {pendingCount > 0 && (
-          <div style={{ background: "rgba(249,115,22,0.08)", borderBottom: "1px solid rgba(249,115,22,0.2)", padding: "10px 20px", textAlign: "center" }}>
-            <span style={{ color: "#f97316", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600 }}>
-              🔔 {pendingCount} new order{pendingCount > 1 ? "s" : ""} waiting!{" "}
-              <button onClick={() => setActiveTab("orders")} style={{ background: "none", border: "none", color: "#f97316", cursor: "pointer", fontWeight: 800, textDecoration: "underline", fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>View now →</button>
-            </span>
+        {/* Navbar */}
+        <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(0,0,0,0.97)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <Link to="/" style={{ textDecoration: "none", flexShrink: 0 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg,#22c55e,#16a34a)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: 18, color: "#000" }}>K</span>
+              </div>
+            </Link>
+            <div style={{ flex: 1 }}>
+              <p style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, margin: 0 }}>{vendor.name}</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: vendor.is_open ? "#22c55e" : "#6b7280", animation: vendor.is_open ? "pulse 2s infinite" : "none" }} />
+                <span style={{ color: vendor.is_open ? "#22c55e" : "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700 }}>{vendor.is_open ? "Open for orders" : "Shop closed"}</span>
+                {pending > 0 && <span style={{ background: "#f97316", color: "#fff", fontSize: 10, fontWeight: 800, padding: "1px 7px", borderRadius: 50, fontFamily: "'DM Sans',sans-serif" }}>{pending} new</span>}
+              </div>
+            </div>
+            <button onClick={toggleShop} disabled={shopToggling} style={{ background: vendor.is_open ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)", border: `1px solid ${vendor.is_open ? "rgba(239,68,68,0.3)" : "rgba(34,197,94,0.3)"}`, color: vendor.is_open ? "#ef4444" : "#22c55e", padding: "7px 14px", borderRadius: 50, cursor: shopToggling ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, fontSize: 12, opacity: shopToggling ? 0.6 : 1 }}>
+              {shopToggling ? "…" : vendor.is_open ? "Close Shop" : "Open Shop"}
+            </button>
+            <button onClick={handleSignOut} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#6b7280", padding: "7px 14px", borderRadius: 50, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, fontSize: 12 }}>Sign Out</button>
           </div>
-        )}
 
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "20px 16px 80px" }}>
-          <div className="tab-content" key={activeTab}>
-            {activeTab === "overview" && <OverviewTab orders={orders} />}
-            {activeTab === "orders"   && <OrdersTab orders={orders} onStatusChange={handleStatusChange} />}
-            {activeTab === "menu"     && <MenuTab menu={menu} setMenu={setMenu} />}
-            {activeTab === "history"  && <HistoryTab orders={orders} />}
+          {/* Tab bar */}
+          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 16px 10px", display: "flex", gap: 6, overflowX: "auto" }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "8px 18px", borderRadius: 50, border: tab === t.id ? "1px solid rgba(34,197,94,0.25)" : "1px solid transparent", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, fontSize: 13, background: tab === t.id ? "rgba(34,197,94,0.1)" : "rgba(255,255,255,0.03)", color: tab === t.id ? "#22c55e" : "rgba(255,255,255,0.45)", display: "flex", alignItems: "center", gap: 6, flexShrink: 0, transition: "all 0.2s", position: "relative" }}>
+                {t.icon} {t.label}
+                {t.id === "orders" && pending > 0 && <span style={{ background: "#f97316", color: "#fff", fontSize: 9, fontWeight: 800, width: 16, height: 16, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>{pending > 9 ? "9+" : pending}</span>}
+              </button>
+            ))}
           </div>
+        </nav>
+
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "20px 16px 80px" }}>
+
+          {/* ── ORDERS ── */}
+          {tab === "orders" && (
+            <div className="tc">
+              <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+                {[["🛒","Today's Orders",todayOrders.length,"#60a5fa"],["⏳","Pending",pending,"#f97316"],["💰","Today Revenue",fmt.kobo(todayRev),"#22c55e"],["📦","Delivered",orders.filter(o=>o.status==="delivered").length,"#4ade80"]].map(([icon,l,v,c]) => (
+                  <div key={l} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: "13px 18px", flex: 1, minWidth: 120 }}>
+                    <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 12, marginBottom: 4 }}>{icon} {l}</p>
+                    <p style={{ color: c, fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: 20, margin: 0 }}>{v}</p>
+                  </div>
+                ))}
+              </div>
+
+              {oL ? <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14, textAlign: "center", padding: "40px 0" }}>Loading orders…</p>
+                : orders.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "60px 0" }}>
+                    <p style={{ fontSize: 52, marginBottom: 14 }}>📭</p>
+                    <p style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>No orders yet</p>
+                    <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14 }}>Orders will appear here in real time when students order from your shop.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                    {orders.map(order => {
+                      const next = NEXT[order.status];
+                      return (
+                        <div key={order.id} className="oc" style={{ background: "#0a0a0a", border: `1px solid ${order.status === "pending" ? "rgba(249,115,22,0.35)" : "rgba(255,255,255,0.06)"}`, borderRadius: 20, padding: "18px 20px", transition: "border-color 0.2s" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
+                            <div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                <span style={{ color: "#22c55e", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 14 }}>{order.order_number}</span>
+                                <Badge status={order.status} />
+                                {order.status === "pending" && <span style={{ color: "#f97316", fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700, animation: "pulse 2s infinite" }}>🔴 NEW</span>}
+                              </div>
+                              <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 12, marginTop: 4 }}>
+                                {order.student?.full_name || "Student"}
+                                {order.student?.phone ? ` · ${order.student.phone}` : ""}
+                                {" · "}{fmt.time(order.placed_at)}
+                              </p>
+                            </div>
+                            <div style={{ textAlign: "right" }}>
+                              <p style={{ color: "#22c55e", fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: 18, margin: 0 }}>{fmt.kobo(order.subtotal)}</p>
+                              {order.vendor_payout > 0 && <p style={{ color: "#374151", fontFamily: "'DM Sans',sans-serif", fontSize: 11, margin: 0 }}>Your cut: {fmt.kobo(order.vendor_payout)}</p>}
+                            </div>
+                          </div>
+
+                          {/* Items */}
+                          <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: 12, padding: "12px 14px", marginBottom: 12 }}>
+                            <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Items</p>
+                            {(order.order_items || []).length === 0
+                              ? <p style={{ color: "#4b5563", fontFamily: "'DM Sans',sans-serif", fontSize: 12 }}>No items data</p>
+                              : (order.order_items || []).map((item, idx) => (
+                                <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: idx < order.order_items.length-1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+                                  <span style={{ color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>{item.emoji || "🍽️"} {item.name} ×{item.quantity}</span>
+                                  <span style={{ color: "#22c55e", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 13 }}>{fmt.kobo(item.price * item.quantity)}</span>
+                                </div>
+                              ))}
+                          </div>
+
+                          {/* Delivery */}
+                          <div style={{ display: "flex", gap: 16, marginBottom: 12, flexWrap: "wrap" }}>
+                            <span style={{ color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>📍 {order.delivery_location || "No location"}</span>
+                            {order.delivery_notes && <span style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>📝 {order.delivery_notes}</span>}
+                          </div>
+
+                          {/* Actions */}
+                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                            {next && (
+                              <button onClick={() => updateStatus(order.id, next.status)} style={{ background: "#22c55e", color: "#000", border: "none", borderRadius: 50, padding: "10px 22px", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", flex: 1, minWidth: 130, transition: "background 0.2s" }}
+                                onMouseEnter={e => e.currentTarget.style.background = "#16a34a"}
+                                onMouseLeave={e => e.currentTarget.style.background = "#22c55e"}
+                              >{next.label} →</button>
+                            )}
+                            {order.status === "pending" && (
+                              <button onClick={() => { if (window.confirm("Cancel this order?")) updateStatus(order.id, "cancelled"); }} style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", borderRadius: 50, padding: "10px 20px", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                                Cancel
+                              </button>
+                            )}
+                            {(order.status === "delivered" || order.status === "cancelled") && (
+                              <span style={{ color: "#4b5563", fontFamily: "'DM Sans',sans-serif", fontSize: 13, padding: "10px 0" }}>
+                                {order.status === "delivered" ? "✅ Completed" : "❌ Cancelled"}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+            </div>
+          )}
+
+          {/* ── MENU ── */}
+          {tab === "menu" && (
+            <div className="tc">
+              {showAddItem && <AddItemModal onClose={() => setShowAddItem(false)} onSave={addItem} />}
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 12 }}>
+                <div>
+                  <h2 style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, margin: 0 }}>Your Menu</h2>
+                  <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 13, marginTop: 3 }}>{items.filter(i => i.is_available).length} available · {items.filter(i => !i.is_available).length} hidden</p>
+                </div>
+                <button onClick={() => setShowAddItem(true)} style={{ background: "#22c55e", color: "#000", border: "none", borderRadius: 50, padding: "10px 20px", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>+ Add Item</button>
+              </div>
+
+              {mL ? <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14, textAlign: "center", padding: "40px 0" }}>Loading menu…</p>
+                : items.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "60px 0" }}>
+                    <p style={{ fontSize: 52, marginBottom: 14 }}>🍽️</p>
+                    <p style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Menu is empty</p>
+                    <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14, marginBottom: 20 }}>Add your first item to start getting orders.</p>
+                    <button onClick={() => setShowAddItem(true)} style={{ background: "#22c55e", color: "#000", border: "none", borderRadius: 50, padding: "12px 28px", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Add First Item</button>
+                  </div>
+                ) : (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: 14 }}>
+                    {items.map(item => (
+                      <div key={item.id} style={{ background: "#0a0a0a", border: `1px solid ${item.is_available ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.06)"}`, borderRadius: 18, padding: "16px", opacity: item.is_available ? 1 : 0.6, transition: "all 0.2s" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                            <span style={{ fontSize: 28 }}>{item.emoji || "🍽️"}</span>
+                            <div>
+                              <p style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, margin: 0 }}>{item.name}</p>
+                              <p style={{ color: "#22c55e", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 13, margin: 0 }}>{fmt.kobo(item.price)}</p>
+                            </div>
+                          </div>
+                          {/* Toggle switch */}
+                          <button onClick={() => toggleAvailability(item.id, !item.is_available)} style={{ width: 44, height: 24, borderRadius: 12, background: item.is_available ? "#22c55e" : "rgba(255,255,255,0.1)", border: "none", cursor: "pointer", position: "relative", flexShrink: 0, transition: "background 0.2s" }}>
+                            <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: item.is_available ? 23 : 3, transition: "left 0.2s ease", boxShadow: "0 1px 4px rgba(0,0,0,0.3)" }} />
+                          </button>
+                        </div>
+                        {item.description && <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 12, marginBottom: 10, lineHeight: 1.5 }}>{item.description}</p>}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ color: item.is_available ? "#22c55e" : "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700 }}>
+                            {item.is_available ? "Available" : "Hidden"} · {item.total_orders || 0} sold
+                          </span>
+                          <button onClick={() => { if (window.confirm(`Delete "${item.name}"?`)) deleteItem(item.id); }} style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontSize: 11 }}>Delete</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+            </div>
+          )}
+
+          {/* ── STATS ── */}
+          {tab === "stats" && (
+            <div className="tc">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: 13, marginBottom: 22 }}>
+                {[["💰","Total Revenue",fmt.kobo(totalRev),"#22c55e"],["📈","Today Revenue",fmt.kobo(todayRev),"#4ade80"],["🛒","Total Orders",orders.length,"#60a5fa"],["✅","Delivered",orders.filter(o=>o.status==="delivered").length,"#22c55e"],["⏳","Pending",pending,"#f97316"],["⭐","Rating",vendor.rating || "None yet","#eab308"],["🍽️","Menu Items",items.length,"#a78bfa"],["✓","Available",items.filter(i=>i.is_available).length,"#22c55e"]].map(([icon,l,v,c]) => (
+                  <div key={l} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 18, padding: "16px 18px" }}>
+                    <span style={{ fontSize: 22, display: "block", marginBottom: 10 }}>{icon}</span>
+                    <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 12, marginBottom: 4 }}>{l}</p>
+                    <p style={{ color: c, fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: "clamp(15px,2.5vw,20px)", margin: 0 }}>{v}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Vendor profile */}
+              <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "20px 22px" }}>
+                <h3 style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 17, marginBottom: 16 }}>Your Profile</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: 12 }}>
+                  {[["Name", vendor.name],["Category", vendor.category],["Phone", vendor.phone || "—"],["TikTok", vendor.tiktok_handle || "—"],["Location", vendor.location || "—"],["Delivery Time", vendor.delivery_time || "—"],["Commission", `${vendor.commission_rate || 15}%`],["Status", vendor.is_active ? "Active ✅" : "Inactive"]].map(([l, v]) => (
+                    <div key={l} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: 12, padding: "12px 14px" }}>
+                      <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{l}</p>
+                      <p style={{ color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: 14, fontWeight: 600, margin: 0 }}>{v}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </>
   );
 }
-
-export default VendorDashboard;
