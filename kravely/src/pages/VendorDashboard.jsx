@@ -1,4 +1,4 @@
-// src/pages/VendorDashboard.jsx
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
@@ -74,7 +74,7 @@ export default function VendorDashboard() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) { navigate("/login"); return; }
+      if (!session?.user) { ; return; }
       setUser(session.user);
       supabase.from("vendors").select("*").eq("owner_id", session.user.id).maybeSingle()
         .then(({ data }) => { setVendor(data || null); setAuthLoading(false); });
@@ -351,9 +351,9 @@ export default function VendorDashboard() {
               </div>
             </div>
           )}
-
+        
         </div>
       </div>
     </>
   );
-}
+}   

@@ -276,7 +276,7 @@ function VendorsTab({ vendors, toggleFeatured, toggleActive, approveVendor, addV
   return (
     <div>
       {showAdd && <AddVendorModal onClose={() => setShowAdd(false)} onSave={addVendor} />}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <span style={{ color: "#22c55e", fontFamily: "'DM Sans',sans-serif", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}><Check size={14} />{vendors.filter(v => v.is_approved && v.is_active).length} active</span>
           <span style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}><Moon size={14} />{vendors.filter(v => v.is_approved && !v.is_active).length} inactive</span>

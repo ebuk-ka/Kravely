@@ -117,6 +117,7 @@ export function useStats() {
       .channel("stats-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetch)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "profiles" }, fetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "vendors" }, fetch)
       .subscribe();
 
     return () => supabase.removeChannel(ch);
@@ -284,18 +285,38 @@ export function usePublicVendors() {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    supabase
+  const fetch = useCallback(async () => {
+    const { data, error } = await supabase
       .from("vendors")
       .select("*")
       .eq("is_active", true)
       .eq("is_approved", true)
-      .order("is_featured", { ascending: false })
-      .then(({ data }) => {
-        setVendors(data || []);
-        setLoading(false);
-      });
+      .order("is_featured", { ascending: false });
+
+    if (error) {
+      console.error("public vendors error:", error);
+      setVendors([]);
+    } else {
+      setVendors(data || []);
+    }
+
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetch();
+
+    const ch = supabase
+      .channel("public-vendors-rt")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "vendors" },
+        fetch
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(ch);
+  }, [fetch]);
 
   return { vendors, loading };
 }
@@ -305,29 +326,41 @@ export function usePopularItems(limit = 12) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    supabase
+  const fetch = useCallback(async () => {
+    const { data, error } = await supabase
       .from("menu_items")
       .select("*, vendors(id, name, is_active, is_approved)")
       .eq("is_available", true)
       .order("total_orders", { ascending: false })
-      .limit(limit)
-      .then(({ data, error }) => {
-        if (error) {
-          console.error("popular items error:", error);
-          setItems([]);
-          setLoading(false);
-          return;
-        }
+      .limit(limit);
 
-        const filtered = (data || []).filter(
-          (i) => i.vendors?.is_active && i.vendors?.is_approved
-        );
+    if (error) {
+      console.error("popular items error:", error);
+      setItems([]);
+    } else {
+      const filtered = (data || []).filter(
+        (i) => i.vendors?.is_active && i.vendors?.is_approved
+      );
+      setItems(filtered);
+    }
 
-        setItems(filtered);
-        setLoading(false);
-      });
+    setLoading(false);
   }, [limit]);
+
+  useEffect(() => {
+    fetch();
+
+    const ch = supabase
+      .channel("menu-items-rt")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "menu_items" },
+        fetch
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(ch);
+  }, [fetch]);
 
   return { items, loading };
 }

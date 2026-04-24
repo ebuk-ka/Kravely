@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 import {
   Activity,
   BarChart3,
@@ -20,6 +21,26 @@ import {
   Trophy,
 } from "lucide-react";
 import { useStats, useAllOrders, useAllVendors, fmt, STATUS_STYLE } from "../hooks/useKravelyData";
+
+// ─── CEO SUMMARY ACCESS CONTROL ──────────────────────────────
+// Put the emails or Supabase auth user IDs of people allowed to view this page.
+// Recommended: use user IDs for stronger control, but emails are okay for quick setup.
+
+const ALLOWED_SUMMARY_USER_IDS = [
+  "okoloebuka756@gmail.com",
+  "nimigeorge400@gmail.com"
+];
+
+function canViewSummary(user) {
+  const email = user?.email?.toLowerCase();
+  const id = user?.id;
+
+  return (
+    ALLOWED_SUMMARY_EMAILS.map((e) => e.toLowerCase()).includes(email) ||
+    ALLOWED_SUMMARY_USER_IDS.includes(id)
+  );
+}
+
 
 function Badge({ status }) {
   const s = STATUS_STYLE[status] || STATUS_STYLE.inactive;
@@ -88,7 +109,7 @@ function StatCard({ icon: Icon, label, value, sub, color, pulse }) {
   );
 }
 
-export default function SummaryDasboard() {
+function SummaryDashboardContent() {
   const [activeSection, setActiveSection] = useState("overview");
   const [countdown, setCountdown] = useState(60);
 
@@ -356,4 +377,75 @@ export default function SummaryDasboard() {
       </div>
     </>
   );
+}
+
+
+export default function SummaryDashboard() {
+  const navigate = useNavigate();
+  const [authLoading, setAuthLoading] = useState(true);
+  const [allowed, setAllowed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function checkAccess() {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!alive) return;
+
+      if (!session?.user) {
+        setAuthLoading(false);
+        navigate("/login");
+        return;
+      }
+
+      const permitted = canViewSummary(session.user);
+      setAllowed(permitted);
+      setAuthLoading(false);
+
+      if (!permitted) {
+        navigate("/");
+      }
+    }
+
+    checkAccess();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        navigate("/login");
+        return;
+      }
+
+      const permitted = canViewSummary(session.user);
+      setAllowed(permitted);
+
+      if (!permitted) {
+        navigate("/");
+      }
+    });
+
+    return () => {
+      alive = false;
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+        <div style={{ textAlign: "center" }}>
+          <Loader2 size={32} color="#22c55e" style={{ animation: "spin 1s linear infinite", marginBottom: 14 }} />
+          <p style={{ color: "#6b7280", fontFamily: "'DM Sans', sans-serif", fontSize: 14 }}>
+            Checking access…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!allowed) {
+    return null;
+  }
+
+  return <SummaryDashboardContent />;
 }

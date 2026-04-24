@@ -23,6 +23,9 @@ import AdminDashboard from './pages/AdminDashboard'
 import RiderDashboard from './pages/RiderDashboard'
 import SummaryDashboard from './pages/SummaryDashboard'
 import ChrissyCuisine from './pages/ChrissyCuisine'
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
 
 // ===================== PROTECTED ROUTE =====================
 // DEV_MODE = true means you can see the dashboard while building
@@ -72,6 +75,8 @@ export default function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/pearls"  element={<PearlsCuisine />} />
       <Route path='/chrissy' element={<ChrissyCuisine/>}/>
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+     <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* ===== VENDOR ROUTES ===== */}
       <Route path="/vendor/login"  element={<Login />} />
