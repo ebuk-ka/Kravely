@@ -74,7 +74,7 @@ export default function VendorDashboard() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) { ; return; }
+      if (!session?.user) { navigate("/login"); return; }
       setUser(session.user);
       supabase.from("vendors").select("*").eq("owner_id", session.user.id).maybeSingle()
         .then(({ data }) => { setVendor(data || null); setAuthLoading(false); });

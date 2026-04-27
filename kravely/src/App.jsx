@@ -14,7 +14,7 @@ import Footer from './components/Footer'
 import About from './pages/About'
 import OrderNow from './pages/OrderNow'
 import Signup from './pages/Signup'
-import Login from './pages/Login'
+import OtpLogin from './pages/OtpLogin'
 import Contact from './pages/Contact'
 import Vendors from './pages/Vendors'
 import VendorDashboard from './pages/VendorDashboard'
@@ -71,7 +71,7 @@ export default function App() {
     
       <Route path="/order"   element={<OrderNow />} />
       <Route path="/signup"  element={<Signup />} />
-      <Route path="/login"   element={<Login />} />
+      <Route path="/otpLogin"   element={<OtpLogin />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/pearls"  element={<PearlsCuisine />} />
       <Route path='/chrissy' element={<ChrissyCuisine/>}/>
@@ -79,8 +79,6 @@ export default function App() {
      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* ===== VENDOR ROUTES ===== */}
-      <Route path="/vendor/login"  element={<Login />} />
-      <Route path="/vendor/signup" element={<Signup />} />
       <Route path="/vendor/dashboard" element={
         <VendorProtectedRoute>
           <VendorDashboard />

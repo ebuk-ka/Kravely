@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
-import {Mali, Loader2} from "lucide-react";
+import {Mail, Loader2} from "lucide-react";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
@@ -8,15 +8,15 @@ export default function ForgotPassword() {
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
-    const handleReset =async (e) => {
+    const handleReset = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError("");
-        setMessage("")
+        setMessage("");
 
 
-        const {error} = await supabase.auth.resetPaswordForEmail(email,{
-            redirectTo:`${window.location.origin}/reset-password`
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo:`${"https://kravely-qc1s.vercel.app"}/reset-password`,
         });
 
         if(error) {

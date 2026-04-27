@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import pearlsImage from "../assets/images/pearlslogo.jpeg"
-import chrissyLogo from "../assets/images/chrissylogo.jpeg"
+import pearlsImage from "../assets/images/pearlslogo.jpeg";
+import chrissyLogo from "../assets/images/chrissylogo.jpeg";
 import {
   Search,
   MapPin,
@@ -148,7 +148,7 @@ function KLogo({ size = 40 }) {
   );
 }
 
-function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat }) {
+function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat, onSignOut }) {
   const [showCompactMobile, setShowCompactMobile] = useState(false);
 
   useEffect(() => {
@@ -170,12 +170,13 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
   }, []);
 
   return (
+    
     <nav style={{ position: "sticky", top: 0, zIndex: 40, background: "rgba(7,7,7,.96)", backdropFilter: "blur(14px)", borderBottom: "1px solid var(--line)" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "14px 18px" }}>
         <div className="desktop-nav topbar-grid" style={{ display: "grid", gridTemplateColumns: "auto 260px 1fr auto auto", gap: 12, alignItems: "center" }}>
           <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <KLogo />
-            <span className="syne" style={{ color: "#fff", fontWeight: 800, fontSize: 30, letterSpacing: -1 }}>Kravely</span>
+            <span className="syne" style={{ color: "#fff", fontWeight: 800, fontSize: 25, letterSpacing: -1 }}>Kravely</span>
           </Link>
 
           <button onClick={onLoc} style={{ background: "var(--soft)", border: "1px solid var(--line)", borderRadius: 18, minHeight: 62, padding: "0 16px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
@@ -191,7 +192,7 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
             <Search size={18} color="rgba(255,255,255,.3)" style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }} />
             <input className="srch" placeholder="Food, drinks, groceries etc" value={q} onChange={(e) => setQ(e.target.value)} />
             {q && (
-              <button onClick={() => setQ("")} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
+              <button onClick={(onSignOut) => setQ("")} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
                 <X size={16} />
               </button>
             )}
@@ -218,7 +219,7 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
               <X size={20} color="#fff" />
             </div>
           ) : (
-            <Link to="/login" style={{ textDecoration: "none", minWidth: 130, height: 56, borderRadius: "999px", background: "#0b5d39", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontWeight: 700 }}> 
+            <Link to="/otpLogin" style={{ textDecoration: "none", minWidth: 130, height: 56, borderRadius: "999px", background: "#0b5d39", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontWeight: 700 }}> 
               <User size={16} /> Sign In
             </Link>
           )}
@@ -487,13 +488,18 @@ function FeaturedSlider({ vendors }) {
   );
 }
 
-function MealCard({ item, onAdd, fallback }) {
+function MealCard({ item, onAdd, fallback, onFavourite, favourites }) {
   const [added, setAdded] = useState(false);
   const priceNaira = Math.round((item.price || item.priceKobo || 0) / 100) || item.priceNaira || fallback.price;
   const image = item.image_url || fallback.image;
   const vendorName = item.vendors?.name || item.vendorName || fallback.vendorName;
   const name = item.name || fallback.name;
   const time = fallback.time;
+
+  const itemId = item.id || name;
+  const isLiked = favourites?.some(
+    (fav) => fav.item_id === itemId && fav.item_type === "meal"
+   )
 
   const handleAdd = () => {
     onAdd({
@@ -513,7 +519,37 @@ function MealCard({ item, onAdd, fallback }) {
       <div style={{ position: "relative", height: 190, overflow: "hidden" }}>
         <img src={image} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg,rgba(0,0,0,.65) 0%,transparent 45%)" }} />
-        <button style={{ position: "absolute", top: 12, right: 12, width: 38, height: 38, borderRadius: "999px", background: "rgba(255,255,255,.9)", border: "none", color: "#0b5d39", display: "grid", placeItems: "center", cursor: "pointer" }}><Heart size={18} /></button>
+        <button
+  onClick={() =>
+    onFavourite(
+      {
+        ...item,
+        id: itemId,
+        name,
+        vendorName,
+        image_url: image,
+        priceNaira,
+      },
+      "meal"
+    )
+  }
+  style={{
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 38,
+    height: 38,
+    borderRadius: "999px",
+    background: "rgba(255,255,255,.9)",
+    border: "none",
+    color: isLiked ? "red" : "#0b5d39",
+    display: "grid",
+    placeItems: "center",
+    cursor: "pointer",
+  }}
+>
+  <Heart size={18} fill={isLiked ? "red" : "none"} />
+</button>
         <button onClick={handleAdd} style={{ position: "absolute", right: 12, bottom: 12, width: 42, height: 42, borderRadius: "999px", background: "#0b8f4a", border: "2px solid rgba(255,255,255,.65)", color: "#fff", display: "grid", placeItems: "center", cursor: "pointer" }}>
           <Plus size={18} />
         </button>
@@ -559,6 +595,37 @@ function VendorCard({ vendor, fallbackImage, onOrder }) {
 
 export default function OrderNow() {
   const navigate = useNavigate();
+
+    useEffect(() => {
+      const checkSession =  async() => {
+        const { data, error} = await supabase.auth.getSession();
+
+        if(error) {
+          console.log("Session error:", error.message);
+        }
+
+        if (!data.session) {
+          navigate("/login");
+        }
+      };
+      checkSession();
+    }, [navigate]);
+
+    //Sign Out
+    const handleSignOut = async () => {
+      const { error } = await supabase.auth.signOut();
+
+      if(error) {
+        console.log("Error signing out:", error.message);
+      } else {
+        navigate("/order");
+      } 
+    };
+    
+
+
+  
+
   const [cat, setCat] = useState("all");
   const [q, setQ] = useState("");
   const [cart, setCart] = useState([]);
@@ -568,6 +635,8 @@ export default function OrderNow() {
   const [location, setLocation] = useState(null);
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
+  const [favourites, setFavourites] = useState([]);
+
 
   const { vendors, loading: vL } = usePublicVendors();
   const { items: meals, loading: mL } = usePopularItems(12);
@@ -583,7 +652,78 @@ export default function OrderNow() {
     });
     return () => subscription.unsubscribe();
   }, []);
+     useEffect(() => {
+      const loadFavourites = async () => {
+        if(!user) return;
 
+        const { data, error} = await supabase
+        .from("favourites")
+        .select("*")
+        .eq("user_id", user.id);
+
+        if(error) {
+          console.log("Favourite error:", error.message);
+          return;
+        }
+        setFavourites(data || []);
+      };
+      loadFavourites();
+     },[user])
+
+   const toggleFavourite = async (item, type) => {
+  if (!user) {
+    setShowLogin(true);
+    return;
+  }
+
+  const itemId = item.id || item.name;
+
+  const alreadyLiked = favourites.find(
+    (fav) => fav.item_id === itemId && fav.item_type === type
+  );
+
+  if (alreadyLiked) {
+    const { error } = await supabase
+      .from("favourites")
+      .delete()
+      .eq("id", alreadyLiked.id);
+
+    if (error) {
+      console.log("Remove favourite error:", error.message);
+      return;
+    }
+
+    setFavourites((prev) =>
+      prev.filter((fav) => fav.id !== alreadyLiked.id)
+    );
+
+    return;
+  }
+
+  const newFavourite = {
+    user_id: user.id,
+    item_id: itemId,
+    item_type: type,
+    item_name: item.name,
+    vendor_name: item.vendorName || item.vendors?.name || item.name,
+    image_url: item.image_url || item.logo_url || item.image,
+    price_naira: item.priceNaira || item.price || null,
+  };
+
+  const { data, error } = await supabase
+    .from("favourites")
+    .insert(newFavourite)
+    .select()
+    .single();
+
+  if (error) {
+    console.log("Add favourite error:", error.message);
+    return;
+  }
+
+  setFavourites((prev) => [...prev, data]);
+};
+ 
   const addToCart = (item) => {
     setCart((prev) => {
       const ex = prev.find((i) => i.cartId === item.cartId);
@@ -639,6 +779,7 @@ export default function OrderNow() {
     return matchCat && matchSearch;
   });
 
+
   return (
     <>
       <style>{CSS}</style>
@@ -647,7 +788,7 @@ export default function OrderNow() {
         <LocationPicker open={showLoc} onClose={() => setShowLoc(false)} onSelect={setLocation} selected={location} />
         <CartSidebar cart={cart} open={cartOpen} onClose={() => setCartOpen(false)} onInc={inc} onDec={dec} onRemove={rem} onClear={clr} onCheckout={handleCheckout} />
 
-        <TopNav user={user} cartCount={cartCount} onCart={() => setCartOpen(true)} onLoc={() => setShowLoc(true)} location={location} q={q} setQ={setQ} cat={cat} setCat={setCat} />
+        <TopNav user={user} cartCount={cartCount} onCart={() => setCartOpen(true)} onLoc={() => setShowLoc(true)} location={location} q={q} setQ={setQ} cat={cat} setCat={setCat} onSignOut={handleSignOut} />
 
         <main style={{ maxWidth: 1280, margin: '0 auto', padding: '26px 18px 100px' }}>
           <div className="filters-row sh pageIn" style={{ display: 'flex', gap: 10, overflowX: 'auto', marginBottom: 24 }}>
@@ -665,6 +806,7 @@ export default function OrderNow() {
               </button>
             ))}
           </div>
+          
 
           <section className="hero-grid pageIn" style={{ display: 'grid', gridTemplateColumns: '1.65fr 1fr', gap: 18, marginBottom: 30 }}>
             {vL ? <Skeleton h={420} r={28} /> : <FeaturedSlider vendors={vendorPool} />}
@@ -694,7 +836,7 @@ export default function OrderNow() {
               </button>
             </div>
           </section>
-
+          
           <section className="pageIn" style={{ marginBottom: 36 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, gap: 14, flexWrap: 'wrap' }}>
               <div>
@@ -706,7 +848,14 @@ export default function OrderNow() {
 
             <div className="food-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,minmax(0,1fr))', gap: 18 }}>
               {(filteredMeals.length ? filteredMeals.slice(0, 10) : STATIC_DISHES).map((item, i) => (
-                <MealCard key={item.id || i} item={item} fallback={STATIC_DISHES[i % STATIC_DISHES.length]} onAdd={addToCart} />
+              <MealCard
+                key={item.id || i}
+                item={item}
+                fallback={STATIC_DISHES[i % STATIC_DISHES.length]}
+                onAdd={addToCart}
+                onFavourite={toggleFavourite}
+                favourites={favourites}
+              />
               ))}
             </div>
           </section>
