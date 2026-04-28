@@ -10,48 +10,44 @@ export default function Favourites() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadFavourites = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const currentUser = sessionData.session?.user;
+  let mounted = true;
 
-      if (!currentUser) {
-        navigate("/login");
-        return;
-      }
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    if (!mounted) return;
 
-      setUser(currentUser);
-
-      const { data, error } = await supabase
-        .from("favourites")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.log("Favourite load error:", error.message);
-      } else {
-        setFavourites(data || []);
-      }
-
+    if (!session?.user) {
+      setUser(null);
       setLoading(false);
-    };
+      navigate("/login");
+      return;
+    }
 
-    loadFavourites();
-  }, [navigate]);
+    setUser(session.user);
 
-  const removeFavourite = async (id) => {
-    setFavourites((prev) => prev.filter((item) => item.id !== id));
-
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("favourites")
-      .delete()
-      .eq("id", id);
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false });
+
+    if (!mounted) return;
 
     if (error) {
-      console.log("Remove favourite error:", error.message);
+      console.log("Favourite load error:", error.message);
+    } else {
+      setFavourites(data || []);
     }
-  };
 
+    setLoading(false);
+  });
+
+  return () => {
+    mounted = false;
+    subscription.unsubscribe();
+  };
+}, [navigate]);
   return (
     <div className="fav-page">
       <style>{`
@@ -238,6 +234,7 @@ export default function Favourites() {
           }
         }
       `}</style>
+      
 
       <div className="fav-wrap">
         <div className="fav-top">

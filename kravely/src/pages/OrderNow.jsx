@@ -646,21 +646,6 @@ function VendorCard({ vendor, fallbackImage, onOrder }) {
 export default function OrderNow() {
   const navigate = useNavigate();
 
-    useEffect(() => {
-      const checkSession =  async() => {
-        const { data, error} = await supabase.auth.getSession();
-
-        if(error) {
-          console.log("Session error:", error.message);
-        }
-
-        if (!data.session) {
-          navigate("/login");
-        }
-      };
-      checkSession();
-    }, [navigate]);
-
     //Sign Out
     const handleSignOut = async () => {
       const { error } = await supabase.auth.signOut();
@@ -854,7 +839,7 @@ export default function OrderNow() {
         <CartSidebar cart={cart} open={cartOpen} onClose={() => setCartOpen(false)} onInc={inc} onDec={dec} onRemove={rem} onClear={clr} onCheckout={handleCheckout} />
 
         <TopNav user={user} cartCount={cartCount} onCart={() => setCartOpen(true)} onLoc={() => setShowLoc(true)} location={location} q={q} setQ={setQ} cat={cat} setCat={setCat} onSignOut={handleSignOut} navigate={navigate} />
-
+        
         <main style={{ maxWidth: 1280, margin: '0 auto', padding: '26px 18px 100px' }}>
           <div className="filters-row sh pageIn" style={{ display: 'flex', gap: 10, overflowX: 'auto', marginBottom: 24 }}>
             {[

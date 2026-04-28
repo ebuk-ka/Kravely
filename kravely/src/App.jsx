@@ -73,6 +73,7 @@ export default function App() {
     
       <Route path="/order"   element={<OrderNow />} />
       <Route path="/signup"  element={<Signup />} />
+      <Route path='/login' element={<OtpLogin/>}/>
       <Route path="/otpLogin"   element={<OtpLogin />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/pearls"  element={<PearlsCuisine />} />
