@@ -131,7 +131,7 @@ function OrderCTA() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                 <Link
-                  to="/signup"
+                  to="/order"
                   className="order-btn inline-block bg-green-500 text-black font-extrabold px-12 py-5 rounded-full text-lg"
                   style={{ fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}
                 >

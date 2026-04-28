@@ -148,7 +148,7 @@ function KLogo({ size = 40 }) {
   );
 }
 
-function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat, onSignOut }) {
+function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat, onSignOut, navigate  }) {
   const [showCompactMobile, setShowCompactMobile] = useState(false);
 
   useEffect(() => {
@@ -192,16 +192,36 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
             <Search size={18} color="rgba(255,255,255,.3)" style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }} />
             <input className="srch" placeholder="Food, drinks, groceries etc" value={q} onChange={(e) => setQ(e.target.value)} />
             {q && (
-              <button onClick={(onSignOut) => setQ("")} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
+              <button onClick={() => setQ("")} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
                 <X size={16} />
               </button>
             )}
           </div>
 
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <button style={{ width: 54, height: 54, borderRadius: "999px", border: "1px solid var(--line)", background: "var(--soft)", color: "#fff", display: "grid", placeItems: "center", cursor: "pointer" }}>
-              <Heart size={21} />
-            </button>
+            <button
+             onClick={() => {
+               if (!user) {
+                 alert("Please login to view your favourites");
+                 return;
+               }
+           
+               navigate("/favourites");
+             }}
+             style={{
+               width: 54,
+               height: 54,
+               borderRadius: "999px",
+               border: "1px solid var(--line)",
+               background: "var(--soft)",
+               color: "#fff",
+               display: "grid",
+               placeItems: "center",
+               cursor: "pointer",
+             }}
+             >
+               <Heart size={21} />
+             </button>
             <button onClick={onCart} style={{ position: "relative", width: 70, height: 54, borderRadius: "999px", border: "1px solid var(--line)", background: "var(--soft)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}>
               <ShoppingBag size={20} />
               <span className="syne" style={{ fontWeight: 700, fontSize: 17 }}>{cartCount}</span>
@@ -216,7 +236,13 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
                 </div>
                 <span style={{ fontWeight: 700, fontSize: 15, color: "#fff" }}>Profile</span>
               </div>
-              <X size={20} color="#fff" />
+              <button
+                onClick={onSignOut}
+                title="Sign out"
+                style={{ background: "none", border: "none", color: "#fff", display: "grid", placeItems: "center", cursor: "pointer" }}
+              >
+                <X size={20} color="#fff" />
+              </button>
             </div>
           ) : (
             <Link to="/otpLogin" style={{ textDecoration: "none", minWidth: 130, height: 56, borderRadius: "999px", background: "#0b5d39", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontWeight: 700 }}> 
@@ -250,7 +276,7 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
             </button>
 
             {user ? (
-              <button style={{ minWidth: showCompactMobile ? 112 : 98, height: 42, borderRadius: "999px", background: "#0b5d39", border: "1px solid rgba(255,255,255,.08)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "0 10px 0 8px", cursor: "pointer", flexShrink: 0 }}>
+              <button onClick={onSignOut} title="Sign out" style={{ minWidth: showCompactMobile ? 112 : 98, height: 42, borderRadius: "999px", background: "#0b5d39", border: "1px solid rgba(255,255,255,.08)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "0 10px 0 8px", cursor: "pointer", flexShrink: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#f4d7df", color: "#0b5d39", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 12 }}>
                     {user.user_metadata?.full_name?.[0]?.toUpperCase() || "U"}
@@ -488,23 +514,34 @@ function FeaturedSlider({ vendors }) {
   );
 }
 
-function MealCard({ item, onAdd, fallback, onFavourite, favourites }) {
+function MealCard({ item, onAdd, fallback, onFavourite, favourites = [] }) {
   const [added, setAdded] = useState(false);
-  const priceNaira = Math.round((item.price || item.priceKobo || 0) / 100) || item.priceNaira || fallback.price;
-  const image = item.image_url || fallback.image;
-  const vendorName = item.vendors?.name || item.vendorName || fallback.vendorName;
-  const name = item.name || fallback.name;
-  const time = fallback.time;
 
-  const itemId = item.id || name;
-  const isLiked = favourites?.some(
+  const name = item.name || fallback.name;
+  const vendorName = item.vendors?.name || item.vendorName || fallback.vendorName;
+  const image = item.image_url || item.image || fallback.image;
+  const time = item.time || fallback.time;
+
+  const priceNaira = item.priceNaira
+    ? item.priceNaira
+    : item.priceKobo
+    ? Math.round(item.priceKobo / 100)
+    : item.price
+    ? item.price > 1000
+      ? item.price
+      : Math.round(item.price / 100)
+    : fallback.price;
+
+  const itemId = item.id || `${name}-${vendorName}`;
+
+  const isLiked = favourites.some(
     (fav) => fav.item_id === itemId && fav.item_type === "meal"
-   )
+  );
 
   const handleAdd = () => {
     onAdd({
-      cartId: item.id || `${name}-${vendorName}`,
-      id: item.id || `${name}-${vendorName}`,
+      cartId: itemId,
+      id: itemId,
       name,
       priceNaira,
       priceKobo: priceNaira * 100,
@@ -514,13 +551,14 @@ function MealCard({ item, onAdd, fallback, onFavourite, favourites }) {
     setTimeout(() => setAdded(false), 1200);
   };
 
-  return (
-    <div className="cardHover" style={{ background: "#0f0f10", border: "1px solid rgba(255,255,255,.07)", borderRadius: 22, overflow: "hidden" }}>
-      <div style={{ position: "relative", height: 190, overflow: "hidden" }}>
-        <img src={image} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg,rgba(0,0,0,.65) 0%,transparent 45%)" }} />
-        <button
-  onClick={() =>
+  const handleFavouriteClick = () => {
+    console.log("Heart clicked:", name);
+
+    if (typeof onFavourite !== "function") {
+      console.log("onFavourite is not connected");
+      return;
+    }
+
     onFavourite(
       {
         ...item,
@@ -531,25 +569,37 @@ function MealCard({ item, onAdd, fallback, onFavourite, favourites }) {
         priceNaira,
       },
       "meal"
-    )
-  }
-  style={{
-    position: "absolute",
-    top: 12,
-    right: 12,
-    width: 38,
-    height: 38,
-    borderRadius: "999px",
-    background: "rgba(255,255,255,.9)",
-    border: "none",
-    color: isLiked ? "red" : "#0b5d39",
-    display: "grid",
-    placeItems: "center",
-    cursor: "pointer",
-  }}
->
-  <Heart size={18} fill={isLiked ? "red" : "none"} />
-</button>
+    );
+  };
+
+  return (
+    <div className="cardHover" style={{ background: "#0f0f10", border: "1px solid rgba(255,255,255,.07)", borderRadius: 22, overflow: "hidden" }}>
+      <div style={{ position: "relative", height: 190, overflow: "hidden" }}>
+        <img src={image} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg,rgba(0,0,0,.65) 0%,transparent 45%)" }} />
+
+        <button
+          onClick={handleFavouriteClick}
+          title={isLiked ? "Remove from favourites" : "Add to favourites"}
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            width: 38,
+            height: 38,
+            borderRadius: "999px",
+            background: "rgba(255,255,255,.9)",
+            border: "none",
+            color: isLiked ? "red" : "#0b5d39",
+            display: "grid",
+            placeItems: "center",
+            cursor: "pointer",
+            zIndex: 5,
+          }}
+        >
+          <Heart size={18} fill={isLiked ? "red" : "none"} />
+        </button>
+
         <button onClick={handleAdd} style={{ position: "absolute", right: 12, bottom: 12, width: 42, height: 42, borderRadius: "999px", background: "#0b8f4a", border: "2px solid rgba(255,255,255,.65)", color: "#fff", display: "grid", placeItems: "center", cursor: "pointer" }}>
           <Plus size={18} />
         </button>
@@ -653,76 +703,91 @@ export default function OrderNow() {
     return () => subscription.unsubscribe();
   }, []);
      useEffect(() => {
-      const loadFavourites = async () => {
-        if(!user) return;
+    const loadFavourites = async () => {
+      if (!user) {
+        setFavourites([]);
+        return;
+      }
 
-        const { data, error} = await supabase
+      const { data, error } = await supabase
         .from("favourites")
         .select("*")
         .eq("user_id", user.id);
 
-        if(error) {
-          console.log("Favourite error:", error.message);
-          return;
-        }
-        setFavourites(data || []);
-      };
-      loadFavourites();
-     },[user])
+      if (error) {
+        console.log("Favourite load error:", error.message);
+        return;
+      }
+
+      setFavourites(data || []);
+    };
+
+    loadFavourites();
+  }, [user]);
 
    const toggleFavourite = async (item, type) => {
-  if (!user) {
-    setShowLogin(true);
-    return;
-  }
+    console.log("toggleFavourite running:", item, type, user);
 
-  const itemId = item.id || item.name;
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
 
-  const alreadyLiked = favourites.find(
-    (fav) => fav.item_id === itemId && fav.item_type === type
-  );
+    const itemId = item.id || item.name;
 
-  if (alreadyLiked) {
-    const { error } = await supabase
+    const alreadyLiked = favourites.find(
+      (fav) => fav.item_id === itemId && fav.item_type === type
+    );
+
+    if (alreadyLiked) {
+      setFavourites((prev) => prev.filter((fav) => fav.id !== alreadyLiked.id));
+
+      const { error } = await supabase
+        .from("favourites")
+        .delete()
+        .eq("id", alreadyLiked.id);
+
+      if (error) {
+        console.log("Remove favourite error:", error.message);
+        setFavourites((prev) => [...prev, alreadyLiked]);
+      }
+
+      return;
+    }
+
+    const newFavourite = {
+      user_id: user.id,
+      item_id: itemId,
+      item_type: type,
+      item_name: item.name,
+      vendor_name: item.vendorName || item.vendors?.name || item.name,
+      image_url: item.image_url || item.logo_url || item.image,
+      price_naira: item.priceNaira || item.price || null,
+    };
+
+    const temporaryFavourite = {
+      id: `temp-${itemId}`,
+      ...newFavourite,
+    };
+
+    setFavourites((prev) => [...prev, temporaryFavourite]);
+
+    const { data, error } = await supabase
       .from("favourites")
-      .delete()
-      .eq("id", alreadyLiked.id);
+      .insert(newFavourite)
+      .select()
+      .single();
 
     if (error) {
-      console.log("Remove favourite error:", error.message);
+      console.log("Add favourite error:", error.message);
+      setFavourites((prev) => prev.filter((fav) => fav.id !== temporaryFavourite.id));
       return;
     }
 
     setFavourites((prev) =>
-      prev.filter((fav) => fav.id !== alreadyLiked.id)
+      prev.map((fav) => (fav.id === temporaryFavourite.id ? data : fav))
     );
-
-    return;
-  }
-
-  const newFavourite = {
-    user_id: user.id,
-    item_id: itemId,
-    item_type: type,
-    item_name: item.name,
-    vendor_name: item.vendorName || item.vendors?.name || item.name,
-    image_url: item.image_url || item.logo_url || item.image,
-    price_naira: item.priceNaira || item.price || null,
   };
-
-  const { data, error } = await supabase
-    .from("favourites")
-    .insert(newFavourite)
-    .select()
-    .single();
-
-  if (error) {
-    console.log("Add favourite error:", error.message);
-    return;
-  }
-
-  setFavourites((prev) => [...prev, data]);
-};
  
   const addToCart = (item) => {
     setCart((prev) => {
@@ -788,7 +853,7 @@ export default function OrderNow() {
         <LocationPicker open={showLoc} onClose={() => setShowLoc(false)} onSelect={setLocation} selected={location} />
         <CartSidebar cart={cart} open={cartOpen} onClose={() => setCartOpen(false)} onInc={inc} onDec={dec} onRemove={rem} onClear={clr} onCheckout={handleCheckout} />
 
-        <TopNav user={user} cartCount={cartCount} onCart={() => setCartOpen(true)} onLoc={() => setShowLoc(true)} location={location} q={q} setQ={setQ} cat={cat} setCat={setCat} onSignOut={handleSignOut} />
+        <TopNav user={user} cartCount={cartCount} onCart={() => setCartOpen(true)} onLoc={() => setShowLoc(true)} location={location} q={q} setQ={setQ} cat={cat} setCat={setCat} onSignOut={handleSignOut} navigate={navigate} />
 
         <main style={{ maxWidth: 1280, margin: '0 auto', padding: '26px 18px 100px' }}>
           <div className="filters-row sh pageIn" style={{ display: 'flex', gap: 10, overflowX: 'auto', marginBottom: 24 }}>
@@ -841,7 +906,7 @@ export default function OrderNow() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, gap: 14, flexWrap: 'wrap' }}>
               <div>
                 <div className="syne" style={{ fontSize: 38, fontWeight: 800, lineHeight: 1 }}>Popular Meals</div>
-                <div style={{ color: '#9ca3af', fontSize: 14, marginTop: 4 }}>Less talk, more food. Fresh picks from Pearl’s and Chrissy. fileciteturn19file5</div>
+                <div style={{ color: '#9ca3af', fontSize: 14, marginTop: 4 }}>Less talk, more food. Fresh picks from Pearl’s and Chrissy.</div>
               </div>
               <button style={{ background: 'none', border: 'none', color: '#22c55e', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>See all</button>
             </div>
@@ -864,7 +929,7 @@ export default function OrderNow() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, gap: 14, flexWrap: 'wrap' }}>
               <div>
                 <div className="syne" style={{ fontSize: 38, fontWeight: 800, lineHeight: 1 }}>Top Vendors</div>
-                <div style={{ color: '#9ca3af', fontSize: 14, marginTop: 4 }}>Image-first marketplace layout inspired by the reference screenshot, rebuilt in dark mode with Syne for headings. fileciteturn19file5turn19file16</div>
+                <div style={{ color: '#9ca3af', fontSize: 14, marginTop: 4 }}>Image-first marketplace layout inspired by the reference screenshot, rebuilt in dark mode with Syne for headings.</div>
               </div>
               <button style={{ background: 'none', border: 'none', color: '#22c55e', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>See all</button>
             </div>

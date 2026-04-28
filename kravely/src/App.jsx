@@ -10,6 +10,7 @@ import OrderCTA from './components/OrderCta'
 import FAQ from './components/FAQ'
 import Footer from './components/Footer'
 
+
 // Pages — these have their OWN navbars so don't wrap with Navbar
 import About from './pages/About'
 import OrderNow from './pages/OrderNow'
@@ -25,6 +26,7 @@ import SummaryDashboard from './pages/SummaryDashboard'
 import ChrissyCuisine from './pages/ChrissyCuisine'
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Favourites from "./pages/Favourites"
 
 
 // ===================== PROTECTED ROUTE =====================
@@ -75,8 +77,7 @@ export default function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/pearls"  element={<PearlsCuisine />} />
       <Route path='/chrissy' element={<ChrissyCuisine/>}/>
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-     <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/favourites" element={<Favourites />} />
 
       {/* ===== VENDOR ROUTES ===== */}
       <Route path="/vendor/dashboard" element={
