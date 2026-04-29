@@ -148,8 +148,28 @@ function KLogo({ size = 40 }) {
   );
 }
 
-function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat, onSignOut, navigate  }) {
+function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat, onSignOut, navigate }) {
   const [showCompactMobile, setShowCompactMobile] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const profileRef = useRef(null);
+
+  const fullName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    "Kravely User";
+
+  const emailOrPhone = user?.email || user?.phone || "Welcome back";
+
+  const profileInitial = fullName?.[0]?.toUpperCase() || "U";
+
+  const goToFavourites = () => {
+    if (!user) {
+      alert("Please login to view your favourites");
+      return;
+    }
+
+    navigate("/favourites");
+  };
 
   useEffect(() => {
     const onScroll = () => {
@@ -163,36 +183,288 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
   }, []);
 
+  useEffect(() => {
+    const closeProfile = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setShowProfile(false);
+      }
+    };
+
+    document.addEventListener("mousedown", closeProfile);
+    return () => document.removeEventListener("mousedown", closeProfile);
+  }, []);
+
+  const ProfileDropdown = () => (
+    <div
+      style={{
+        position: "absolute",
+        top: "calc(100% + 12px)",
+        right: 0,
+        width: "min(360px, calc(100vw - 32px))",
+        background: "#eafff6",
+        color: "#063f2b",
+        border: "1px solid rgba(11,93,57,.16)",
+        borderRadius: 22,
+        boxShadow: "0 24px 70px rgba(0,0,0,.42)",
+        overflow: "hidden",
+        zIndex: 90,
+        animation: "fadeUp .22s ease both",
+      }}
+    >
+      <div style={{ padding: "28px 18px 18px", textAlign: "center" }}>
+        <div
+          style={{
+            width: 72,
+            height: 72,
+            borderRadius: "50%",
+            background: "#0b5d39",
+            color: "#fff",
+            display: "grid",
+            placeItems: "center",
+            margin: "0 auto 12px",
+            fontFamily: "Syne, sans-serif",
+            fontWeight: 800,
+            fontSize: 28,
+            border: "4px solid rgba(11,93,57,.12)",
+          }}
+        >
+          {profileInitial}
+        </div>
+
+        <h3
+          className="syne"
+          style={{
+            fontSize: 24,
+            fontWeight: 800,
+            color: "#064b34",
+            letterSpacing: -1,
+            marginBottom: 6,
+            textTransform: "lowercase",
+          }}
+        >
+          {fullName}
+        </h3>
+
+        <p style={{ color: "rgba(6,75,52,.65)", fontSize: 14, fontWeight: 700 }}>
+          {emailOrPhone}
+        </p>
+      </div>
+
+      <div style={{ padding: "0 18px 14px" }}>
+        <p
+          style={{
+            color: "#064b34",
+            fontSize: 12,
+            fontWeight: 900,
+            letterSpacing: ".12em",
+            textTransform: "uppercase",
+            marginBottom: 10,
+          }}
+        >
+          Personal
+        </p>
+
+        <div
+          style={{
+            height: 4,
+            width: 82,
+            borderRadius: 999,
+            background: "#0b5d39",
+            marginBottom: 14,
+          }}
+        />
+
+        <div
+          style={{
+            background: "rgba(255,255,255,.75)",
+            border: "1px solid rgba(11,93,57,.12)",
+            borderRadius: 16,
+            padding: 14,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 10,
+          }}
+        >
+          <span style={{ color: "rgba(6,75,52,.7)", fontSize: 14, fontWeight: 700 }}>
+            Wallet Balance
+          </span>
+          <span className="syne" style={{ color: "#07140f", fontSize: 18, fontWeight: 800 }}>
+            ₦0.00
+          </span>
+        </div>
+
+        <button
+          onClick={() => {
+            setShowProfile(false);
+            navigate("/favourites");
+          }}
+          style={{
+            width: "100%",
+            border: "1px solid rgba(11,93,57,.12)",
+            background: "rgba(255,255,255,.75)",
+            color: "#064b34",
+            borderRadius: 16,
+            padding: "14px 14px",
+            fontWeight: 800,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 10,
+          }}
+        >
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <Heart size={17} />
+            My Favourites
+          </span>
+          <ArrowRight size={16} />
+        </button>
+
+        <button
+          onClick={() => {
+            setShowProfile(false);
+            onSignOut();
+          }}
+          style={{
+            width: "100%",
+            border: "none",
+            background: "#0b5d39",
+            color: "#fff",
+            borderRadius: 16,
+            padding: "14px 14px",
+            fontWeight: 900,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+          }}
+        >
+          <X size={17} />
+          Sign Out
+        </button>
+      </div>
+
+      <div
+        style={{
+          background: "#ffefb0",
+          color: "#111",
+          padding: "14px 18px",
+          fontSize: 13,
+          fontWeight: 800,
+        }}
+      >
+        Starters · Rack up more points to enjoy monthly goodies!
+      </div>
+    </div>
+  );
+
   return (
-    
-    <nav style={{ position: "sticky", top: 0, zIndex: 40, background: "rgba(7,7,7,.96)", backdropFilter: "blur(14px)", borderBottom: "1px solid var(--line)" }}>
+    <nav
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 40,
+        background: "rgba(7,7,7,.96)",
+        backdropFilter: "blur(14px)",
+        borderBottom: "1px solid var(--line)",
+      }}
+    >
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "14px 18px" }}>
-        <div className="desktop-nav topbar-grid" style={{ display: "grid", gridTemplateColumns: "auto 260px 1fr auto auto", gap: 12, alignItems: "center" }}>
+        <div
+          className="desktop-nav topbar-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "auto 260px 1fr auto auto",
+            gap: 12,
+            alignItems: "center",
+          }}
+        >
           <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <KLogo />
-            <span className="syne" style={{ color: "#fff", fontWeight: 800, fontSize: 25, letterSpacing: -1 }}>Kravely</span>
+            <span className="syne" style={{ color: "#fff", fontWeight: 800, fontSize: 25, letterSpacing: -1 }}>
+              Kravely
+            </span>
           </Link>
 
-          <button onClick={onLoc} style={{ background: "var(--soft)", border: "1px solid var(--line)", borderRadius: 18, minHeight: 62, padding: "0 16px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+          <button
+            onClick={onLoc}
+            style={{
+              background: "var(--soft)",
+              border: "1px solid var(--line)",
+              borderRadius: 18,
+              minHeight: 62,
+              padding: "0 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              cursor: "pointer",
+            }}
+          >
             <MapPin size={18} color={location ? "#22c55e" : "#9ca3af"} />
             <div style={{ textAlign: "left", minWidth: 0, flex: 1 }}>
-              <div style={{ color: "#6b7280", fontSize: 10, fontWeight: 800, letterSpacing: ".12em", textTransform: "uppercase" }}>Delivery to</div>
-              <div style={{ color: location ? "#22c55e" : "#fff", fontSize: 14, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{location ? location.label : "Set your location"}</div>
+              <div
+                style={{
+                  color: "#6b7280",
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: ".12em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Delivery to
+              </div>
+              <div
+                style={{
+                  color: location ? "#22c55e" : "#fff",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {location ? location.label : "Set your location"}
+              </div>
             </div>
             <ChevronDown size={16} color={location ? "#22c55e" : "#9ca3af"} />
           </button>
 
           <div style={{ position: "relative" }}>
-            <Search size={18} color="rgba(255,255,255,.3)" style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }} />
-            <input className="srch" placeholder="Food, drinks, groceries etc" value={q} onChange={(e) => setQ(e.target.value)} />
+            <Search
+              size={18}
+              color="rgba(255,255,255,.3)"
+              style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }}
+            />
+            <input
+              className="srch"
+              placeholder="Food, drinks, groceries etc"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
             {q && (
-              <button onClick={() => setQ("")} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
+              <button
+                onClick={() => setQ("")}
+                style={{
+                  position: "absolute",
+                  right: 14,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#9ca3af",
+                }}
+              >
                 <X size={16} />
               </button>
             )}
@@ -200,110 +472,328 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
 
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <button
-             onClick={() => {
-               if (!user) {
-                 alert("Please login to view your favourites");
-                 return;
-               }
-           
-               navigate("/favourites");
-             }}
-             style={{
-               width: 54,
-               height: 54,
-               borderRadius: "999px",
-               border: "1px solid var(--line)",
-               background: "var(--soft)",
-               color: "#fff",
-               display: "grid",
-               placeItems: "center",
-               cursor: "pointer",
-             }}
-             >
-               <Heart size={21} />
-             </button>
-            <button onClick={onCart} style={{ position: "relative", width: 70, height: 54, borderRadius: "999px", border: "1px solid var(--line)", background: "var(--soft)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}>
+              onClick={goToFavourites}
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: "999px",
+                border: "1px solid var(--line)",
+                background: "var(--soft)",
+                color: "#fff",
+                display: "grid",
+                placeItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <Heart size={21} />
+            </button>
+
+            <button
+              onClick={onCart}
+              style={{
+                position: "relative",
+                width: 70,
+                height: 54,
+                borderRadius: "999px",
+                border: "1px solid var(--line)",
+                background: "var(--soft)",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                cursor: "pointer",
+              }}
+            >
               <ShoppingBag size={20} />
-              <span className="syne" style={{ fontWeight: 700, fontSize: 17 }}>{cartCount}</span>
+              <span className="syne" style={{ fontWeight: 700, fontSize: 17 }}>
+                {cartCount}
+              </span>
             </button>
           </div>
 
           {user ? (
-            <div style={{ minWidth: 170, height: 56, borderRadius: "999px", background: "#0b5d39", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "0 12px 0 10px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 38, height: 38, borderRadius: "50%", background: "#f4d7df", color: "#0b5d39", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 14 }}>
-                  {user.user_metadata?.full_name?.[0]?.toUpperCase() || "U"}
-                </div>
-                <span style={{ fontWeight: 700, fontSize: 15, color: "#fff" }}>Profile</span>
-              </div>
+            <div ref={profileRef} style={{ position: "relative" }}>
               <button
-                onClick={onSignOut}
-                title="Sign out"
-                style={{ background: "none", border: "none", color: "#fff", display: "grid", placeItems: "center", cursor: "pointer" }}
+                onClick={() => setShowProfile((prev) => !prev)}
+                style={{
+                  minWidth: 170,
+                  height: 56,
+                  borderRadius: "999px",
+                  background: "#0b5d39",
+                  border: "1px solid rgba(255,255,255,.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 10,
+                  padding: "0 12px 0 10px",
+                  cursor: "pointer",
+                }}
               >
-                <X size={20} color="#fff" />
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: "50%",
+                      background: "#f4d7df",
+                      color: "#0b5d39",
+                      display: "grid",
+                      placeItems: "center",
+                      fontWeight: 800,
+                      fontSize: 14,
+                    }}
+                  >
+                    {profileInitial}
+                  </div>
+                  <span style={{ fontWeight: 800, fontSize: 15, color: "#fff" }}>Profile</span>
+                </div>
+                {showProfile ? <X size={20} color="#fff" /> : <ChevronDown size={18} color="#fff" />}
               </button>
+
+              {showProfile && <ProfileDropdown />}
             </div>
           ) : (
-            <Link to="/otpLogin" style={{ textDecoration: "none", minWidth: 130, height: 56, borderRadius: "999px", background: "#0b5d39", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontWeight: 700 }}> 
+            <Link
+              to="/otpLogin"
+              style={{
+                textDecoration: "none",
+                minWidth: 130,
+                height: 56,
+                borderRadius: "999px",
+                background: "#0b5d39",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                fontWeight: 700,
+              }}
+            >
               <User size={16} /> Sign In
             </Link>
           )}
         </div>
 
         <div className="mobile-nav" style={{ display: "none", flexDirection: "column", gap: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Link to="/" style={{ textDecoration: "none" }}><KLogo size={36} /></Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Link to="/" style={{ textDecoration: "none" }}>
+              <KLogo size={36} />
+            </Link>
 
             {!showCompactMobile && (
-              <button onClick={onLoc} style={{ flex: 1, display: "flex", alignItems: "center", gap: 8, background: "var(--soft)", border: "1px solid var(--line)", borderRadius: 12, padding: "10px 12px", cursor: "pointer" }}>
+              <button
+                onClick={onLoc}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "var(--soft)",
+                  border: "1px solid var(--line)",
+                  borderRadius: 12,
+                  padding: "10px 10px",
+                  cursor: "pointer",
+                }}
+              >
                 <MapPin size={14} color={location ? "#22c55e" : "#9ca3af"} />
-                <span style={{ flex: 1, textAlign: "left", color: location ? "#22c55e" : "#fff", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{location ? location.label : "Set location"}</span>
+                <span
+                  style={{
+                    flex: 1,
+                    textAlign: "left",
+                    color: location ? "#22c55e" : "#fff",
+                    fontSize: 12,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {location ? location.label : "Set location"}
+                </span>
                 <ChevronDown size={14} color="#9ca3af" />
               </button>
             )}
 
             {showCompactMobile && (
-              <div style={{ position: "relative", flex: 1, animation: "mobileDrop .28s ease both" }}>
-                <Search size={16} color="rgba(255,255,255,.3)" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
-                <input className="srch" style={{ padding: "12px 14px 12px 42px", width: "100%" }} placeholder="Search meals or vendors" value={q} onChange={(e) => setQ(e.target.value)} />
+              <div style={{ position: "relative", flex: 1, minWidth: 0, animation: "mobileDrop .28s ease both" }}>
+                <Search
+                  size={16}
+                  color="rgba(255,255,255,.3)"
+                  style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }}
+                />
+                <input
+                  className="srch"
+                  style={{ padding: "12px 14px 12px 42px", width: "100%" }}
+                  placeholder="Search"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
               </div>
             )}
 
-            <button onClick={onCart} style={{ position: "relative", width: 42, height: 42, borderRadius: 12, border: "1px solid var(--line)", background: "var(--soft)", color: "#fff", display: "grid", placeItems: "center", cursor: "pointer", flexShrink: 0 }}>
-              <ShoppingBag size={18} />
-              {cartCount > 0 && <span style={{ position: "absolute", top: -4, right: -4, minWidth: 16, height: 16, borderRadius: "999px", background: "var(--green)", color: "#000", display: "grid", placeItems: "center", fontSize: 9, fontWeight: 800 }}>{cartCount}</span>}
+            <button
+              onClick={goToFavourites}
+              style={{
+                position: "relative",
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                border: "1px solid var(--line)",
+                background: "var(--soft)",
+                color: "#fff",
+                display: "grid",
+                placeItems: "center",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              <Heart size={17} />
+            </button>
+
+            <button
+              onClick={onCart}
+              style={{
+                position: "relative",
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                border: "1px solid var(--line)",
+                background: "var(--soft)",
+                color: "#fff",
+                display: "grid",
+                placeItems: "center",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              <ShoppingBag size={17} />
+              {cartCount > 0 && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -4,
+                    right: -4,
+                    minWidth: 16,
+                    height: 16,
+                    borderRadius: "999px",
+                    background: "var(--green)",
+                    color: "#000",
+                    display: "grid",
+                    placeItems: "center",
+                    fontSize: 9,
+                    fontWeight: 800,
+                  }}
+                >
+                  {cartCount}
+                </span>
+              )}
             </button>
 
             {user ? (
-              <button onClick={onSignOut} title="Sign out" style={{ minWidth: showCompactMobile ? 112 : 98, height: 42, borderRadius: "999px", background: "#0b5d39", border: "1px solid rgba(255,255,255,.08)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "0 10px 0 8px", cursor: "pointer", flexShrink: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#f4d7df", color: "#0b5d39", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 12 }}>
-                    {user.user_metadata?.full_name?.[0]?.toUpperCase() || "U"}
+              <div ref={profileRef} style={{ position: "relative", flexShrink: 0 }}>
+                <button
+                  onClick={() => setShowProfile((prev) => !prev)}
+                  style={{
+                    width: showCompactMobile ? 42 : 78,
+                    height: 40,
+                    borderRadius: "999px",
+                    background: "#0b5d39",
+                    border: "1px solid rgba(255,255,255,.08)",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    padding: "0 7px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      background: "#f4d7df",
+                      color: "#0b5d39",
+                      display: "grid",
+                      placeItems: "center",
+                      fontWeight: 800,
+                      fontSize: 12,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {profileInitial}
                   </div>
-                  {!showCompactMobile && <span style={{ fontWeight: 700, fontSize: 12, color: "#fff" }}>Profile</span>}
-                </div>
-                <User size={15} color="#fff" />
-              </button>
+                  {!showCompactMobile && <span style={{ fontWeight: 800, fontSize: 12 }}>Me</span>}
+                </button>
+
+                {showProfile && <ProfileDropdown />}
+              </div>
             ) : (
-              <Link to="/login" style={{ textDecoration: "none", minWidth: showCompactMobile ? 46 : 96, height: 42, borderRadius: "999px", background: "#0b5d39", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 12, padding: showCompactMobile ? "0" : "0 12px", flexShrink: 0 }}>
+              <Link
+                to="/login"
+                style={{
+                  textDecoration: "none",
+                  width: showCompactMobile ? 42 : 78,
+                  height: 40,
+                  borderRadius: "999px",
+                  background: "#0b5d39",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  fontWeight: 700,
+                  fontSize: 12,
+                  padding: "0 8px",
+                  flexShrink: 0,
+                }}
+              >
                 <User size={15} />
-                {!showCompactMobile && "Profile"}
+                {!showCompactMobile && "Me"}
               </Link>
             )}
           </div>
 
           {!showCompactMobile && (
             <div style={{ position: "relative" }}>
-              <Search size={16} color="rgba(255,255,255,.3)" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
-              <input className="srch" style={{ padding: "12px 14px 12px 42px" }} placeholder="Search meals or vendors" value={q} onChange={(e) => setQ(e.target.value)} />
+              <Search
+                size={16}
+                color="rgba(255,255,255,.3)"
+                style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }}
+              />
+              <input
+                className="srch"
+                style={{ padding: "12px 14px 12px 42px" }}
+                placeholder="Search meals or vendors"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
             </div>
           )}
         </div>
 
         <div className="sh" style={{ display: "flex", gap: 18, overflowX: "auto", marginTop: 14, paddingBottom: 4 }}>
           {CATS.map(({ id, label, Icon }) => (
-            <button key={id} onClick={() => setCat(id)} style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "none", border: "none", borderBottom: cat === id ? "3px solid var(--green)" : "3px solid transparent", color: cat === id ? "#fff" : "#b4b4b8", padding: "12px 2px", fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer" }}>
+            <button
+              key={id}
+              onClick={() => setCat(id)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 9,
+                background: "none",
+                border: "none",
+                borderBottom: cat === id ? "3px solid var(--green)" : "3px solid transparent",
+                color: cat === id ? "#fff" : "#b4b4b8",
+                padding: "12px 2px",
+                fontSize: 14,
+                fontWeight: 700,
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+              }}
+            >
               <Icon size={18} color={cat === id ? "#22c55e" : "#b4b4b8"} />
               {label}
             </button>
@@ -313,7 +803,6 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
     </nav>
   );
 }
-
 function LocationPicker({ open, onClose, onSelect, selected }) {
   const [q, setQ] = useState("");
   if (!open) return null;

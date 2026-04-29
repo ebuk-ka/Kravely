@@ -12,13 +12,18 @@ export default function Favourites() {
   useEffect(() => {
   let mounted = true;
 
-  const {
-    data: { subscription },
-  } = supabase.auth.onAuthStateChange(async (_event, session) => {
+  const loadFavourites = async () => {
+    setLoading(true);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
     if (!mounted) return;
 
     if (!session?.user) {
       setUser(null);
+      setFavourites([]);
       setLoading(false);
       navigate("/login");
       return;
@@ -36,11 +41,29 @@ export default function Favourites() {
 
     if (error) {
       console.log("Favourite load error:", error.message);
+      setFavourites([]);
     } else {
       setFavourites(data || []);
     }
 
     setLoading(false);
+  };
+
+  loadFavourites();
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (!mounted) return;
+
+    if (session?.user) {
+      loadFavourites();
+    } else {
+      setUser(null);
+      setFavourites([]);
+      setLoading(false);
+      navigate("/login");
+    }
   });
 
   return () => {
@@ -48,6 +71,20 @@ export default function Favourites() {
     subscription.unsubscribe();
   };
 }, [navigate]);
+
+  const removeFavourite = async (id) => {
+  const { error } = await supabase
+    .from("favourites")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.log("Remove favourite error:", error.message);
+    return;
+  }
+
+  setFavourites((prev) => prev.filter((item) => item.id !== id));
+};
   return (
     <div className="fav-page">
       <style>{`
