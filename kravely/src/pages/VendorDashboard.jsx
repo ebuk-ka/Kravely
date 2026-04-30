@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useVendorOwnOrders, useVendorMenu, fmt, STATUS_STYLE } from "../hooks/useKravelyData";
 
@@ -65,6 +64,7 @@ function AddItemModal({ onClose, onSave }) {
 // ─── MAIN EXPORT ─────────────────────────────────────────────
 export default function VendorDashboard() {
   const navigate = useNavigate();
+  const { vendorId } = useParams();
   const [tab,          setTab]          = useState("orders");
   const [showAddItem,  setShowAddItem]  = useState(false);
   const [user,         setUser]         = useState(null);
@@ -73,17 +73,64 @@ export default function VendorDashboard() {
   const [shopToggling, setShopToggling] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) { navigate("/login"); return; }
+    const loadVendor = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user) {
+        navigate("/login");
+        return;
+      }
+
       setUser(session.user);
-      supabase.from("vendors").select("*").eq("owner_id", session.user.id).maybeSingle()
-        .then(({ data }) => { setVendor(data || null); setAuthLoading(false); });
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+        setVendor(null);
+        setAuthLoading(false);
+        return;
+      }
+
+      let query = supabase
+        .from("vendors")
+        .select("*")
+        .eq("is_approved", true);
+
+      if (profile?.role === "admin" && vendorId) {
+        query = query.eq("id", vendorId);
+      } else {
+        query = query.eq("owner_id", session.user.id);
+      }
+
+      const { data, error } = await query.maybeSingle();
+
+      if (error) {
+        console.error("Error fetching vendor:", error);
+        setVendor(null);
+      } else {
+        setVendor(data || null);
+      }
+
+      setAuthLoading(false);
+    };
+
+    loadVendor();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) navigate("/login");
     });
+
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, vendorId]);
 
   const { orders, loading: oL, updateStatus }         = useVendorOwnOrders(vendor?.id);
   const { items,  loading: mL, toggleAvailability, addItem, deleteItem } = useVendorMenu(vendor?.id);
@@ -356,4 +403,4 @@ export default function VendorDashboard() {
       </div>
     </>
   );
-}   
+}

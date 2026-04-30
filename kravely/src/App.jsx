@@ -86,6 +86,7 @@ export default function App() {
           <VendorDashboard />
         </VendorProtectedRoute>
       } />
+      <Route path="/vendor-dashboard/:vendorId" element={<VendorDashboard />} />
 
       {/* ===== ADMIN ROUTES ===== */}
       <Route path="/admin/dashboard" element={<AdminDashboard />} />

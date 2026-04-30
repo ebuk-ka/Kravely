@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Loader2,
   Menu,
+  ExternalLink,
   Moon,
   Package,
   Plus,
@@ -308,6 +309,27 @@ function VendorsTab({ vendors, toggleFeatured, toggleActive, approveVendor, addV
                   ))}
                 </div>
                 <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+                  <Link
+                     to={`/vendor-dashboard/${v.id}`}
+                     style={{
+                       background: "rgba(34,197,94,0.1)",
+                       border: "1px solid rgba(34,197,94,0.25)",
+                       color: "#22c55e",
+                       padding: "7px 13px",
+                       borderRadius: 50,
+                       cursor: "pointer",
+                       fontFamily: "'DM Sans',sans-serif",
+                       fontWeight: 600,
+                       fontSize: 12,
+                       display: "flex",
+                       alignItems: "center",
+                       gap: 5,
+                       textDecoration: "none",
+                     }}
+                   >
+                     <ExternalLink size={12} />
+                     View Dashboard
+                   </Link>
                   {!v.is_approved && <button onClick={() => approveVendor(v.id)} style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.3)", color: "#22c55e", padding: "7px 13px", borderRadius: 50, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><Check size={12} />Approve</button>}
                   <button onClick={() => toggleFeatured(v.id, !v.is_featured)} style={{ background: v.is_featured ? "rgba(234,179,8,0.15)" : "rgba(255,255,255,0.05)", border: `1px solid ${v.is_featured ? "rgba(234,179,8,0.3)" : "rgba(255,255,255,0.1)"}`, color: v.is_featured ? "#eab308" : "#6b7280", padding: "7px 13px", borderRadius: 50, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}>
                     <Crown size={12} />

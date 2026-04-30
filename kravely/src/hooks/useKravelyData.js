@@ -470,7 +470,11 @@ export function useVendorMenu(vendorId) {
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
-    if (!vendorId) return;
+    if (!vendorId) {
+  setItems([]);
+  setLoading(false);
+  return;
+}
 
     const { data, error } = await supabase
       .from("menu_items")
