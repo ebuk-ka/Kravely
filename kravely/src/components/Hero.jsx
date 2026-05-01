@@ -68,7 +68,7 @@ function PhoneMockup() {
   }, []);
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center overflow-hidden">
       <div className="absolute w-80 h-80 rounded-full border border-green-500/10 animate-ping" style={{ animationDuration: "3s" }} />
       <div className="absolute w-96 h-96 rounded-full border border-green-500/5" style={{ animation: "spin 12s linear infinite" }} />
       <div className="absolute w-64 h-64 rounded-full blur-3xl pointer-events-none"
@@ -344,8 +344,10 @@ function Hero() {
           </div>
 
           {/* RIGHT — iPhone */}
-          <div className="slide-right lg:flex flex-1 items-center justify-center xl:justify-end">
-            <PhoneMockup />
+          <div className="slide-right lg:flex flex-1 items-center justify-center xl:justify-end" style={{ minHeight: "600px" }}>
+            <div style={{ position: "relative", width: "320px", height: "600px", willChange: "transform" }}>
+              <PhoneMockup />
+            </div>
           </div>
 
         </div>

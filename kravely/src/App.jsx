@@ -27,7 +27,7 @@ import ChrissyCuisine from './pages/ChrissyCuisine'
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Favourites from "./pages/Favourites"
-
+import VendorStore from './pages/VendorStore'
 
 // ===================== PROTECTED ROUTE =====================
 // DEV_MODE = true means you can see the dashboard while building
@@ -79,6 +79,8 @@ export default function App() {
       <Route path="/pearls"  element={<PearlsCuisine />} />
       <Route path='/chrissy' element={<ChrissyCuisine/>}/>
       <Route path="/favourites" element={<Favourites />} />
+
+      <Route path="/vendors/:vendorId" element={<VendorStore />} />
 
       {/* ===== VENDOR ROUTES ===== */}
       <Route path="/vendor/dashboard" element={
