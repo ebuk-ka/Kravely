@@ -28,6 +28,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Favourites from "./pages/Favourites"
 import VendorStore from './pages/VendorStore'
+import VendorLogin from './pages/VendorLogin'
 
 // ===================== PROTECTED ROUTE =====================
 // DEV_MODE = true means you can see the dashboard while building
@@ -81,6 +82,7 @@ export default function App() {
       <Route path="/favourites" element={<Favourites />} />
 
       <Route path="/vendors/:vendorId" element={<VendorStore />} />
+      <Route path="/vendor-login" element={<VendorLogin />} />
 
       {/* ===== VENDOR ROUTES ===== */}
       <Route path="/vendor/dashboard" element={

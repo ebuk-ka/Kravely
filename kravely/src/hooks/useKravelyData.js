@@ -371,7 +371,11 @@ export function useVendorOwnOrders(vendorId) {
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
-    if (!vendorId) return;
+    if (!vendorId) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
 
     const { data: rawOrders, error } = await supabase
       .from("orders")

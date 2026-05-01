@@ -1264,7 +1264,7 @@ export default function OrderNow() {
   const handleOrderVendor = (vendor) => {
     if (!user) { setShowLogin(true); return; }
     if (!location) { setShowLoc(true); return; }
-    navigate(vendor.name.toLowerCase().includes("pear") ? "/pearls" : vendor.name.toLowerCase().includes("chrissy") ? "/chrissy" : "/checkout", { state: { vendor } });
+    navigate(`/vendors/${vendor.id}`);
   };
 
   const qLower = q.toLowerCase().trim();

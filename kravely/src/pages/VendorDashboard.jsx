@@ -74,51 +74,56 @@ export default function VendorDashboard() {
 
   useEffect(() => {
     const loadVendor = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      if (!session?.user) {
-        navigate("/login");
-        return;
-      }
+        if (!session?.user) {
+          setAuthLoading(false);
+          navigate("/login");
+          return;
+        }
 
-      setUser(session.user);
+        setUser(session.user);
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
 
-      if (profileError) {
-        console.error("Error fetching profile:", profileError);
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          setVendor(null);
+          return;
+        }
+
+        let query = supabase
+          .from("vendors")
+          .select("*")
+          .eq("is_approved", true);
+
+        if (profile?.role === "admin" && vendorId) {
+          query = query.eq("id", vendorId);
+        } else {
+          query = query.eq("owner_id", session.user.id);
+        }
+
+        const { data, error } = await query.maybeSingle();
+
+        if (error) {
+          console.error("Error fetching vendor:", error);
+          setVendor(null);
+        } else {
+          setVendor(data || null);
+        }
+      } catch (error) {
+        console.error("Unexpected auth/vendor load error:", error);
         setVendor(null);
+      } finally {
         setAuthLoading(false);
-        return;
       }
-
-      let query = supabase
-        .from("vendors")
-        .select("*")
-        .eq("is_approved", true);
-
-      if (profile?.role === "admin" && vendorId) {
-        query = query.eq("id", vendorId);
-      } else {
-        query = query.eq("owner_id", session.user.id);
-      }
-
-      const { data, error } = await query.maybeSingle();
-
-      if (error) {
-        console.error("Error fetching vendor:", error);
-        setVendor(null);
-      } else {
-        setVendor(data || null);
-      }
-
-      setAuthLoading(false);
     };
 
     loadVendor();
