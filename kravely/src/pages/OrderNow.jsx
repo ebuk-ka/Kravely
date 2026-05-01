@@ -3,32 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import pearlsImage from "../assets/images/pearlslogo.jpeg";
 import chrissyLogo from "../assets/images/chrissylogo.jpeg";
 import {
-  Search,
-  MapPin,
-  ShoppingBag,
-  User,
-  ChevronDown,
-  X,
-  Plus,
-  Minus,
-  Clock3,
-  Star,
-  Filter,
-  Sparkles,
-  Truck,
-  Package,
-  CookingPot,
-  Salad,
-  Soup,
-  Sandwich,
-  CupSoda,
-  LayoutGrid,
-  ShieldCheck,
-  ChevronLeft,
-  ChevronRight,
-  Flame,
-  ArrowRight,
-  Heart,
+  Search,MapPin,ShoppingBag,
+  User,ChevronDown,X,Plus,Minus,Clock3,
+  Star,Filter,Sparkles,Truck,Package,CookingPot,
+  Salad,Soup,Sandwich,CupSoda,
+  LayoutGrid,ShieldCheck,ChevronLeft,ChevronRight,
+  Flame,ArrowRight,Heart,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { usePublicVendors, usePopularItems } from "../hooks/useKravelyData";
@@ -281,27 +261,6 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
           }}
         />
 
-        <div
-          style={{
-            background: "rgba(255,255,255,.75)",
-            border: "1px solid rgba(11,93,57,.12)",
-            borderRadius: 16,
-            padding: 14,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 12,
-            marginBottom: 10,
-          }}
-        >
-          <span style={{ color: "rgba(6,75,52,.7)", fontSize: 14, fontWeight: 700 }}>
-            Wallet Balance
-          </span>
-          <span className="syne" style={{ color: "#07140f", fontSize: 18, fontWeight: 800 }}>
-            ₦0.00
-          </span>
-        </div>
-
         <button
           onClick={() => {
             setShowProfile(false);
@@ -328,31 +287,37 @@ function TopNav({ user, cartCount, onCart, onLoc, location, q, setQ, cat, setCat
           </span>
           <ArrowRight size={16} />
         </button>
+       <button
+  type="button"
+  onClick={async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-        <button
-          onClick={() => {
-            setShowProfile(false);
-            onSignOut();
-          }}
-          style={{
-            width: "100%",
-            border: "none",
-            background: "#0b5d39",
-            color: "#fff",
-            borderRadius: 16,
-            padding: "14px 14px",
-            fontWeight: 900,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-          }}
-        >
-          <X size={17} />
-          Sign Out
-        </button>
+    setShowProfile(false);
+    await onSignOut();
+  }}
+  style={{
+    width: "100%",
+    border: "none",
+    background: "#0b5d39",
+    color: "#fff",
+    borderRadius: 16,
+    padding: "14px 14px",
+    fontWeight: 900,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  }}
+>
+  <X size={17} />
+  Sign Out
+</button>
+        
       </div>
+
+      
 
       <div
         style={{
@@ -1149,20 +1114,21 @@ export default function OrderNow() {
   //Sign Out
 
   const handleSignOut = async () => {
+  console.log("Sign out clicked");
+
   try {
-    const { error } = await supabase.auth.signOut();
-
-    if (error) throw error;
-
-    // Clear local UI state
     setUser(null);
     setFavourites([]);
     setCart([]);
+    setCartOpen(false);
+    setShowLogin(false);
 
-    // Force fresh state reload
-    window.location.href = "/OtpLogin";
+    await supabase.auth.signOut({ scope: "local" });
+
+    window.location.replace("/otpLogin");
   } catch (err) {
     console.log("Sign out error:", err.message);
+    window.location.replace("/otpLogin");
   }
 };
 
