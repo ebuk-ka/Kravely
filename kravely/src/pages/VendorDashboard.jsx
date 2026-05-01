@@ -135,7 +135,14 @@ export default function VendorDashboard() {
   const { orders, loading: oL, updateStatus }         = useVendorOwnOrders(vendor?.id);
   const { items,  loading: mL, toggleAvailability, addItem, deleteItem } = useVendorMenu(vendor?.id);
 
-  const handleSignOut = async () => { await supabase.auth.signOut(); navigate("/"); };
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error signing out:", error);
+      return;
+    }
+    navigate("/login", { replace: true });
+  };
 
   const toggleShop = async () => {
     if (!vendor || shopToggling) return;

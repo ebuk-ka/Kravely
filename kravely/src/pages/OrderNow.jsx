@@ -1135,21 +1135,6 @@ function VendorCard({ vendor, fallbackImage, onOrder }) {
 export default function OrderNow() {
   const navigate = useNavigate();
 
-    //Sign Out
-    const handleSignOut = async () => {
-      const { error } = await supabase.auth.signOut();
-
-      if(error) {
-        console.log("Error signing out:", error.message);
-      } else {
-        navigate("/order");
-      } 
-    };
-    
-
-
-  
-
   const [cat, setCat] = useState("all");
   const [q, setQ] = useState("");
   const [cart, setCart] = useState([]);
@@ -1161,6 +1146,25 @@ export default function OrderNow() {
   const [authReady, setAuthReady] = useState(false);
   const [favourites, setFavourites] = useState([]);
 
+  //Sign Out
+
+  const handleSignOut = async () => {
+  try {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) throw error;
+
+    // Clear local UI state
+    setUser(null);
+    setFavourites([]);
+    setCart([]);
+
+    // Force fresh state reload
+    window.location.href = "/OtpLogin";
+  } catch (err) {
+    console.log("Sign out error:", err.message);
+  }
+};
 
   const { vendors, loading: vL } = usePublicVendors();
   const { items: meals, loading: mL } = usePopularItems(12);
@@ -1425,7 +1429,7 @@ export default function OrderNow() {
                       : STATIC_DISHES[i % STATIC_DISHES.length].image}
                     onOrder={handleOrderVendor}
                   />
-                ))}
+                ))} 
               </div>
             )}
           </section>
