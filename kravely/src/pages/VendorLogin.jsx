@@ -24,44 +24,47 @@ export default function VendorLogin() {
   const [message, setMessage] = useState("");
 
   const checkVendorAccess = async (userId) => {
-    const { data: vendor, error: vendorError } = await supabase
+  try {
+    const { data: vendor, error } = await supabase
       .from("vendors")
       .select("id, name, is_approved, owner_id")
       .eq("owner_id", userId)
       .eq("is_approved", true)
       .maybeSingle();
 
-    if (vendorError) {
-      console.log("Vendor check error:", vendorError.message);
+    if (error) {
+      console.log("Vendor check error:", error.message);
       return false;
     }
 
     if (vendor) {
-      navigate("/vendor/dashboard", { replace: true });
+      navigate("/vendor-dashboard", { replace: true });
       return true;
     }
 
     return false;
-  };
-
+  } catch (err) {
+    console.log("Unexpected error:", err.message);
+    return false;
+  }
+};
   useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+  const checkSession = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
 
       if (session?.user) {
-        const hasAccess = await checkVendorAccess(session.user.id);
-        if (!hasAccess) {
-          setError("You are logged in, but this account is not linked to an approved vendor yet.");
-        }
+        await checkVendorAccess(session.user.id);
       }
+    } catch (err) {
+      console.log("Session error:", err.message);
+    } finally {
+      setCheckingSession(false); 
+    }
+  };
 
-      setCheckingSession(false);
-    };
-
-    checkSession();
-  }, []);
+  checkSession();
+}, []);
 
   const sendOtp = async (e) => {
     e.preventDefault();
