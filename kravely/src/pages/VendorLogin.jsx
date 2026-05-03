@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Mail, ShieldCheck, Store } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
+
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -38,7 +39,7 @@ export default function VendorLogin() {
     }
 
     if (vendor) {
-      navigate("/vendor-dashboard", { replace: true });
+      navigate("/vendor/dashboard", { replace: true });
       return true;
     }
 
