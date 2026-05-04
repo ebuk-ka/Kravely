@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useVendorOwnOrders, useVendorMenu, fmt, STATUS_STYLE } from "../hooks/useKravelyData";
+import { ShoppingCart, Clock, DollarSign, Package, Star, Utensils, Check, X, Store, Inbox, BarChart3, TrendingUp, MapPin, FileText, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 
 function Badge({ status }) {
   const s = STATUS_STYLE[status] || STATUS_STYLE.inactive;
   return <span style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}`, fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 50, fontFamily: "'DM Sans',sans-serif", whiteSpace: "nowrap" }}>{status}</span>;
 }
 
-const NEXT = { pending: { status: "confirmed", label: "Confirm Order" }, confirmed: { status: "preparing", label: "Start Preparing" }, preparing: { status: "ready", label: "Mark as Ready" }, ready: { status: "delivered", label: "Mark Delivered ✓" } };
+const NEXT = { pending: { status: "confirmed", label: "Confirm Order" }, confirmed: { status: "preparing", label: "Start Preparing" }, preparing: { status: "ready", label: "Mark as Ready" }, ready: { status: "delivered", label: <>Mark Delivered <Check size={16} /></> } };
 
 // ─── ADD ITEM MODAL ──────────────────────────────────────────
 function AddItemModal({ onClose, onSave }) {
@@ -180,7 +181,7 @@ export default function VendorDashboard() {
     return (
       <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
         <div style={{ textAlign: "center", maxWidth: 380 }}>
-          <p style={{ fontSize: 52, marginBottom: 16 }}>🏪</p>
+          <p style={{ fontSize: 52, marginBottom: 16 }}><Store size={52} /></p>
           <h2 style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: 22, marginBottom: 10 }}>No vendor account found</h2>
           <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14, lineHeight: 1.7, marginBottom: 22 }}>
             Your account isn't linked to a vendor yet. Contact Ebuka to set it up — he'll update your vendor row with your user ID in Supabase.
@@ -194,7 +195,7 @@ export default function VendorDashboard() {
     );
   }
 
-  const tabs = [{ id: "orders", icon: "🛒", label: "Orders" }, { id: "menu", icon: "🍽️", label: "Menu" }, { id: "stats", icon: "📊", label: "Stats" }];
+  const tabs = [{ id: "orders", icon: <ShoppingCart size={16} />, label: "Orders" }, { id: "menu", icon: <Utensils size={16} />, label: "Menu" }, { id: "stats", icon: <BarChart3 size={16} />, label: "Stats" }];
 
   return (
     <>
@@ -256,7 +257,7 @@ export default function VendorDashboard() {
               {oL ? <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14, textAlign: "center", padding: "40px 0" }}>Loading orders…</p>
                 : orders.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "60px 0" }}>
-                    <p style={{ fontSize: 52, marginBottom: 14 }}>📭</p>
+                    <p style={{ fontSize: 52, marginBottom: 14 }}><Inbox size={52} /></p>
                     <p style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>No orders yet</p>
                     <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14 }}>Orders will appear here in real time when students order from your shop.</p>
                   </div>
@@ -271,7 +272,7 @@ export default function VendorDashboard() {
                               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                                 <span style={{ color: "#22c55e", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 14 }}>{order.order_number}</span>
                                 <Badge status={order.status} />
-                                {order.status === "pending" && <span style={{ color: "#f97316", fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700, animation: "pulse 2s infinite" }}>🔴 NEW</span>}
+                                {order.status === "pending" && <span style={{ color: "#f97316", fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700, animation: "pulse 2s infinite" }}><AlertTriangle size={16} /> NEW</span>}
                               </div>
                               <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 12, marginTop: 4 }}>
                                 {order.student?.full_name || "Student"}
@@ -292,7 +293,7 @@ export default function VendorDashboard() {
                               ? <p style={{ color: "#4b5563", fontFamily: "'DM Sans',sans-serif", fontSize: 12 }}>No items data</p>
                               : (order.order_items || []).map((item, idx) => (
                                 <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: idx < order.order_items.length-1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-                                  <span style={{ color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>{item.emoji || "🍽️"} {item.name} ×{item.quantity}</span>
+                                  <span style={{ color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>{item.emoji || <Utensils size={16} />} {item.name} ×{item.quantity}</span>
                                   <span style={{ color: "#22c55e", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 13 }}>{fmt.kobo(item.price * item.quantity)}</span>
                                 </div>
                               ))}
@@ -300,8 +301,8 @@ export default function VendorDashboard() {
 
                           {/* Delivery */}
                           <div style={{ display: "flex", gap: 16, marginBottom: 12, flexWrap: "wrap" }}>
-                            <span style={{ color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>📍 {order.delivery_location || "No location"}</span>
-                            {order.delivery_notes && <span style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>📝 {order.delivery_notes}</span>}
+                            <span style={{ color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}><MapPin size={16} /> {order.delivery_location || "No location"}</span>
+                            {order.delivery_notes && <span style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}><FileText size={16} /> {order.delivery_notes}</span>}
                           </div>
 
                           {/* Actions */}
@@ -319,7 +320,7 @@ export default function VendorDashboard() {
                             )}
                             {(order.status === "delivered" || order.status === "cancelled") && (
                               <span style={{ color: "#4b5563", fontFamily: "'DM Sans',sans-serif", fontSize: 13, padding: "10px 0" }}>
-                                {order.status === "delivered" ? "✅ Completed" : "❌ Cancelled"}
+                                {order.status === "delivered" ? <><CheckCircle size={16} /> Completed</> : <><XCircle size={16} /> Cancelled</>}
                               </span>
                             )}
                           </div>
@@ -347,7 +348,7 @@ export default function VendorDashboard() {
               {mL ? <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14, textAlign: "center", padding: "40px 0" }}>Loading menu…</p>
                 : items.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "60px 0" }}>
-                    <p style={{ fontSize: 52, marginBottom: 14 }}>🍽️</p>
+                    <p style={{ fontSize: 52, marginBottom: 14 }}><Utensils size={52} /></p>
                     <p style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Menu is empty</p>
                     <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 14, marginBottom: 20 }}>Add your first item to start getting orders.</p>
                     <button onClick={() => setShowAddItem(true)} style={{ background: "#22c55e", color: "#000", border: "none", borderRadius: 50, padding: "12px 28px", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Add First Item</button>
@@ -358,7 +359,7 @@ export default function VendorDashboard() {
                       <div key={item.id} style={{ background: "#0a0a0a", border: `1px solid ${item.is_available ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.06)"}`, borderRadius: 18, padding: "16px", opacity: item.is_available ? 1 : 0.6, transition: "all 0.2s" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                            <span style={{ fontSize: 28 }}>{item.emoji || "🍽️"}</span>
+                            <span style={{ fontSize: 28 }}>{item.emoji || <Utensils size={28} />}</span>
                             <div>
                               <p style={{ color: "#fff", fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, margin: 0 }}>{item.name}</p>
                               <p style={{ color: "#22c55e", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 13, margin: 0 }}>{fmt.kobo(item.price)}</p>
@@ -387,7 +388,7 @@ export default function VendorDashboard() {
           {tab === "stats" && (
             <div className="tc">
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: 13, marginBottom: 22 }}>
-                {[["💰","Total Revenue",fmt.kobo(totalRev),"#22c55e"],["📈","Today Revenue",fmt.kobo(todayRev),"#4ade80"],["🛒","Total Orders",orders.length,"#60a5fa"],["✅","Delivered",orders.filter(o=>o.status==="delivered").length,"#22c55e"],["⏳","Pending",pending,"#f97316"],["⭐","Rating",vendor.rating || "None yet","#eab308"],["🍽️","Menu Items",items.length,"#a78bfa"],["✓","Available",items.filter(i=>i.is_available).length,"#22c55e"]].map(([icon,l,v,c]) => (
+                {[[<DollarSign size={22} />,"Total Revenue",fmt.kobo(totalRev),"#22c55e"],[<TrendingUp size={22} />,"Today Revenue",fmt.kobo(todayRev),"#4ade80"],[<ShoppingCart size={22} />,"Total Orders",orders.length,"#60a5fa"],[<CheckCircle size={22} />,"Delivered",orders.filter(o=>o.status==="delivered").length,"#22c55e"],[<Clock size={22} />,"Pending",pending,"#f97316"],[<Star size={22} />,"Rating",vendor.rating || "None yet","#eab308"],[<Utensils size={22} />,"Menu Items",items.length,"#a78bfa"],[<Check size={22} />,"Available",items.filter(i=>i.is_available).length,"#22c55e"]].map(([icon,l,v,c]) => (
                   <div key={l} style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 18, padding: "16px 18px" }}>
                     <span style={{ fontSize: 22, display: "block", marginBottom: 10 }}>{icon}</span>
                     <p style={{ color: "#6b7280", fontFamily: "'DM Sans',sans-serif", fontSize: 12, marginBottom: 4 }}>{l}</p>
